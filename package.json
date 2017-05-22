@@ -1,0 +1,53 @@
+{
+  "name": "adonis-body-parser",
+  "version": "1.0.0",
+  "description": "Body parser middleware for Adonis 4.0 and above",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm run lint && istanbul cover _mocha --report lcovonly -- -R spec test && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
+    "coverage": "istanbul cover _mocha test --bail",
+    "lint": "standard src/**/*.js test/*.js"
+  },
+  "standard": {
+    "global": [
+      "use",
+      "it",
+      "describe",
+      "context",
+      "before",
+      "after"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adonisjs/adonis-middleware.git"
+  },
+  "keywords": [
+    "adonis",
+    "http-middleware",
+    "middleware",
+    "adonisjs"
+  ],
+  "author": "adonisjs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adonisjs/adonis-middleware/issues"
+  },
+  "homepage": "https://github.com/adonisjs/adonis-middleware#readme",
+  "dependencies": {
+    "co-body": "^5.1.1"
+  },
+  "devDependencies": {
+    "adonis-sink": "^1.0.2",
+    "japa": "^1.0.3",
+    "japa-cli": "^1.0.1",
+    "node-req": "git+https://github.com/poppinss/node-req.git#develop",
+    "supertest": "^3.0.0",
+    "zombie": "^5.0.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}
