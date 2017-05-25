@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-middleware
+ * adonis-bodyparser
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *

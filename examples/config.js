@@ -53,7 +53,7 @@ module.exports = {
 
   /*
   |--------------------------------------------------------------------------
-  | raw
+  | Raw Parser
   |--------------------------------------------------------------------------
   |
   |
@@ -67,7 +67,7 @@ module.exports = {
 
   /*
   |--------------------------------------------------------------------------
-  | form x-www-form-urlencoded
+  | Form Parser
   |--------------------------------------------------------------------------
   |
   |
@@ -81,12 +81,56 @@ module.exports = {
 
   /*
   |--------------------------------------------------------------------------
-  | files multipart/form-data
+  | Files Parser
   |--------------------------------------------------------------------------
   |
   |
   |
   */
   files: {
+    types: [
+      'multipart/form-data'
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Max Size
+    |--------------------------------------------------------------------------
+    |
+    | Below value is the max size of all the files uploaded to the server. It
+    | is validated even before files have been processed and hard exception
+    | is thrown.
+    |
+    | Consider setting a reasonable value here, otherwise people may upload GB's
+    | of files which will keep your server busy.
+    |
+    | Also this value is considered when `autoProcess` is set to true.
+    |
+    */
+    maxSize: '20mb',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Auto Process
+    |--------------------------------------------------------------------------
+    |
+    | Whether or not to auto-process files. Since HTTP servers handle files via
+    | couple of specific endpoints. It is better to set this value off and
+    | manually process the files when required.
+    |
+    */
+    autoProcess: true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Process Manually
+    |--------------------------------------------------------------------------
+    |
+    | The list of routes that should not process files and instead rely on
+    | manual process. This list should only contain routes when autoProcess
+    | is to true. Otherwise everything is process manually.
+    |
+    */
+    processManually: []
   }
 }

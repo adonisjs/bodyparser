@@ -1,7 +1,7 @@
 'use strict'
 
 /*
- * adonis-middleware
+ * adonis-bodyparser
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -9,16 +9,22 @@
  * file that was distributed with this source code.
 */
 
+const _ = require('lodash')
 const parse = require('co-body')
+const Multipart = require('../Multipart')
+const FormFields = require('../FormFields')
+const FileJar = require('../Multipart/FileJar')
 const defaultConfig = require('../../examples/config.js')
 
 class BodyParser {
   constructor (Config) {
     this.config = Config.merge('bodyParser', defaultConfig)
+    this.files = new FormFields()
+    this.fields = new FormFields()
   }
 
   /**
-   * The JSON types to be used for identiying
+   * The JSON types to be used for identifying
    * the JSON request.
    *
    * @attributes jsonTypes
@@ -30,7 +36,7 @@ class BodyParser {
   }
 
   /**
-   * Form types to be used for identiying
+   * Form types to be used for identifying
    * the form request.
    *
    * @attributes formTypes
@@ -42,7 +48,7 @@ class BodyParser {
   }
 
   /**
-   * Raw types to be used for identiying
+   * Raw types to be used for identifying
    * the raw request.
    *
    * @attributes rawTypes
@@ -51,6 +57,18 @@ class BodyParser {
    */
   get rawTypes () {
     return this.config.raw.types
+  }
+
+  /**
+   * Files types to be used for identifying
+   * the multipart types.
+   *
+   * @method filesTypes
+   *
+   * @return {Array}
+   */
+  get filesTypes () {
+    return this.config.files.types
   }
 
   /**
@@ -134,6 +152,13 @@ class BodyParser {
    */
   async handle ({ request }, next) {
     request._body = {}
+    request._raw = {}
+    request._files = {}
+    request.multipart = new Multipart(request)
+
+    /**
+     * Don't bother when request does not have body
+     */
     if (!request.hasBody()) {
       await next()
       return
@@ -145,7 +170,21 @@ class BodyParser {
       request._body = await this._parseForm(request.request)
     } else if (this.rawTypes.length && request.is(this.rawTypes)) {
       request._raw = await this._parseRaw(request.request)
+    } else if (this.filesTypes.length && request.is(this.filesTypes)) {
+      request.multipart.file('*', {}, async (file) => {
+        this.files.add(file._fieldName, file)
+        await file.moveToTmp()
+      })
+
+      request.multipart.field((name, value) => {
+        this.fields.add(name, value)
+      })
+
+      await request.multipart.process()
+      request._files = this.files.get()
+      request._body = this.fields.get()
     }
+    await next()
   }
 }
 

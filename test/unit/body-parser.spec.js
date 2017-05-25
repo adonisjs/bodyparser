@@ -1,6 +1,16 @@
 'use strict'
 
+/*
+ * adonis-bodyparser
+ *
+ * (c) Harminder Virk <virk@adonisjs.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+*/
+
 const test = require('japa')
+const path = require('path')
 const Browser = require('zombie')
 const { Config } = require('adonis-sink')
 const app = require('./app')
@@ -35,7 +45,7 @@ test.group('Body Parser', (group) => {
      */
     app.post = async function (request, res) {
       const parser = new BodyParser(new Config())
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(JSON.stringify(request._body))
       res.end()
@@ -76,7 +86,7 @@ test.group('Body Parser', (group) => {
      */
     app.post = async function (request, res) {
       const parser = new BodyParser(new Config())
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(JSON.stringify(request._body))
       res.end()
@@ -119,7 +129,7 @@ test.group('Body Parser', (group) => {
      */
     app.post = async function (request, res) {
       const parser = new BodyParser(new Config())
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(JSON.stringify(request._body))
       res.end()
@@ -139,7 +149,7 @@ test.group('Body Parser', (group) => {
   test('parse JSON when request has json data', async (assert) => {
     app.post = async function (request, res) {
       const parser = new BodyParser(new Config())
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(JSON.stringify(request._body))
       res.end()
@@ -151,7 +161,7 @@ test.group('Body Parser', (group) => {
   test('process arrays inside json properly', async (assert) => {
     app.post = async function (request, res) {
       const parser = new BodyParser(new Config())
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(JSON.stringify(request._body))
       res.end()
@@ -165,7 +175,7 @@ test.group('Body Parser', (group) => {
       const config = new Config()
       config.set('bodyParser.json.types', [])
       const parser = new BodyParser(config)
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(JSON.stringify(request._body))
       res.end()
@@ -197,7 +207,7 @@ test.group('Body Parser', (group) => {
       const config = new Config()
       config.set('bodyParser.json.types', [])
       const parser = new BodyParser(config)
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(JSON.stringify(request._body))
       res.end()
@@ -217,7 +227,7 @@ test.group('Body Parser', (group) => {
   test('parse raw body', async (assert) => {
     app.post = async function (request, res) {
       const parser = new BodyParser(new Config())
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
       res.write(request._raw)
       res.end()
@@ -234,7 +244,7 @@ test.group('Body Parser', (group) => {
   test('parse raw body when payload is buffer', async (assert) => {
     app.post = async function (request, res) {
       const parser = new BodyParser(new Config())
-      await parser.handle({ request })
+      await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'text/plain' })
       res.write(request._raw)
       res.end()
@@ -245,5 +255,163 @@ test.group('Body Parser', (group) => {
       .set('content-type', 'text/plain')
       .send(Buffer.from('Hello world'))
     assert.equal(text, 'Hello world')
+  })
+
+  test('parse multipart/form-data', async (assert) => {
+    /**
+     * Get method to render the form
+     */
+    app.get = function (req, res) {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write(`
+      <form method='POST' action='/' enctype="multipart/form-data">
+        <input type="file" name="package" />
+        <button type='submit'> Submit </button>
+      </form>
+      `)
+      res.end()
+    }
+
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify(request._files.package))
+      res.end()
+    }
+
+    const browser = new Browser()
+    await browser.visit('/')
+
+    await browser
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .pressButton('Submit')
+
+    const file = JSON.parse(browser.text())
+    assert.equal(file.filename, 'package.json')
+    assert.equal(file.fieldName, 'package')
+    assert.isAbove(file.size, 0)
+    assert.isDefined(file.tmpPath)
+  })
+
+  test('upload multiple files', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      assert.lengthOf(request._files['ignore-files'], 2)
+      res.write(JSON.stringify(request._files['ignore-files'].map((file) => file.toJSON())))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .attach('ignore-files', path.join(__dirname, '../../.gitignore'))
+      .attach('ignore-files', path.join(__dirname, '../../.npmignore'))
+
+    assert.equal(body[0].filename, '.gitignore')
+    assert.equal(body[0].fieldName, 'ignore-files')
+    assert.isAbove(body[0].size, 0)
+    assert.isDefined(body[0].tmpPath)
+    assert.equal(body[1].filename, '.npmignore')
+    assert.equal(body[1].fieldName, 'ignore-files')
+    assert.isAbove(body[1].size, 0)
+    assert.isDefined(body[1].tmpPath)
+  })
+
+  test('upload nested multiple files', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify([request._files.user[0]['ignore-file'], request._files.user[1]['ignore-file']]))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .attach('user[0][ignore-file]', path.join(__dirname, '../../.gitignore'))
+      .attach('user[1][ignore-file]', path.join(__dirname, '../../.npmignore'))
+
+    assert.equal(body[0].filename, '.gitignore')
+    assert.equal(body[0].fieldName, 'user[0][ignore-file]')
+    assert.isAbove(body[0].size, 0)
+    assert.isDefined(body[0].tmpPath)
+    assert.equal(body[1].filename, '.npmignore')
+    assert.equal(body[1].fieldName, 'user[1][ignore-file]')
+    assert.isAbove(body[1].size, 0)
+    assert.isDefined(body[1].tmpPath)
+  })
+
+  test('process fields with files', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify(request._body))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .field('username', 'virk')
+      .attach('package', path.join(__dirname, '../../package.json'))
+
+    assert.deepEqual(body, { username: 'virk' })
+  })
+
+  test('process nested fields with files', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify(request._body))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .field('user[0][name]', 'virk')
+      .attach('package', path.join(__dirname, '../../package.json'))
+
+    assert.deepEqual(body, { user: [{ name: 'virk' }] })
+  })
+
+  test('process fields and files both', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify({ fields: request._body, files: request._files.package.toJSON() }))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .field('username', 'virk')
+      .attach('package', path.join(__dirname, '../../package.json'))
+
+    assert.deepEqual(body.fields, { username: 'virk' })
+    assert.equal(body.files.filename, 'package.json')
+    assert.equal(body.files.fieldName, 'package')
+    assert.isAbove(body.files.size, 0)
   })
 })
