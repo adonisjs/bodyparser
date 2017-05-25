@@ -11,6 +11,13 @@
 
 const _ = require('lodash')
 
+/**
+ * FormFields class is used to handle array of or nested fields
+ * when parsing multipart data.
+ *
+ * @class FormFields
+ * @constructor
+ */
 class FormFields {
   constructor () {
     this._fields = {}

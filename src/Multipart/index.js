@@ -14,8 +14,18 @@ const File = require('./File')
 const FileJar = require('./FileJar')
 const CE = require('../Exceptions')
 
+/**
+ * Multipart class does all the heavy lifting of processing multipart
+ * data and allows lazy access to the uploaded files. Ideally this
+ * class is used by the BodyParser middleware but if `autoProcess`
+ * is set to false, you can use this class manually to read file
+ * streams and process them.
+ *
+ * @class Multipart
+ * @constructor
+ */
 class Multipart {
-  constructor (request) {
+  constructor (request, disableJar = false) {
     this.req = request.request
 
     /**
@@ -54,12 +64,28 @@ class Multipart {
      */
     this._fieldsCallback = null
 
-    this._jar = new FileJar()
+    /**
+     * Storing instance to file jar. Attaching as an helper
+     * so that users using this class directly can use
+     * some helper methods to know the upload status.
+     *
+     * This attribute is optional and disabled by the BodyParser
+     * when bodyparser middleware using the multipart class
+     * for autoProcessing all files.
+     *
+     * @type {FileJar}
+     *
+     * @attribute jar
+     */
+    if (!disableJar) {
+      this.jar = new FileJar()
+    }
   }
 
   /**
    * Executed for each part in stream. Returning
-   * promise will advance the stream
+   * promise or consuming the stream will
+   * advance the process.
    *
    * @method onPart
    *
@@ -86,8 +112,15 @@ class Multipart {
     }
 
     const fileInstance = new File(part, handler.options)
-    this._jar.track(fileInstance)
-    return handler.callback(fileInstance)
+
+    /**
+     * Only track the file when jar is enabled.
+     */
+    if (this.jar) {
+      this.jar.track(fileInstance)
+    }
+
+    return Promise.resolve(handler.callback(fileInstance))
   }
 
   /**
@@ -104,9 +137,7 @@ class Multipart {
       form.on('error', reject)
       form.on('part', (part) => {
         this.onPart(part)
-          .then(() => {
-            part.resume()
-          })
+          .then(() => part.resume())
           .catch((error) => form.emit('error', error))
       })
 
@@ -125,7 +156,7 @@ class Multipart {
    * Add a listener to file. It is important to attach a callback and
    * handle the processing of the file. Also only one listener can
    * be added at a given point of time, since 2 parties processing
-   * a single doesn't make much sense.
+   * a single file doesn't make much sense.
    *
    * @method file
    *
@@ -149,25 +180,20 @@ class Multipart {
     return this
   }
 
+  /**
+   * Attach a listener to get fields name/value. Callback
+   * will be executed for each field inside multipart
+   * form/data.
+   *
+   * @method field
+   *
+   * @param  {Function} callback
+   *
+   * @chainable
+   */
   field (callback) {
     this._fieldsCallback = callback
     return this
-  }
-
-  movedAll () {
-    return this._jar.movedAll()
-  }
-
-  all () {
-    return this._jar.all()
-  }
-
-  errors () {
-    return this._jar.errors()
-  }
-
-  movedList () {
-    return this._jar.movedList()
   }
 }
 

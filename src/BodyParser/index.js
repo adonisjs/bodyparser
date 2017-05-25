@@ -228,7 +228,6 @@ class BodyParser {
     request._body = {}
     request._raw = {}
     request._files = {}
-    request.multipart = new Multipart(request)
 
     /**
      * Don't bother when request does not have body
@@ -237,6 +236,33 @@ class BodyParser {
       await next()
       return
     }
+
+    /**
+     * Body is multipart/form-data and autoProcess is set to
+     * true, so process all the files and fields inside
+     * it.
+     */
+    if (this._shouldBeProcessed(request) && this._isType(request, this.filesTypes)) {
+      request.multipart = new Multipart(request, true)
+
+      request.multipart.file('*', {}, async (file) => {
+        this.files.add(file._fieldName, file)
+        await file.moveToTmp()
+      })
+
+      request.multipart.field((name, value) => {
+        this.fields.add(name, value)
+      })
+
+      await request.multipart.process()
+      request._files = this.files.get()
+      request._body = this.fields.get()
+
+      await next()
+      return
+    }
+
+    request.multipart = new Multipart(request)
 
     /**
      * Body is JSON, so parse it and move forward
@@ -261,29 +287,6 @@ class BodyParser {
      */
     if (this._isType(request, this.rawTypes)) {
       request._raw = await this._parseRaw(request.request)
-      await next()
-      return
-    }
-
-    /**
-     * Body is multipart/form-data and autoProcess is set to
-     * true, so process all the files and fields inside
-     * it.
-     */
-    if (this._shouldBeProcessed(request) && this._isType(request, this.filesTypes)) {
-      request.multipart.file('*', {}, async (file) => {
-        this.files.add(file._fieldName, file)
-        await file.moveToTmp()
-      })
-
-      request.multipart.field((name, value) => {
-        this.fields.add(name, value)
-      })
-
-      await request.multipart.process()
-      request._files = this.files.get()
-      request._body = this.fields.get()
-
       await next()
       return
     }

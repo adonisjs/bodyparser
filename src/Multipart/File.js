@@ -17,26 +17,63 @@ const _ = require('lodash')
 const fs = require('fs-extra')
 const mediaTyper = require('media-typer')
 
+/**
+ * Returns the error string for given error
+ * type
+ *
+ * @method getError
+ *
+ * @param  {String} type
+ * @param  {Object} data
+ *
+ * @return {String}
+ */
+const getError = function (type, data) {
+  if (type === 'size') {
+    return `File size should be less than ${bytes(data.size)}`
+  }
+
+  if (type === 'type') {
+    const verb = data.types.length === 1 ? 'is' : 'are'
+    return `Invalid file type ${data.subtype} or ${data.type}. Only ${data.types.join(', ')} ${verb} allowed`
+  }
+}
+
+/**
+ * File class holds information and behavior related to a single file
+ * accessed using `request.file` or `request.multipart.file`. It let
+ * you stream or save user uploaded file to a given location.
+ *
+ * @class File
+ * @constructor
+ */
 class File {
   constructor (readStream, options = {}) {
     /**
      * public properties
      */
     this.stream = readStream
+
+    /**
+     * Marked as ended when stream is consued
+     *
+     * @type {Boolean}
+     */
     this.ended = false
 
     /**
      * private properties
      */
     this._validationOptions = options
+    this._validateFn = this._validateFile.bind(this)
     this._error = {}
-    this._filename = this.stream.filename
+    this._fileName = null
+    this._clientName = this.stream.filename
     this._fieldName = this.stream.name
     this._headers = _.clone(this.stream.headers)
     this._size = 0
     this._tmpPath = null
     this._writeStream = null
-    this._validateFn = this._validateFile.bind(this)
 
     const parsedTypes = mediaTyper.parse(this._headers['content-type'])
     this._type = parsedTypes.type
@@ -51,14 +88,17 @@ class File {
      */
     this._status = 'pending'
 
-    if (this._validationOptions.maxSize && typeof (this._validationOptions.maxSize) === 'string') {
-      this._validationOptions.maxSize = bytes(this._validationOptions.maxSize)
+    /**
+     * If size is in string, then convert it to numeric bytes
+     */
+    if (typeof (this._validationOptions.size) === 'string') {
+      this._validationOptions.size = bytes(this._validationOptions.size)
     }
     this._bindRequiredListeners()
   }
 
   /**
-   * Validates the file maxSize and extensions before moving the
+   * Validates the file size and extensions before moving the
    * file using the `move` method.
    *
    * @method _validateFile
@@ -68,28 +108,28 @@ class File {
    * @private
    */
   _validateFile () {
-    const expectedBytes = this._validationOptions.maxSize || Infinity
+    const expectedBytes = this._validationOptions.size || Infinity
 
     /**
      * Max size exceeded
      */
     if (this._size > expectedBytes) {
-      this._setError(`File size should be less than ${bytes(expectedBytes)}`, 'size')
+      this._setError(getError('size', { size: expectedBytes }), 'size')
       return
     }
 
     /**
-     * Invalid extension
+     * Invalid file type
      */
-    const extensions = this._validationOptions.allowedExtensions
-    if (_.size(extensions) && (!_.includes(extensions, this._type) && !_.includes(extensions, this._subtype))) {
-      const verb = extensions.length === 1 ? 'is' : 'are'
-      this._setError(`Invalid file extension ${this._subtype}. Only ${extensions.join(',')} ${verb} allowed`, 'extension')
+    const types = this._validationOptions.types
+    if (_.size(types) && (!_.includes(types, this._type) && !_.includes(types, this._subtype))) {
+      this._setError(getError('type', { types, type: this._type, subtype: this._subtype }), 'type')
     }
   }
 
   /**
-   * Pushes an error to the errors array
+   * Pushes an error to the errors array and also
+   * set the file status to `error`.
    *
    * @method _setError
    *
@@ -103,11 +143,11 @@ class File {
   _setError (message, type) {
     const error = {
       fieldName: this._fieldName,
-      filename: this._filename,
+      clientName: this._clientName,
       message: message,
       type: type
     }
-    this._status = 'failed'
+    this._status = 'error'
     this._error = error
   }
 
@@ -138,6 +178,8 @@ class File {
    * @param  {Number}    [limit = 0]
    *
    * @return {Promise}
+   *
+   * @private
    */
   _streamFile (location, limit) {
     return new Promise((resolve, reject) => {
@@ -162,12 +204,20 @@ class File {
         this._writeStream.on('error', reject)
         this._writeStream.on('close', resolve)
 
+        /**
+         * On each data chunk, update the file size
+         */
         this.stream.on('data', (line) => {
           this._size += line.length
           if (limit && this._size > limit) {
-            this.stream.emit('error', 'Max buffer exceeded')
+            this.stream.emit('error', getError('size', { size: limit }))
           }
         })
+
+        /**
+         * Pipe readable stream stream to
+         * writable stream.
+         */
         this.stream.pipe(this._writeStream)
       })
     })
@@ -180,10 +230,11 @@ class File {
    *
    * @param  {Object}   options
    *
-   * @return {void}
+   * @chainable
    */
   setOptions (options) {
     this._validationOptions = options
+    return this
   }
 
   /**
@@ -226,7 +277,7 @@ class File {
    */
   moveToTmp () {
     if (this.ended) {
-      throw new Error('Cannot file to tmp directory for multiple times')
+      throw new Error('Cannot move file to tmp directory for multiple times')
     }
 
     this._tmpPath = path.join(os.tmpdir(), `ab-${new Date().getTime()}.tmp`)
@@ -245,7 +296,7 @@ class File {
    * @return {Promise}
    */
   async move (location, options = {}) {
-    options.filename = options.name || this._filename
+    options.filename = options.name || this._clientName
 
     /**
      * Throw error when stream has been consumed but there
@@ -273,10 +324,12 @@ class File {
      */
     if (!this.ended) {
       try {
-        await this._streamFile(path.join(location, options.filename), this._validationOptions.maxSize)
+        await this._streamFile(path.join(location, options.filename), this._validationOptions.size)
+        this._fileName = options.filename
+        this._location = location
         this._status = 'moved'
       } catch (error) {
-        this._setError(`File size should be less than ${bytes(this._validationOptions.maxSize)}`, 'size')
+        this._setError(getError('size', { size: this._validationOptions.size }), 'size')
       }
       return
     }
@@ -286,6 +339,8 @@ class File {
      * location.
      */
     await fs.move(this._tmpPath, path.join(location, options.filename))
+    this._fileName = options.filename
+    this._location = location
     this._status = 'moved'
   }
 
@@ -309,7 +364,8 @@ class File {
    */
   toJSON () {
     return {
-      filename: this._filename,
+      clientName: this._clientName,
+      fileName: this._fileName,
       fieldName: this._fieldName,
       tmpPath: this._tmpPath,
       headers: this._headers,
