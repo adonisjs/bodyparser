@@ -26,6 +26,10 @@ module.exports = {
         return nodeReq.is(req, inputs)
       }
 
+      request.match = function (routes) {
+        return routes.indexOf(req.url) > -1
+      }
+
       request.hasBody = function () {
         return nodeReq.hasBody(req)
       }

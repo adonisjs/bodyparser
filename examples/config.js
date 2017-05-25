@@ -118,6 +118,8 @@ module.exports = {
     | couple of specific endpoints. It is better to set this value off and
     | manually process the files when required.
     |
+    | This value can contain a boolean or an array of route patterns
+    | to be autoprocessed.
     */
     autoProcess: true,
 

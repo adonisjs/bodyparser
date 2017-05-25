@@ -400,7 +400,82 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify({ fields: request._body, files: request._files.package.toJSON() }))
+      res.write(JSON.stringify({ fields: request._body, files: request._files.package }))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .field('username', 'virk')
+      .attach('package', path.join(__dirname, '../../package.json'))
+
+    assert.deepEqual(body.fields, { username: 'virk' })
+    assert.equal(body.files.filename, 'package.json')
+    assert.equal(body.files.fieldName, 'package')
+    assert.isAbove(body.files.size, 0)
+  })
+
+  test('ignore multipart request when autoProcess is set to false', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const config = new Config()
+      config.set('bodyParser.files.autoProcess', false)
+
+      const parser = new BodyParser(config)
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify({ fields: request._body, files: request._files }))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .field('username', 'virk')
+      .attach('package', path.join(__dirname, '../../package.json'))
+
+    assert.deepEqual(body.fields, {})
+    assert.deepEqual(body.files, {})
+  })
+
+  test('ignore multipart request when autoProcess is true but url is defined to be processed', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const config = new Config()
+      config.set('bodyParser.files.autoProcess', true)
+      config.set('bodyParser.files.processManually', ['/'])
+
+      const parser = new BodyParser(config)
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify({ fields: request._body, files: request._files }))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .field('username', 'virk')
+      .attach('package', path.join(__dirname, '../../package.json'))
+
+    assert.deepEqual(body.fields, {})
+    assert.deepEqual(body.files, {})
+  })
+
+  test('parse multipart request when url is defined in autoProcess', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const config = new Config()
+      config.set('bodyParser.files.autoProcess', ['/'])
+
+      const parser = new BodyParser(config)
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify({ fields: request._body, files: request._files.package }))
       res.end()
     }
 

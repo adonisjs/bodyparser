@@ -44,6 +44,7 @@
   },
   "devDependencies": {
     "adonis-sink": "git+https://github.com/adonisjs/adonis-sink.git#develop",
+    "cz-conventional-changelog": "^2.0.0",
     "japa": "^1.0.3",
     "japa-cli": "^1.0.1",
     "media-typer": "^0.3.0",

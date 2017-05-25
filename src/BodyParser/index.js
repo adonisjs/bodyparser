@@ -9,63 +9,100 @@
  * file that was distributed with this source code.
 */
 
-const _ = require('lodash')
 const parse = require('co-body')
 const Multipart = require('../Multipart')
 const FormFields = require('../FormFields')
-const FileJar = require('../Multipart/FileJar')
 const defaultConfig = require('../../examples/config.js')
 
+/**
+ * @module Adonis
+ * @submodule bodyparser
+ */
+
+/**
+ * BodyParser class is a global middleware attached to Adonis
+ * HTTP server to parse and read request body. It has out
+ * of the box support for.
+ *
+ * 1. JSON API, JSON Patch and CSV reports.
+ * 2. Raw data
+ * 3. Url encoded forms
+ * 4. Multipart form data.
+ *
+ * Also it allows lazily streaming multipart payload.
+ *
+ * **Namespace**: `Adonis/Middleware/BodyParser` <br />
+ * **Singleton**: No <br />
+ * **Alias**: None
+ *
+ * @class BodyParser
+ * @constructor
+ */
 class BodyParser {
   constructor (Config) {
-    this.config = Config.merge('bodyParser', defaultConfig)
+    /**
+     * Giving preference to types from the user config over the
+     * default config, since user can defined empty arrays as
+     * part of ignoring body parsing, which will be overridden
+     * otherwise by the merge method.
+     */
+    this.config = Config.merge('bodyParser', defaultConfig, (obj, src, key) => {
+      if (key === 'types' && typeof (src) !== 'undefined') {
+        return src
+      }
+    })
+
     this.files = new FormFields()
     this.fields = new FormFields()
   }
 
   /**
-   * The JSON types to be used for identifying
-   * the JSON request.
+   * The JSON types to be used for identifying the JSON request.
+   * The values are defined in `config/bodyParser.js` file
+   * under `json` object.
    *
-   * @attributes jsonTypes
+   * @attribute jsonTypes
    *
-   * @return {Array}
+   * @type {Array}
    */
   get jsonTypes () {
     return this.config.json.types
   }
 
   /**
-   * Form types to be used for identifying
-   * the form request.
+   * Form types to be used for identifying the form request.
+   * The values are defined in `config/bodyParser.js` file
+   * under `form` object.
    *
-   * @attributes formTypes
+   * @attribute formTypes
    *
-   * @return {Array}
+   * @type {Array}
    */
   get formTypes () {
     return this.config.form.types
   }
 
   /**
-   * Raw types to be used for identifying
-   * the raw request.
+   * Raw types to be used for identifying the raw request.
+   * The values are defined in `config/bodyParser.js`
+   * file under `raw` object.
    *
-   * @attributes rawTypes
+   * @attribute rawTypes
    *
-   * @return {Array}
+   * @type {Array}
    */
   get rawTypes () {
     return this.config.raw.types
   }
 
   /**
-   * Files types to be used for identifying
-   * the multipart types.
+   * Files types to be used for identifying the multipart types.
+   * The values are defined in `config/bodyParser.js` file
+   * under `files` object.
    *
-   * @method filesTypes
+   * @attribute filesTypes
    *
-   * @return {Array}
+   * @type {Array}
    */
   get filesTypes () {
     return this.config.files.types
@@ -73,8 +110,7 @@ class BodyParser {
 
   /**
    * Parses the JSON body when `Content-Type` is set to
-   * one of the available `this.jsonTypes`. It will
-   * not parse the body when jsonTypes are empty.
+   * one of the available `this.jsonTypes`.
    *
    * @method _parseJSON
    *
@@ -85,19 +121,15 @@ class BodyParser {
    * @private
    */
   _parseJSON (req) {
-    if (this.jsonTypes.length) {
-      return parse.json(req, {
-        limit: this.config.json.limit,
-        strict: this.config.json.strict
-      })
-    }
-    return {}
+    return parse.json(req, {
+      limit: this.config.json.limit,
+      strict: this.config.json.strict
+    })
   }
 
   /**
    * Parses the form body when `Content-type` is set to
-   * one of the available `this.formTypes`. It will not
-   * parse the body when formTypes are empty.
+   * one of the available `this.formTypes`.
    *
    * @method _parseForm
    *
@@ -108,18 +140,14 @@ class BodyParser {
    * @private
    */
   _parseForm (req) {
-    if (this.formTypes.length) {
-      return parse.form(req, {
-        limit: this.config.form.limit
-      })
-    }
-    return {}
+    return parse.form(req, {
+      limit: this.config.form.limit
+    })
   }
 
   /**
    * Parses the raw body when `Content-type` is set to
-   * one of the available `this.rawTypes`. It will not
-   * parse the body when rawTypes are empty.
+   * one of the available `this.rawTypes`.
    *
    * @method _parseRaw
    *
@@ -130,18 +158,64 @@ class BodyParser {
    * @private
    */
   _parseRaw (req) {
-    if (this.rawTypes.length) {
-      return parse.text(req, {
-        limit: this.config.raw.limit
-      })
-    }
-    return {}
+    return parse.text(req, {
+      limit: this.config.raw.limit
+    })
   }
 
   /**
-   * Method called by adonis middleware stack. It will read
+   * Returns a boolean indicating whether request is
+   * of a given type. Also makes sure that user
+   * wants to process the given type.
+   *
+   * @method _isType
+   *
+   * @param  {Object}  request
+   * @param  {Array}  types
+   *
+   * @return {Boolean}
+   *
+   * @private
+   */
+  _isType (request, types) {
+    return types.length && request.is(types)
+  }
+
+  /**
+   * Returns a boolean indicating whether or not
+   * the files should be autoProcessed based
+   * on certain conditions
+   *
+   * @method _shouldBeProcessed
+   *
+   * @param {Object} request
+   *
+   * @return {Boolean}
+   *
+   * @private
+   */
+  _shouldBeProcessed (request) {
+    const autoProcess = this.config.files.autoProcess
+    if (!autoProcess) {
+      return false
+    }
+
+    if (autoProcess instanceof Array === true && request.match(autoProcess)) {
+      return true
+    }
+
+    return !request.match(this.config.files.processManually)
+  }
+
+  /**
+   * Method called by Adonis middleware stack. It will read
    * the request body as per the config defined inside
-   * `config/bodyParser.js` file.
+   * `config/bodyParser.js` file. It will set following
+   * private properties on the request object.
+   *
+   * 1. _body - The request body ( JSON or Url endcoded )
+   * 2. _files - Uploaded files
+   * 3. _raw - The request raw body.
    *
    * @method handle
    *
@@ -164,13 +238,39 @@ class BodyParser {
       return
     }
 
-    if (this.jsonTypes.length && request.is(this.jsonTypes)) {
+    /**
+     * Body is JSON, so parse it and move forward
+     */
+    if (this._isType(request, this.jsonTypes)) {
       request._body = await this._parseJSON(request.request)
-    } else if (this.formTypes.length && request.is(this.formTypes)) {
+      await next()
+      return
+    }
+
+    /**
+     * Body is Url encoded form, so parse it and move forward
+     */
+    if (this._isType(request, this.formTypes)) {
       request._body = await this._parseForm(request.request)
-    } else if (this.rawTypes.length && request.is(this.rawTypes)) {
+      await next()
+      return
+    }
+
+    /**
+     * Body is raw data, parse it and move forward
+     */
+    if (this._isType(request, this.rawTypes)) {
       request._raw = await this._parseRaw(request.request)
-    } else if (this.filesTypes.length && request.is(this.filesTypes)) {
+      await next()
+      return
+    }
+
+    /**
+     * Body is multipart/form-data and autoProcess is set to
+     * true, so process all the files and fields inside
+     * it.
+     */
+    if (this._shouldBeProcessed(request) && this._isType(request, this.filesTypes)) {
       request.multipart.file('*', {}, async (file) => {
         this.files.add(file._fieldName, file)
         await file.moveToTmp()
@@ -183,7 +283,14 @@ class BodyParser {
       await request.multipart.process()
       request._files = this.files.get()
       request._body = this.fields.get()
+
+      await next()
+      return
     }
+
+    /**
+     * Nothing matched, so please move forward
+     */
     await next()
   }
 }
