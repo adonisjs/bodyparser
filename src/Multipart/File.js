@@ -16,6 +16,7 @@ const bytes = require('bytes')
 const _ = require('lodash')
 const fs = require('fs-extra')
 const mediaTyper = require('media-typer')
+const CE = require('../Exceptions')
 
 /**
  * Returns the error string for given error
@@ -249,7 +250,7 @@ class File {
    */
   validate (callback) {
     if (typeof (callback) !== 'function') {
-      throw new Error('file.validate expects a function')
+      throw CE.InvalidArgumentException.invalidParameter('file.validate expects a function')
     }
     this._validateFn = callback
     return this
@@ -277,7 +278,7 @@ class File {
    */
   moveToTmp () {
     if (this.ended) {
-      throw new Error('Cannot move file to tmp directory for multiple times')
+      throw CE.FileMoveException.multipleMoveAttempts(this._fieldName)
     }
 
     this._tmpPath = path.join(os.tmpdir(), `ab-${new Date().getTime()}.tmp`)
@@ -304,7 +305,7 @@ class File {
      * way to move file anywhere.
      */
     if (!this._tmpPath && this.ended) {
-      throw new Error('Cannot move file since tmp file does not exists')
+      throw CE.FileMoveException.invalidMoveState(this._fieldName)
     }
 
     /**

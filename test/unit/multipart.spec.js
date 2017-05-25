@@ -266,7 +266,7 @@ test.group('Multipart', () => {
       .attach('package', path.join(__dirname, '../../package.json'))
       .expect(500)
 
-    assert.equal(text, 'Cannot move file since tmp file does not exists')
+    assert.equal(text, 'E_CANNOT_MOVE: Cannot move file package since there is no tmp file and stream is already consumed')
   }).timeout(0)
 
   test('validate file size before moving', async (assert) => {
