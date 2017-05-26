@@ -75,7 +75,7 @@ class File {
     this._fieldName = this.stream.name
     this._headers = _.clone(this.stream.headers)
     this._tmpPath = null
-    this._writeStream = null
+    this._writeFd = null
 
     const parsedTypes = mediaTyper.parse(this._headers['content-type'])
     this._type = parsedTypes.type
@@ -134,6 +134,9 @@ class File {
    */
   _bindRequiredListeners () {
     this.stream.on('end', () => {
+      if (this._writeFd) {
+        fs.close(this._writeFd)
+      }
       debug('read stream ended for %s - %s', this._fieldName, this._clientName)
       this.ended = true
       this._status = this._status === 'pending' ? 'consumed' : this._status
@@ -157,26 +160,27 @@ class File {
   _streamFile (location, limit) {
     return new Promise((resolve, reject) => {
       fs.open(location, 'w', (error, fd) => {
+        this._writeFd = fd
         /**
          * Reject when there is an erorr
          */
         if (error) { return reject(error) }
 
+        const writeStream = fs.createWriteStream(location)
+        writeStream.on('error', reject)
+        writeStream.on('close', resolve)
+
         this.stream.on('error', (error) => {
           debug('received error from read stream %s', error.message)
-          if (this._writeStream && this._writeStream.destroy) {
-            this._writeStream.destroy()
+          if (writeStream && writeStream.destroy) {
+            writeStream.destroy()
             fs
-              .unlink(this._writeStream.path)
+              .unlink(writeStream.path)
               .then(() => {
                 reject(error)
               }).catch(reject)
           }
         })
-
-        this._writeStream = fs.createWriteStream(location)
-        this._writeStream.on('error', reject)
-        this._writeStream.on('close', resolve)
 
         /**
          * On each data chunk, update the file size
@@ -192,7 +196,7 @@ class File {
          * Pipe readable stream stream to
          * writable stream.
          */
-        this.stream.pipe(this._writeStream)
+        this.stream.pipe(writeStream)
       })
     })
   }
