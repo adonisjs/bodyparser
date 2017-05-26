@@ -16,8 +16,7 @@ const { Config } = require('adonis-sink')
 const app = require('./app')
 const BodyParser = require('../../src/BodyParser')
 const supertest = require('supertest')
-
-Browser.localhost('localhost', 4000)
+const TEST_URL = 'http://localhost:4000/'
 
 test.group('Body Parser', (group) => {
   group.before(() => {
@@ -52,7 +51,7 @@ test.group('Body Parser', (group) => {
     }
 
     const browser = new Browser()
-    await browser.visit('/')
+    await browser.visit(TEST_URL)
 
     await browser
       .fill('name', 'virk')
@@ -93,7 +92,7 @@ test.group('Body Parser', (group) => {
     }
 
     const browser = new Browser()
-    await browser.visit('/')
+    await browser.visit(TEST_URL)
 
     await browser
       .fill('#name1', 'virk')
@@ -136,7 +135,7 @@ test.group('Body Parser', (group) => {
     }
 
     const browser = new Browser()
-    await browser.visit('/')
+    await browser.visit(TEST_URL)
 
     await browser
       .fill('#name2', 'nikk')
@@ -214,7 +213,7 @@ test.group('Body Parser', (group) => {
     }
 
     const browser = new Browser()
-    await browser.visit('/')
+    await browser.visit(TEST_URL)
 
     await browser
       .fill('name', 'virk')
@@ -284,7 +283,7 @@ test.group('Body Parser', (group) => {
     }
 
     const browser = new Browser()
-    await browser.visit('/')
+    await browser.visit(TEST_URL)
 
     await browser
       .attach('package', path.join(__dirname, '../../package.json'))
