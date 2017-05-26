@@ -54,6 +54,7 @@ class File {
      * public properties
      */
     this.stream = readStream
+    this.size = 0
 
     /**
      * Marked as ended when stream is consued
@@ -65,14 +66,12 @@ class File {
     /**
      * private properties
      */
-    this._validationOptions = options
     this._validateFn = this._validateFile.bind(this)
     this._error = {}
     this._fileName = null
     this._clientName = this.stream.filename
     this._fieldName = this.stream.name
     this._headers = _.clone(this.stream.headers)
-    this._size = 0
     this._tmpPath = null
     this._writeStream = null
 
@@ -88,14 +87,8 @@ class File {
      * @type {String}
      */
     this._status = 'pending'
-
-    /**
-     * If size is in string, then convert it to numeric bytes
-     */
-    if (typeof (this._validationOptions.size) === 'string') {
-      this._validationOptions.size = bytes(this._validationOptions.size)
-    }
     this._bindRequiredListeners()
+    this.setOptions(options)
   }
 
   /**
@@ -109,47 +102,23 @@ class File {
    * @private
    */
   _validateFile () {
-    const expectedBytes = this._validationOptions.size || Infinity
+    const expectedBytes = this.validationOptions.size || Infinity
 
     /**
      * Max size exceeded
      */
-    if (this._size > expectedBytes) {
-      this._setError(getError('size', { size: expectedBytes }), 'size')
+    if (this.size > expectedBytes) {
+      this.setError(getError('size', { size: expectedBytes }), 'size')
       return
     }
 
     /**
      * Invalid file type
      */
-    const types = this._validationOptions.types
+    const types = this.validationOptions.types
     if (_.size(types) && (!_.includes(types, this._type) && !_.includes(types, this._subtype))) {
-      this._setError(getError('type', { types, type: this._type, subtype: this._subtype }), 'type')
+      this.setError(getError('type', { types, type: this._type, subtype: this._subtype }), 'type')
     }
-  }
-
-  /**
-   * Pushes an error to the errors array and also
-   * set the file status to `error`.
-   *
-   * @method _setError
-   *
-   * @param  {String}   message
-   * @param  {String}   type
-   *
-   * @return {void}
-   *
-   * @private
-   */
-  _setError (message, type) {
-    const error = {
-      fieldName: this._fieldName,
-      clientName: this._clientName,
-      message: message,
-      type: type
-    }
-    this._status = 'error'
-    this._error = error
   }
 
   /**
@@ -209,8 +178,8 @@ class File {
          * On each data chunk, update the file size
          */
         this.stream.on('data', (line) => {
-          this._size += line.length
-          if (limit && this._size > limit) {
+          this.size += line.length
+          if (limit && this.size > limit) {
             this.stream.emit('error', getError('size', { size: limit }))
           }
         })
@@ -225,6 +194,28 @@ class File {
   }
 
   /**
+   * Pushes an error to the errors array and also
+   * set the file status to `error`.
+   *
+   * @method setError
+   *
+   * @param  {String}   message
+   * @param  {String}   type
+   *
+   * @return {void}
+   */
+  setError (message, type) {
+    const error = {
+      fieldName: this._fieldName,
+      clientName: this._clientName,
+      message: message,
+      type: type
+    }
+    this._status = 'error'
+    this._error = error
+  }
+
+  /**
    * Set validation options on the file instance
    *
    * @method setOptions
@@ -234,7 +225,12 @@ class File {
    * @chainable
    */
   setOptions (options) {
-    this._validationOptions = options
+    this.validationOptions = options
+
+    if (typeof (this.validationOptions.size) === 'string') {
+      this.validationOptions.size = bytes(this.validationOptions.size)
+    }
+
     return this
   }
 
@@ -252,7 +248,7 @@ class File {
     if (typeof (callback) !== 'function') {
       throw CE.InvalidArgumentException.invalidParameter('file.validate expects a function')
     }
-    this._validateFn = callback
+    this._validateFn = callback.bind(this)
     return this
   }
 
@@ -314,7 +310,7 @@ class File {
      * file, since size is calculated once stream
      * is consumed.
      */
-    await this._validateFile()
+    await this._validateFn()
     if (_.size(this._error)) {
       return
     }
@@ -325,12 +321,12 @@ class File {
      */
     if (!this.ended) {
       try {
-        await this._streamFile(path.join(location, options.filename), this._validationOptions.size)
+        await this._streamFile(path.join(location, options.filename), this.validationOptions.size)
         this._fileName = options.filename
         this._location = location
         this._status = 'moved'
       } catch (error) {
-        this._setError(getError('size', { size: this._validationOptions.size }), 'size')
+        this.setError(getError('size', { size: this.validationOptions.size }), 'size')
       }
       return
     }
@@ -370,7 +366,7 @@ class File {
       fieldName: this._fieldName,
       tmpPath: this._tmpPath,
       headers: this._headers,
-      size: this._size,
+      size: this.size,
       type: this._type,
       subtype: this._subtype,
       status: this._status,

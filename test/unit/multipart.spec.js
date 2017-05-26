@@ -136,7 +136,7 @@ test.group('Multipart', () => {
         .process()
         .then(() => {
           assert.isTrue(multipart.jar._files[0].ended)
-          assert.isAbove(multipart.jar._files[0]._size, 0)
+          assert.isAbove(multipart.jar._files[0].size, 0)
           return exists(multipart.jar._files[0]._tmpPath)
         }).then((s) => {
           res.end()
@@ -150,6 +150,33 @@ test.group('Multipart', () => {
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
       .expect(200)
+  }).timeout(0)
+
+  test('throw exception when try to move file multiple times to the tmp directory', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {}, async (file) => {
+        await file.moveToTmp()
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          return multipart.jar._files[0].moveToTmp()
+        }).then((s) => {
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+    const { text } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .expect(500)
+
+    assert.equal(text, 'E_CANNOT_MOVE: Cannot move file package for multiple times')
   }).timeout(0)
 
   test('throw error when processing files for multiple times', async (assert) => {
@@ -346,6 +373,90 @@ test.group('Multipart', () => {
       fieldName: 'package',
       type: 'type',
       message: 'Invalid file type json or application. Only jpg, png are allowed'
+    })
+  }).timeout(0)
+
+  test('add custom validate fn', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {
+        size: '10B'
+      }, async (file) => {
+        file.validate(function () {
+          if (this.size > this.validationOptions.size) {
+            this.setError('Max size execedded', 'size')
+          }
+        })
+        await file.moveToTmp()
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+            name: 'foo.json'
+          })
+        }).then(() => {
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.end()
+        }).catch((error) => {
+          console.log(error)
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    const { body } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .expect(200)
+
+    assert.deepEqual(body, {
+      clientName: 'package.json',
+      fieldName: 'package',
+      type: 'size',
+      message: 'Max size execedded'
+    })
+  }).timeout(0)
+
+  test('set validation options at a later stage', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {}, async (file) => {
+        file.setOptions({ size: '10B' })
+        await file.moveToTmp()
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+            name: 'foo.json'
+          })
+        }).then(() => {
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.end()
+        }).catch((error) => {
+          console.log(error)
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    const { body } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .expect(200)
+
+    assert.deepEqual(body, {
+      clientName: 'package.json',
+      fieldName: 'package',
+      type: 'size',
+      message: 'File size should be less than 10B'
     })
   }).timeout(0)
 
@@ -717,4 +828,93 @@ test.group('Multipart', () => {
       message: 'Invalid file type plain or text. Only json is allowed'
     }])
   }).timeout(0)
+
+  test('throw exception when no callback is passed to multipart.file', async (assert) => {
+    const multipart = new Multipart({ request: {} })
+    const fn = () => multipart.file('*')
+    assert.throw(fn, 'E_INVALID_PARAMETER: multipart.file expects callback to be a function')
+  })
+
+  test('throw exception when multiple.file callback throws error', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {}, async (file) => {
+        throw new Error('Something bad happened')
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    const { text } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .expect(500)
+
+    assert.equal(text, 'Something bad happened')
+  })
+
+  test('throw exception when no callback is passed to file.validate', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {}, async (file) => {
+        file.validate()
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    const { text } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .expect(500)
+
+    assert.equal(text, 'E_INVALID_PARAMETER: file.validate expects a function')
+  })
+
+  test('reading stream as buffer should end the stream', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {}, async (file) => {
+        await file.read()
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          res.writeHead(200)
+          res.write(String(multipart.jar._files[0].ended))
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    const { text } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .expect(200)
+
+    assert.equal(text, 'true')
+  })
 })

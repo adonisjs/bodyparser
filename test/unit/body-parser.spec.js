@@ -489,4 +489,23 @@ test.group('Body Parser', (group) => {
     assert.equal(body.files.fieldName, 'package')
     assert.isAbove(body.files.size, 0)
   })
+
+  test('ignore body processing when request has no body', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.get = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify({ fields: request._body, files: request._files, raw: request._raw }))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server).get('/')
+
+    assert.deepEqual(body.fields, {})
+    assert.deepEqual(body.files, {})
+    assert.deepEqual(body.raw, {})
+  })
 })
