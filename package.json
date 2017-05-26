@@ -55,6 +55,7 @@
     "media-typer": "^0.3.0",
     "node-req": "git+https://github.com/poppinss/node-req.git#develop",
     "nyc": "^10.3.2",
+    "standard": "^10.0.2",
     "supertest": "^3.0.0",
     "zombie": "^5.0.5"
   },
