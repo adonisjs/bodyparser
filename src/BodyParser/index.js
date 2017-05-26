@@ -10,6 +10,7 @@
 */
 
 const parse = require('co-body')
+const debug = require('debug')('adonis:bodyparser')
 const Multipart = require('../Multipart')
 const FormFields = require('../FormFields')
 const defaultConfig = require('../../examples/config.js')
@@ -233,6 +234,7 @@ class BodyParser {
      * Don't bother when request does not have body
      */
     if (!request.hasBody()) {
+      debug('skipping body parsing, since request body is empty')
       await next()
       return
     }
@@ -243,6 +245,7 @@ class BodyParser {
      * it.
      */
     if (this._shouldBeProcessed(request) && this._isType(request, this.filesTypes)) {
+      debug('detected multipart body')
       request.multipart = new Multipart(request, true)
 
       request.multipart.file('*', {}, async (file) => {
@@ -268,6 +271,7 @@ class BodyParser {
      * Body is JSON, so parse it and move forward
      */
     if (this._isType(request, this.jsonTypes)) {
+      debug('detected json body')
       request._body = await this._parseJSON(request.request)
       await next()
       return
@@ -277,6 +281,7 @@ class BodyParser {
      * Body is Url encoded form, so parse it and move forward
      */
     if (this._isType(request, this.formTypes)) {
+      debug('detected form body')
       request._body = await this._parseForm(request.request)
       await next()
       return
@@ -286,6 +291,7 @@ class BodyParser {
      * Body is raw data, parse it and move forward
      */
     if (this._isType(request, this.rawTypes)) {
+      debug('detected raw body')
       request._raw = await this._parseRaw(request.request)
       await next()
       return

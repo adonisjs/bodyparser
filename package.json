@@ -7,9 +7,9 @@
     "lint": "standard",
     "pretest": "npm run lint",
     "posttest": "npm run coverage",
-    "test:local": "node --harmony-async-await ./node_modules/.bin/japa",
+    "test:local": "DEBUG=adonis:bodyparser node --harmony-async-await ./node_modules/.bin/japa",
     "test": "./node_modules/.bin/nyc npm run test:local",
-    "test:win": "node --harmony-async-await ./node_modules/japa-cli/index.js",
+    "test:win": "DEBUG=adonis:bodyparser node --harmony-async-await ./node_modules/japa-cli/index.js",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "standard": {
@@ -41,6 +41,7 @@
   "dependencies": {
     "bytes": "^2.5.0",
     "co-body": "^5.1.1",
+    "debug": "^2.6.8",
     "fs-extra": "^3.0.1",
     "get-stream": "^3.0.0",
     "multiparty": "^4.1.3",

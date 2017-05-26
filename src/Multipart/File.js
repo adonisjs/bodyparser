@@ -16,6 +16,8 @@ const bytes = require('bytes')
 const _ = require('lodash')
 const fs = require('fs-extra')
 const mediaTyper = require('media-typer')
+const debug = require('debug')('adonis:bodyparser')
+
 const CE = require('../Exceptions')
 
 /**
@@ -132,6 +134,7 @@ class File {
    */
   _bindRequiredListeners () {
     this.stream.on('end', () => {
+      debug('read stream ended for %s - %s', this._fieldName, this._clientName)
       this.ended = true
       this._status = this._status === 'pending' ? 'consumed' : this._status
     })
@@ -160,6 +163,7 @@ class File {
         if (error) { return reject(error) }
 
         this.stream.on('error', (error) => {
+          debug('received error from read stream %s', error.message)
           if (this._writeStream && this._writeStream.destroy) {
             this._writeStream.destroy()
             fs
@@ -278,6 +282,7 @@ class File {
     }
 
     this._tmpPath = path.join(os.tmpdir(), `ab-${new Date().getTime()}.tmp`)
+    debug('moving file %s to tmp directory %s', this._fieldName, this._tmpPath)
     return this._streamFile(this._tmpPath)
   }
 
@@ -325,6 +330,7 @@ class File {
         this._fileName = options.filename
         this._location = location
         this._status = 'moved'
+        debug('streamed file to final location %s - %s', this._fieldName, this._fileName)
       } catch (error) {
         this.setError(getError('size', { size: this.validationOptions.size }), 'size')
       }
@@ -339,6 +345,7 @@ class File {
     this._fileName = options.filename
     this._location = location
     this._status = 'moved'
+    debug('moved file to final location %s - %s', this._fieldName, this._fileName)
   }
 
   /**

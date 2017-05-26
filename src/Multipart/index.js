@@ -10,6 +10,8 @@
 */
 
 const multiparty = require('multiparty')
+const debug = require('debug')('adonis:bodyparser')
+
 const File = require('./File')
 const FileJar = require('./FileJar')
 const CE = require('../Exceptions')
@@ -167,6 +169,7 @@ class Multipart {
    * @chainable
    */
   file (name, options = {}, callback) {
+    debug('attached callback for %s file', name)
     if (typeof (callback) !== 'function') {
       throw CE.InvalidArgumentException.invalidParameter('multipart.file expects callback to be a function')
     }
@@ -192,6 +195,7 @@ class Multipart {
    * @chainable
    */
   field (callback) {
+    debug('attached callback on multipart fields')
     this._fieldsCallback = callback
     return this
   }
