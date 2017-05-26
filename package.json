@@ -4,9 +4,13 @@
   "description": "Body parser middleware for Adonis 4.0 and above",
   "main": "index.js",
   "scripts": {
-    "test": "npm run lint && istanbul cover _mocha --report lcovonly -- -R spec test && cat ./coverage/lcov.info | coveralls && rm -rf ./coverage",
-    "coverage": "istanbul cover _mocha test --bail",
-    "lint": "standard src/**/*.js test/*.js"
+    "lint": "standard",
+    "pretest": "npm run lint",
+    "posttest": "npm run coverage",
+    "test:local": "node --harmony-async-await ./node_modules/.bin/japa",
+    "test": "./node_modules/.bin/nyc npm run test:local",
+    "test:win": "node --harmony-async-await ./node_modules/japa-cli/index.js",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "standard": {
     "global": [
@@ -44,11 +48,13 @@
   },
   "devDependencies": {
     "adonis-sink": "git+https://github.com/adonisjs/adonis-sink.git#develop",
+    "coveralls": "^2.13.1",
     "cz-conventional-changelog": "^2.0.0",
     "japa": "^1.0.3",
     "japa-cli": "^1.0.1",
     "media-typer": "^0.3.0",
     "node-req": "git+https://github.com/poppinss/node-req.git#develop",
+    "nyc": "^10.3.2",
     "supertest": "^3.0.0",
     "zombie": "^5.0.5"
   },
