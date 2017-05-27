@@ -847,9 +847,11 @@ test.group('Multipart', () => {
         .then(() => {
           res.end()
         }).catch((error) => {
-          res.writeHead(500)
-          res.write(error.message)
-          res.end()
+          setTimeout(() => {
+            res.writeHead(500)
+            res.write(error.message)
+            res.end()
+          })
         })
     })
 
@@ -874,9 +876,11 @@ test.group('Multipart', () => {
         .then(() => {
           res.end()
         }).catch((error) => {
-          res.writeHead(500)
-          res.write(error.message)
-          res.end()
+          setTimeout(() => {
+            res.writeHead(500)
+            res.write(error.message)
+            res.end()
+          })
         })
     })
 
