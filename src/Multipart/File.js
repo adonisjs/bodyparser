@@ -17,6 +17,7 @@ const _ = require('lodash')
 const fs = require('fs-extra')
 const mediaTyper = require('media-typer')
 const debug = require('debug')('adonis:bodyparser')
+const eos = require('end-of-stream')
 
 const CE = require('../Exceptions')
 
@@ -134,9 +135,6 @@ class File {
    */
   _bindRequiredListeners () {
     this.stream.on('end', () => {
-      if (this._writeFd) {
-        fs.close(this._writeFd)
-      }
       debug('read stream ended for %s - %s', this._fieldName, this._clientName)
       this.ended = true
       this._status = this._status === 'pending' ? 'consumed' : this._status
@@ -160,26 +158,29 @@ class File {
   _streamFile (location, limit) {
     return new Promise((resolve, reject) => {
       fs.open(location, 'w', (error, fd) => {
-        this._writeFd = fd
         /**
          * Reject when there is an erorr
          */
-        if (error) { return reject(error) }
+        if (error) {
+          fs.close(fd)
+          return reject(error)
+        }
 
         const writeStream = fs.createWriteStream(location)
         writeStream.on('error', reject)
-        writeStream.on('close', resolve)
 
-        this.stream.on('error', (error) => {
-          debug('received error from read stream %s', error.message)
-          if (writeStream && writeStream.destroy) {
-            writeStream.destroy()
-            fs
-              .unlink(writeStream.path)
-              .then(() => {
-                reject(error)
-              }).catch(reject)
+        /**
+         * Knowing when stream ends
+         */
+        eos(this.stream, (error) => {
+          fs.close(fd)
+          if (!error) {
+            resolve()
+            return
           }
+          debug('received error from read stream %s', error.message)
+          writeStream.destroy()
+          fs.unlink(writeStream.path).then(() => reject(error)).catch(reject)
         })
 
         /**
