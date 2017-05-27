@@ -9,7 +9,7 @@
     "posttest": "npm run coverage",
     "test:local": "DEBUG=adonis:bodyparser node --harmony-async-await ./node_modules/.bin/japa",
     "test": "./node_modules/.bin/nyc npm run test:local",
-    "test:win": "DEBUG=adonis:bodyparser node --harmony-async-await ./node_modules/japa-cli/index.js",
+    "test:win": "set DEBUG=adonis:bodyparser && node --harmony-async-await ./node_modules/japa-cli/index.js",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "standard": {

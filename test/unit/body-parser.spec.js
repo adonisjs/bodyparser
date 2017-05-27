@@ -424,9 +424,11 @@ test.group('Body Parser', (group) => {
 
       const parser = new BodyParser(config)
       await parser.handle({ request }, function () {})
-      res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify({ fields: request._body, files: request._files }))
-      res.end()
+      setTimeout(() => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.write(JSON.stringify({ fields: request._body, files: request._files }))
+        res.end()
+      })
     }
 
     const { body } = await supertest(app.server)
@@ -449,9 +451,11 @@ test.group('Body Parser', (group) => {
 
       const parser = new BodyParser(config)
       await parser.handle({ request }, function () {})
-      res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify({ fields: request._body, files: request._files }))
-      res.end()
+      setTimeout(() => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.write(JSON.stringify({ fields: request._body, files: request._files }))
+        res.end()
+      })
     }
 
     const { body } = await supertest(app.server)
