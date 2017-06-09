@@ -201,7 +201,7 @@ test.group('Multipart', () => {
       .attach('package', path.join(__dirname, '../../package.json'))
       .expect(500)
 
-    assert.equal(res.text, 'stream ended unexpectedly')
+    assert.equal(res.text, 'E_CANNOT_PROCESS_STREAM: Cannot process multipart stream twice. Make sure to disable files {autoProcess} when manually calling multipart.process')
   }).timeout(0)
 
   test('move file from tmp directory', async (assert) => {

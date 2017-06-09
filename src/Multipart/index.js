@@ -82,6 +82,8 @@ class Multipart {
     if (!disableJar) {
       this.jar = new FileJar()
     }
+
+    this._processedStream = false
   }
 
   /**
@@ -134,7 +136,12 @@ class Multipart {
    * @return {Promise}
    */
   process () {
+    if (this._processedStream) {
+      return Promise.reject(CE.RuntimeException.cannotReProcessStream())
+    }
+
     return new Promise((resolve, reject) => {
+      this._processedStream = true
       const form = new multiparty.Form(this._multipartyOptions)
       form.on('error', reject)
       form.on('part', (part) => {

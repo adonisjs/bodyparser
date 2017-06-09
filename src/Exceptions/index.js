@@ -72,4 +72,18 @@ class InvalidArgumentException extends NE.InvalidArgumentException {
   }
 }
 
-module.exports = { FileMoveException, InvalidArgumentException }
+class RuntimeException extends NE.RuntimeException {
+  /**
+   * This exception is raised when someone tries to
+   * process the stream for multiple times.
+   *
+   * @method cannotReProcessStream
+   *
+   * @return {Object}
+   */
+  static cannotReProcessStream () {
+    return new this('Cannot process multipart stream twice. Make sure to disable files {autoProcess} when manually calling multipart.process', 500, 'E_CANNOT_PROCESS_STREAM')
+  }
+}
+
+module.exports = { FileMoveException, InvalidArgumentException, RuntimeException }
