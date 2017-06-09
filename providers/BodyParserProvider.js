@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
 */
 
-const { ServiceProvider } = require('adonis-bodyparser')
+const { ServiceProvider } = require('adonis-fold')
 const _ = require('lodash')
 const FileJar = require('../src/Multipart/FileJar')
 
