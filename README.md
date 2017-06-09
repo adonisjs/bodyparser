@@ -19,6 +19,26 @@ This is the official body parser middleware for the Adonis framework. Apart from
 9. Set hard limits on server to deny request payload greater than `x` bytes.
 
 
+## Usage
+The body parser is pre-configured with every new AdonisJs application. But in case you want to setup it manually.
+
+### Installation
+```bash
+npm i --save adonis-bodyparser
+```
+
+### Setup
+Make sure to register the provider inside `start/app.js` file.
+
+```js
+const providers = [
+  ...
+  'adonis-bodyparsers/providers/BodyParser'
+]
+```
+
+Once the provider has been setup, it will automatically register a global middleware for you.
+
 ## Node/OS Target
 
 This repo/branch is supposed to run fine on all major OS platforms and targets `Node.js >=7.0`
