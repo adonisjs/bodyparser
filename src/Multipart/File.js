@@ -57,7 +57,7 @@ class File {
      * public properties
      */
     this.stream = readStream
-    this.size = 0
+    this._size = 0
 
     /**
      * Marked as ended when stream is consued
@@ -110,7 +110,7 @@ class File {
     /**
      * Max size exceeded
      */
-    if (this.size > expectedBytes) {
+    if (this._size > expectedBytes) {
       this.setError(getError('size', { size: expectedBytes }), 'size')
       return
     }
@@ -187,8 +187,8 @@ class File {
          * On each data chunk, update the file size
          */
         this.stream.on('data', (line) => {
-          this.size += line.length
-          if (limit && this.size > limit) {
+          this._size += line.length
+          if (limit && this._size > limit) {
             this.stream.emit('error', getError('size', { size: limit }))
           }
         })
@@ -200,6 +200,39 @@ class File {
         this.stream.pipe(writeStream)
       })
     })
+  }
+
+  /**
+   * Returns status for the file
+   *
+   * @method status
+   *
+   * @return {String}
+   */
+  get status () {
+    return this._status
+  }
+
+  /**
+   * Returns tmp path for the file
+   *
+   * @method tmpPath
+   *
+   * @return {String}
+   */
+  get tmpPath () {
+    return this._tmpPath
+  }
+
+  /**
+   * Returns file size in bytes
+   *
+   * @method size
+   *
+   * @return {Number}
+   */
+  get size () {
+    return this._size
   }
 
   /**
@@ -303,7 +336,7 @@ class File {
    * @return {Promise}
    */
   async move (location, options = {}) {
-    options.filename = options.name || this._clientName
+    options.name = options.name || this._clientName
 
     /**
      * Throw error when stream has been consumed but there
@@ -331,8 +364,8 @@ class File {
      */
     if (!this.ended) {
       try {
-        await this._streamFile(path.join(location, options.filename), this.validationOptions.size)
-        this._fileName = options.filename
+        await this._streamFile(path.join(location, options.name), this.validationOptions.size)
+        this._fileName = options.name
         this._location = location
         this._status = 'moved'
         debug('streamed file to final location %s - %s', this._fieldName, this._fileName)
@@ -346,8 +379,8 @@ class File {
      * Otherwise move the tmpFile to the user specified
      * location.
      */
-    await fs.move(this._tmpPath, path.join(location, options.filename))
-    this._fileName = options.filename
+    await fs.move(this._tmpPath, path.join(location, options.name))
+    this._fileName = options.name
     this._location = location
     this._status = 'moved'
     debug('moved file to final location %s - %s', this._fieldName, this._fileName)
@@ -376,12 +409,12 @@ class File {
       clientName: this._clientName,
       fileName: this._fileName,
       fieldName: this._fieldName,
-      tmpPath: this._tmpPath,
+      tmpPath: this.tmpPath,
       headers: this._headers,
       size: this.size,
       type: this._type,
       subtype: this._subtype,
-      status: this._status,
+      status: this.status,
       error: this._error
     }
   }

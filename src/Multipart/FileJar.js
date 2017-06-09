@@ -77,6 +77,30 @@ class FileJar {
   }
 
   /**
+   * Moves all files to the given location parallely
+   *
+   * @method moveAll
+   *
+   * @param  {String} location
+   * @param  {Function} callback
+   *
+   * @return {Promise}
+   *
+   * @example
+   * ```js
+   * fileJar.moveAll(Helpers.tmpPath('uploads'), function (file) {
+   *   return { name: new Date().getTime() }
+   * })
+   * ```
+   */
+  moveAll (location, callback) {
+    callback = typeof (callback) === 'function' ? callback : function () {}
+    return Promise.all(_.map(this._files, (file) => {
+      return file.move(location, callback(file))
+    }))
+  }
+
+  /**
    * Returns an array errors occured during file move.
    *
    * @method errors
@@ -85,7 +109,7 @@ class FileJar {
    */
   errors () {
     return _(this.all())
-    .filter((file) => file.status !== 'moved')
+    .filter((file) => file.status !== 'moved' && file.error)
     .map((file) => file.error)
     .value()
   }
