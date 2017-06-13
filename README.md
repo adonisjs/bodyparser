@@ -4,7 +4,8 @@ This is the official body parser middleware for the Adonis framework. Apart from
 
 > **NOTE**: Only support Adonis4.0 or greater
 
-<img src="http://res.cloudinary.com/adonisjs/image/upload/q_100/v1496763925/Readme-Logo_z2zzhb.svg" width="200px" align="right" hspace="30px" vspace="140px">
+
+<img src="http://res.cloudinary.com/adonisjs/image/upload/q_100/v1497112678/adonis-purple_pzkmzt.svg" width="200px" align="right" hspace="30px" vspace="80px">
 
 ## Features
 
