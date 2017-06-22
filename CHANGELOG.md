@@ -1,3 +1,13 @@
+<a name="1.0.2"></a>
+## [1.0.2](https://github.com/adonisjs/adonis-middleware/compare/v1.0.1...v1.0.2) (2017-06-22)
+
+
+### Bug Fixes
+
+* **provider:** use correct package via [@adonisjs](https://github.com/adonisjs) org ([12757d5](https://github.com/adonisjs/adonis-middleware/commit/12757d5))
+
+
+
 <a name="1.0.1"></a>
 ## [1.0.1](https://github.com/adonisjs/adonis-middleware/compare/v1.0.0...v1.0.1) (2017-06-22)
 
