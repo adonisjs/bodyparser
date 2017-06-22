@@ -1,6 +1,6 @@
 {
-  "name": "adonis-bodyparser",
-  "version": "1.0.0",
+  "name": "@adonisjs/bodyparser",
+  "version": "1.0.1",
   "description": "Body parser middleware for Adonis 4.0 and above",
   "main": "index.js",
   "scripts": {
@@ -46,17 +46,17 @@
     "fs-extra": "^3.0.1",
     "get-stream": "^3.0.0",
     "multiparty": "^4.1.3",
-    "node-exceptions": "^2.0.1"
+    "node-exceptions": "^2.0.2"
   },
   "devDependencies": {
-    "adonis-sink": "git+https://github.com/adonisjs/adonis-sink.git#develop",
+    "@adonisjs/sink": "^1.0.8",
     "coveralls": "^2.13.1",
     "cz-conventional-changelog": "^2.0.0",
     "japa": "^1.0.3",
     "japa-cli": "^1.0.1",
     "media-typer": "^0.3.0",
-    "node-req": "git+https://github.com/poppinss/node-req.git#develop",
-    "nyc": "^10.3.2",
+    "node-req": "^2.0.1",
+    "nyc": "^11.0.2",
     "semver": "^5.3.0",
     "standard": "^10.0.2",
     "supertest": "^3.0.0",

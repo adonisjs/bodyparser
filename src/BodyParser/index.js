@@ -179,7 +179,7 @@ class BodyParser {
    * @private
    */
   _isType (request, types) {
-    return types.length && request.is(types)
+    return types && types.length && request.is(types)
   }
 
   /**

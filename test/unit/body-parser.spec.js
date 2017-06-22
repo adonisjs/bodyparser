@@ -12,7 +12,7 @@
 const test = require('japa')
 const path = require('path')
 const Browser = require('zombie')
-const { Config } = require('adonis-sink')
+const { Config } = require('@adonisjs/sink')
 const app = require('./app')
 const BodyParser = require('../../src/BodyParser')
 const supertest = require('supertest')
