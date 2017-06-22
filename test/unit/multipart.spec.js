@@ -15,6 +15,11 @@ const http = require('http')
 const supertest = require('supertest')
 const Multipart = require('../../src/Multipart')
 const fs = require('fs-extra')
+const sleep = function (time) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time)
+  })
+}
 
 const exists = async function (location) {
   const fileExists = await fs.exists(location)
@@ -917,6 +922,37 @@ test.group('Multipart', () => {
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
       .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .expect(200)
+
+    assert.equal(text, 'true')
+  })
+
+  test('wait for file handler to finish before ending the request', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      let ended = false
+      multipart.file('*', {}, async (file) => {
+        await file.read()
+        await sleep(10)
+        ended = true
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          res.writeHead(200)
+          res.write(String(ended))
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    const { text } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
       .expect(200)
 
     assert.equal(text, 'true')
