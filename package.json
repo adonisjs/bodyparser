@@ -1,6 +1,6 @@
 {
   "name": "@adonisjs/bodyparser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Body parser middleware for Adonis 4.0 and above",
   "main": "index.js",
   "scripts": {

@@ -84,6 +84,17 @@ class Multipart {
     }
 
     this._processedStream = false
+
+    /**
+     * Multiparty will finish the stream when read stream
+     * is consumed but at times clients needs more time
+     * even when stream is consumed. In that case we
+     * should make sure all promises are resolved
+     * or rejected before moving forwards.
+     *
+     * @type {Object}
+     */
+    this._pendingPromises = new Set()
   }
 
   /**
@@ -124,7 +135,19 @@ class Multipart {
       this.jar.track(fileInstance)
     }
 
-    return Promise.resolve(handler.callback(fileInstance))
+    return new Promise((resolve, reject) => {
+      const filePromise = Promise.resolve(handler.callback(fileInstance))
+      this._pendingPromises.add(filePromise)
+
+      filePromise
+      .then(() => {
+        this._pendingPromises.delete(filePromise)
+        resolve()
+      }).catch((error) => {
+        this._pendingPromises.delete(filePromise)
+        reject(error)
+      })
+    })
   }
 
   /**
@@ -146,8 +169,13 @@ class Multipart {
       form.on('error', reject)
       form.on('part', (part) => {
         this.onPart(part)
-          .then(() => part.resume())
-          .catch((error) => form.emit('error', error))
+        .then(() => {
+          part.resume()
+          if (form.flushing <= 0 && this._pendingPromises.size === 0) {
+            resolve()
+          }
+        })
+        .catch((error) => form.emit('error', error))
       })
 
       form.on('field', (name, value) => {
@@ -156,7 +184,11 @@ class Multipart {
         }
       })
 
-      form.on('close', resolve)
+      form.on('close', () => {
+        if (this._pendingPromises.size === 0) {
+          resolve()
+        }
+      })
       form.parse(this.req)
     })
   }
