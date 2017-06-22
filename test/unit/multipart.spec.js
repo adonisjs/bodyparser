@@ -851,7 +851,7 @@ test.group('Multipart', () => {
             res.writeHead(500)
             res.write(error.message)
             res.end()
-          })
+          }, 10)
         })
     })
 
