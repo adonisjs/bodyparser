@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
 */
 
-const { ServiceProvider } = require('adonis-fold')
+const { ServiceProvider } = require('@adonisjs/fold')
 const _ = require('lodash')
 const FileJar = require('../src/Multipart/FileJar')
 
