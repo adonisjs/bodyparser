@@ -398,6 +398,18 @@ class File {
   }
 
   /**
+   * Returns a boolean indicating whether
+   * file has been moved or not
+   *
+   * @method moved
+   *
+   * @return {Boolean}
+   */
+  moved () {
+    return this.status === 'moved'
+  }
+
+  /**
    * Returns JSON representation of the file
    *
    * @method toJSON
