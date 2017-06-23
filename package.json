@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/adonisjs/adonis-middleware.git"
+    "url": "git+https://github.com/adonisjs/adonis-bodyparser.git"
   },
   "keywords": [
     "adonis",
@@ -35,9 +35,9 @@
   "author": "adonisjs",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/adonisjs/adonis-middleware/issues"
+    "url": "https://github.com/adonisjs/adonis-bodyparser/issues"
   },
-  "homepage": "https://github.com/adonisjs/adonis-middleware#readme",
+  "homepage": "https://github.com/adonisjs/adonis-bodyparser#readme",
   "dependencies": {
     "bytes": "^2.5.0",
     "co-body": "^5.1.1",
