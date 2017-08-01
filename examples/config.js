@@ -130,7 +130,7 @@ module.exports = {
     |
     | The list of routes that should not process files and instead rely on
     | manual process. This list should only contain routes when autoProcess
-    | is to true. Otherwise everything is process manually.
+    | is to true. Otherwise everything is processed manually.
     |
     */
     processManually: []
