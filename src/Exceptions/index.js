@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
 */
 
-const NE = require('node-exceptions')
+const GE = require('@adonisjs/generic-exceptions')
 
 /**
  * This class contains static methods to throw exceptions
@@ -19,7 +19,7 @@ const NE = require('node-exceptions')
  * @class FileMoveException
  * @constructor
  */
-class FileMoveException extends NE.RuntimeException {
+class FileMoveException extends GE.RuntimeException {
   /**
    * This exception is thrown when user is trying to move
    * file to the `tmp` directory for multiple times.
@@ -56,34 +56,4 @@ class FileMoveException extends NE.RuntimeException {
   }
 }
 
-class InvalidArgumentException extends NE.InvalidArgumentException {
-  /**
-   * Throws exception by instantiating the class and setting error code
-   * to `E_INVALID_PARAMETER`.
-   *
-   * @method invalidParameter
-   *
-   * @param  {String}        message
-   *
-   * @return {Object}
-   */
-  static invalidParameter (message) {
-    return new this(message, 500, 'E_INVALID_PARAMETER')
-  }
-}
-
-class RuntimeException extends NE.RuntimeException {
-  /**
-   * This exception is raised when someone tries to
-   * process the stream for multiple times.
-   *
-   * @method cannotReProcessStream
-   *
-   * @return {Object}
-   */
-  static cannotReProcessStream () {
-    return new this('Cannot process multipart stream twice. Make sure to disable files {autoProcess} when manually calling multipart.process', 500, 'E_CANNOT_PROCESS_STREAM')
-  }
-}
-
-module.exports = { FileMoveException, InvalidArgumentException, RuntimeException }
+module.exports = { FileMoveException }
