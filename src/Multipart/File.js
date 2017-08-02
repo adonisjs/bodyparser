@@ -18,7 +18,7 @@ const fs = require('fs-extra')
 const mediaTyper = require('media-typer')
 const debug = require('debug')('adonis:bodyparser')
 const eos = require('end-of-stream')
-
+const GE = require('@adonisjs/generic-exceptions')
 const CE = require('../Exceptions')
 
 /**
@@ -288,7 +288,7 @@ class File {
    */
   validate (callback) {
     if (typeof (callback) !== 'function') {
-      throw CE.InvalidArgumentException.invalidParameter('file.validate expects a function')
+      throw GE.InvalidArgumentException.invalidParameter('file.validate expects a function', callback)
     }
     this._validateFn = callback.bind(this)
     return this

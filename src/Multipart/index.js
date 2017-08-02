@@ -14,7 +14,7 @@ const debug = require('debug')('adonis:bodyparser')
 
 const File = require('./File')
 const FileJar = require('./FileJar')
-const CE = require('../Exceptions')
+const GE = require('@adonisjs/generic-exceptions')
 
 /**
  * Multipart class does all the heavy lifting of processing multipart
@@ -160,7 +160,7 @@ class Multipart {
    */
   process () {
     if (this._processedStream) {
-      return Promise.reject(CE.RuntimeException.cannotReProcessStream())
+      return Promise.reject(GE.RuntimeException.invoke('Cannot process multipart stream twice. Make sure to disable files {autoProcess} when manually calling multipart.process', 500, 'E_CANNOT_PROCESS_STREAM'))
     }
 
     return new Promise((resolve, reject) => {
@@ -210,7 +210,7 @@ class Multipart {
   file (name, options = {}, callback) {
     debug('attached callback for %s file', name)
     if (typeof (callback) !== 'function') {
-      throw CE.InvalidArgumentException.invalidParameter('multipart.file expects callback to be a function')
+      throw GE.InvalidArgumentException.invalidParameter('multipart.file expects callback to be a function', callback)
     }
 
     if (name === '*') {

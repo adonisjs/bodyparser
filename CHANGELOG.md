@@ -1,3 +1,14 @@
+<a name="1.0.5"></a>
+## [1.0.5](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.4...v1.0.5) (2017-08-02)
+
+
+### Features
+
+* **exceptions:** use generic-exceptions package ([f4f3fb4](https://github.com/adonisjs/adonis-bodyparser/commit/f4f3fb4))
+* **instructions:** add instructions.js and md file ([13ff287](https://github.com/adonisjs/adonis-bodyparser/commit/13ff287))
+
+
+
 <a name="1.0.4"></a>
 ## [1.0.4](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.3...v1.0.4) (2017-06-23)
 
