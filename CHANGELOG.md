@@ -1,3 +1,13 @@
+<a name="1.0.6"></a>
+## [1.0.6](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.5...v1.0.6) (2017-09-02)
+
+
+### Bug Fixes
+
+* **body:** set request.body public body ([62ff44b](https://github.com/adonisjs/adonis-bodyparser/commit/62ff44b))
+
+
+
 <a name="1.0.5"></a>
 ## [1.0.5](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.4...v1.0.5) (2017-08-02)
 
