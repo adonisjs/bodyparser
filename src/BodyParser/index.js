@@ -226,9 +226,9 @@ class BodyParser {
    * @return {void}
    */
   async handle ({ request }, next) {
-    request._body = {}
-    request._raw = {}
     request._files = {}
+    request.body = {}
+    request._raw = {}
 
     /**
      * Don't bother when request does not have body
@@ -259,7 +259,7 @@ class BodyParser {
 
       await request.multipart.process()
       request._files = this.files.get()
-      request._body = this.fields.get()
+      request.body = this.fields.get()
 
       await next()
       return
@@ -272,7 +272,7 @@ class BodyParser {
      */
     if (this._isType(request, this.jsonTypes)) {
       debug('detected json body')
-      request._body = await this._parseJSON(request.request)
+      request.body = await this._parseJSON(request.request)
       await next()
       return
     }
@@ -282,7 +282,7 @@ class BodyParser {
      */
     if (this._isType(request, this.formTypes)) {
       debug('detected form body')
-      request._body = await this._parseForm(request.request)
+      request.body = await this._parseForm(request.request)
       await next()
       return
     }

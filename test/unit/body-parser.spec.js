@@ -46,7 +46,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
 
@@ -87,7 +87,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
 
@@ -130,7 +130,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
 
@@ -150,7 +150,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
     const { body } = await supertest(app.server).post('/').send({ name: 'virk', isJSON: true })
@@ -162,7 +162,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
     const { body } = await supertest(app.server).post('/').send({ names: ['virk', 'foo@bar.com'], isJSON: true })
@@ -176,7 +176,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(config)
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
     const { body } = await supertest(app.server).post('/').send({ name: 'virk', isJSON: true })
@@ -208,7 +208,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(config)
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
 
@@ -359,7 +359,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
 
@@ -379,7 +379,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request._body))
+      res.write(JSON.stringify(request.body))
       res.end()
     }
 
@@ -399,7 +399,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify({ fields: request._body, files: request._files.package }))
+      res.write(JSON.stringify({ fields: request.body, files: request._files.package }))
       res.end()
     }
 
@@ -426,7 +426,7 @@ test.group('Body Parser', (group) => {
       await parser.handle({ request }, function () {})
       setTimeout(() => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.write(JSON.stringify({ fields: request._body, files: request._files }))
+        res.write(JSON.stringify({ fields: request.body, files: request._files }))
         res.end()
       })
     }
@@ -453,7 +453,7 @@ test.group('Body Parser', (group) => {
       await parser.handle({ request }, function () {})
       setTimeout(() => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.write(JSON.stringify({ fields: request._body, files: request._files }))
+        res.write(JSON.stringify({ fields: request.body, files: request._files }))
         res.end()
       })
     }
@@ -478,7 +478,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(config)
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify({ fields: request._body, files: request._files.package }))
+      res.write(JSON.stringify({ fields: request.body, files: request._files.package }))
       res.end()
     }
 
@@ -501,7 +501,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(new Config())
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify({ fields: request._body, files: request._files, raw: request._raw }))
+      res.write(JSON.stringify({ fields: request.body, files: request._files, raw: request._raw }))
       res.end()
     }
 
