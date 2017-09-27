@@ -236,6 +236,17 @@ class File {
   }
 
   /**
+   * Uploaded file name
+   *
+   * @attribute fileName
+   *
+   * @return {String}
+   */
+  get fileName () {
+    return this._fileName
+  }
+
+  /**
    * Pushes an error to the errors array and also
    * set the file status to `error`.
    *
