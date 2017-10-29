@@ -11,12 +11,13 @@
 
 const test = require('japa')
 const path = require('path')
+const os = require('os')
 const Browser = require('zombie')
 const { Config } = require('@adonisjs/sink')
 const app = require('./app')
 const BodyParser = require('../../src/BodyParser')
-const supertest = require('supertest')
 const TEST_URL = 'http://localhost:4000/'
+const supertest = require('supertest')
 
 test.group('Body Parser', (group) => {
   group.before(() => {
@@ -510,5 +511,29 @@ test.group('Body Parser', (group) => {
     assert.deepEqual(body.fields, {})
     assert.deepEqual(body.files, {})
     assert.deepEqual(body.raw, {})
+  })
+
+  test('create custom tmp file name from config', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const config = new Config()
+      config.set('bodyParser.files.tmpFileName', function () {
+        return 'abc'
+      })
+
+      const parser = new BodyParser(config)
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify(request._files['ignore-file'].toJSON()))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .attach('ignore-file', path.join(__dirname, '../../.gitignore'))
+
+    assert.equal(body.tmpPath, path.join(os.tmpdir(), 'abc'))
   })
 })
