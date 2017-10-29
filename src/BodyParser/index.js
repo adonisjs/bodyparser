@@ -250,7 +250,7 @@ class BodyParser {
 
       request.multipart.file('*', {}, async (file) => {
         this.files.add(file._fieldName, file)
-        await file.moveToTmp()
+        await file.moveToTmp(this.config.files.tmpFileName)
       })
 
       request.multipart.field((name, value) => {

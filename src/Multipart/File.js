@@ -328,14 +328,22 @@ class File {
    *
    * @method moveToTmp
    *
+   * @package {Function} tmpNameFn
+   *
    * @return {Promise}
    */
-  moveToTmp () {
+  moveToTmp (tmpNameFn) {
     if (this.ended) {
       throw CE.FileMoveException.multipleMoveAttempts(this._fieldName)
     }
 
-    this._tmpPath = path.join(os.tmpdir(), `ab-${uuid()}.tmp`)
+    /**
+     * The function to be used for generating
+     * the tmp file name
+     */
+    tmpNameFn = typeof (tmpNameFn) === 'function' ? tmpNameFn : () => `ab-${uuid()}.tmp`
+
+    this._tmpPath = path.join(os.tmpdir(), tmpNameFn())
     debug('moving file %s to tmp directory %s', this._fieldName, this._tmpPath)
     return this._streamFile(this._tmpPath)
   }
