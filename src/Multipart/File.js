@@ -21,6 +21,11 @@ const eos = require('end-of-stream')
 const GE = require('@adonisjs/generic-exceptions')
 const CE = require('../Exceptions')
 
+function uuid (a) {
+  return a ? (a ^ Math.random() * 16 >> a / 4).toString(16)
+    : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, uuid)
+}
+
 /**
  * Returns the error string for given error
  * type
@@ -330,7 +335,7 @@ class File {
       throw CE.FileMoveException.multipleMoveAttempts(this._fieldName)
     }
 
-    this._tmpPath = path.join(os.tmpdir(), `ab-${new Date().getTime()}.tmp`)
+    this._tmpPath = path.join(os.tmpdir(), `ab-${uuid()}.tmp`)
     debug('moving file %s to tmp directory %s', this._fieldName, this._tmpPath)
     return this._streamFile(this._tmpPath)
   }
