@@ -1,3 +1,18 @@
+<a name="1.0.8"></a>
+## [1.0.8](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.7...v1.0.8) (2017-10-29)
+
+
+### Bug Fixes
+
+* **file:** generate more unique tmp file names ([257d031](https://github.com/adonisjs/adonis-bodyparser/commit/257d031)), closes [#2](https://github.com/adonisjs/adonis-bodyparser/issues/2)
+
+
+### Features
+
+* **file:** add option to define custom tmp file names ([0f50a83](https://github.com/adonisjs/adonis-bodyparser/commit/0f50a83))
+
+
+
 <a name="1.0.7"></a>
 ## [1.0.7](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.6...v1.0.7) (2017-09-27)
 
