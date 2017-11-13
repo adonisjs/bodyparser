@@ -35,6 +35,8 @@ const notExists = async function (location) {
   }
 }
 
+test.grep('@latest')
+
 test.group('Multipart', () => {
   test('do not process files unless instructed', async (assert) => {
     const server = http.createServer((req, res) => {
@@ -956,5 +958,130 @@ test.group('Multipart', () => {
       .expect(200)
 
     assert.equal(text, 'true')
+  })
+
+  test('access all file properties before moving the file @latest', async (assert) => {
+    assert.plan(9)
+
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('package', {}, function (file) {
+        assert.equal(file.clientName, 'package.json')
+        assert.isNull(file.fileName)
+        assert.equal(file.fieldName, 'package')
+        assert.isNull(file.tmpPath)
+        assert.deepEqual(file.headers, {
+          'content-disposition': 'form-data; name="package"; filename="package.json"',
+          'content-type': 'application/json'
+        })
+        assert.equal(file.size, 0)
+        assert.equal(file.type, 'application')
+        assert.equal(file.subtype, 'json')
+        assert.equal(file.status, 'pending')
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          res.writeHead(200)
+          res.end()
+        }).catch((error) => {
+          console.log(error)
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+  })
+
+  test('access all file properties after moveToTmp @latest', async (assert) => {
+    assert.plan(10)
+
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('package', {}, async function (file) {
+        await file.moveToTmp()
+
+        assert.equal(file.clientName, 'package.json')
+        assert.isNull(file.fileName)
+        assert.equal(file.fieldName, 'package')
+        assert.isDefined(file.tmpPath)
+        assert.isTrue(file.tmpPath.endsWith('.tmp'))
+
+        assert.deepEqual(file.headers, {
+          'content-disposition': 'form-data; name="package"; filename="package.json"',
+          'content-type': 'application/json'
+        })
+        assert.isAbove(file.size, 0)
+        assert.equal(file.type, 'application')
+        assert.equal(file.subtype, 'json')
+        assert.equal(file.status, 'consumed')
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          res.writeHead(200)
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+  })
+
+  test('access all file properties after moving the file @latest', async (assert) => {
+    assert.plan(10)
+
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('package', {}, async function (file) {
+        await file.moveToTmp()
+        await file.move(path.join(__dirname, './'))
+
+        assert.equal(file.clientName, 'package.json')
+        assert.equal(file.fileName, 'package.json')
+        assert.equal(file.fieldName, 'package')
+        assert.isDefined(file.tmpPath)
+        assert.isTrue(file.tmpPath.endsWith('.tmp'))
+
+        assert.deepEqual(file.headers, {
+          'content-disposition': 'form-data; name="package"; filename="package.json"',
+          'content-type': 'application/json'
+        })
+        assert.isAbove(file.size, 0)
+        assert.equal(file.type, 'application')
+        assert.equal(file.subtype, 'json')
+        assert.equal(file.status, 'moved')
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          return fs.remove(path.join(__dirname, './package.json'))
+        })
+        .then(() => {
+          res.writeHead(200)
+          res.end()
+        }).catch((error) => {
+          console.log(error)
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
   })
 })

@@ -59,10 +59,69 @@ const getError = function (type, data) {
 class File {
   constructor (readStream, options = {}) {
     /**
-     * public properties
+     * Access to multipart stream
+     *
+     * @attribute stream
+     *
+     * @type {Stream}
      */
     this.stream = readStream
-    this._size = 0
+
+    /**
+     * File size
+     *
+     * @attribute size
+     *
+     * @type {Number}
+     */
+    this.size = 0
+
+    /**
+     * The file name uploaded the end user
+     *
+     * @attribute clientName
+     *
+     * @type {String}
+     */
+    this.clientName = this.stream.filename
+
+    /**
+     * The field name using which file was
+     * uploaded
+     *
+     * @attribute fieldName
+     *
+     * @type {String}
+     */
+    this.fieldName = this.stream.name
+
+    /**
+     * Upload file header
+     *
+     * @attribute headers
+     *
+     * @type {Object}
+     */
+    this.headers = _.clone(this.stream.headers)
+
+    /**
+     * File name after move
+     *
+     * @attribute fileName
+     *
+     * @type {String|Null}
+     */
+    this.fileName = null
+
+    /**
+     * File tmp path after `moveToTmp` is
+     * called.
+     *
+     * @attribute tmpPath
+     *
+     * @type {String|Null}
+     */
+    this.tmpPath = null
 
     /**
      * Marked as ended when stream is consued
@@ -71,30 +130,40 @@ class File {
      */
     this.ended = false
 
+    const parsedTypes = mediaTyper.parse(this.headers['content-type'])
+
+    /**
+     * The file main type.
+     *
+     * @attribute type
+     *
+     * @type {String}
+     */
+    this.type = parsedTypes.type
+
+    /**
+     * The file subtype.
+     *
+     * @type {String}
+     */
+    this.subtype = parsedTypes.subtype
+
+    /**
+     * valid statuses are - pending, consumed, moved, error
+     * Consumed is set when readable stream ends.
+     *
+     * @attribute status
+     *
+     * @type {String}
+     */
+    this.status = 'pending'
+
     /**
      * private properties
      */
     this._validateFn = this._validateFile.bind(this)
     this._error = {}
-    this._fileName = null
-    this._clientName = this.stream.filename
-    this._fieldName = this.stream.name
-    this._headers = _.clone(this.stream.headers)
-    this._tmpPath = null
     this._writeFd = null
-
-    const parsedTypes = mediaTyper.parse(this._headers['content-type'])
-    this._type = parsedTypes.type
-    this._subtype = parsedTypes.subtype
-
-    /**
-     * valid statuses are - pending, consumed, moved, error
-     *
-     * Consumed is set when readable stream ends.
-     *
-     * @type {String}
-     */
-    this._status = 'pending'
     this._bindRequiredListeners()
     this.setOptions(options)
   }
@@ -115,7 +184,7 @@ class File {
     /**
      * Max size exceeded
      */
-    if (this._size > expectedBytes) {
+    if (this.size > expectedBytes) {
       this.setError(getError('size', { size: expectedBytes }), 'size')
       return
     }
@@ -124,8 +193,8 @@ class File {
      * Invalid file type
      */
     const types = this.validationOptions.types
-    if (_.size(types) && (!_.includes(types, this._type) && !_.includes(types, this._subtype))) {
-      this.setError(getError('type', { types, type: this._type, subtype: this._subtype }), 'type')
+    if (_.size(types) && (!_.includes(types, this.type) && !_.includes(types, this.subtype))) {
+      this.setError(getError('type', { types, type: this.type, subtype: this.subtype }), 'type')
     }
   }
 
@@ -140,9 +209,9 @@ class File {
    */
   _bindRequiredListeners () {
     this.stream.on('end', () => {
-      debug('read stream ended for %s - %s', this._fieldName, this._clientName)
+      debug('read stream ended for %s - %s', this.fieldName, this.clientName)
       this.ended = true
-      this._status = this._status === 'pending' ? 'consumed' : this._status
+      this.status = this.status === 'pending' ? 'consumed' : this.status
     })
   }
 
@@ -192,8 +261,8 @@ class File {
          * On each data chunk, update the file size
          */
         this.stream.on('data', (line) => {
-          this._size += line.length
-          if (limit && this._size > limit) {
+          this.size += line.length
+          if (limit && this.size > limit) {
             this.stream.emit('error', getError('size', { size: limit }))
           }
         })
@@ -205,50 +274,6 @@ class File {
         this.stream.pipe(writeStream)
       })
     })
-  }
-
-  /**
-   * Returns status for the file
-   *
-   * @method status
-   *
-   * @return {String}
-   */
-  get status () {
-    return this._status
-  }
-
-  /**
-   * Returns tmp path for the file
-   *
-   * @method tmpPath
-   *
-   * @return {String}
-   */
-  get tmpPath () {
-    return this._tmpPath
-  }
-
-  /**
-   * Returns file size in bytes
-   *
-   * @method size
-   *
-   * @return {Number}
-   */
-  get size () {
-    return this._size
-  }
-
-  /**
-   * Uploaded file name
-   *
-   * @attribute fileName
-   *
-   * @return {String}
-   */
-  get fileName () {
-    return this._fileName
   }
 
   /**
@@ -264,12 +289,12 @@ class File {
    */
   setError (message, type) {
     const error = {
-      fieldName: this._fieldName,
-      clientName: this._clientName,
+      fieldName: this.fieldName,
+      clientName: this.clientName,
       message: message,
       type: type
     }
-    this._status = 'error'
+    this.status = 'error'
     this._error = error
   }
 
@@ -334,7 +359,7 @@ class File {
    */
   moveToTmp (tmpNameFn) {
     if (this.ended) {
-      throw CE.FileMoveException.multipleMoveAttempts(this._fieldName)
+      throw CE.FileMoveException.multipleMoveAttempts(this.fieldName)
     }
 
     /**
@@ -343,9 +368,9 @@ class File {
      */
     tmpNameFn = typeof (tmpNameFn) === 'function' ? tmpNameFn : () => `ab-${uuid()}.tmp`
 
-    this._tmpPath = path.join(os.tmpdir(), tmpNameFn())
-    debug('moving file %s to tmp directory %s', this._fieldName, this._tmpPath)
-    return this._streamFile(this._tmpPath)
+    this.tmpPath = path.join(os.tmpdir(), tmpNameFn())
+    debug('moving file %s to tmp directory %s', this.fieldName, this.tmpPath)
+    return this._streamFile(this.tmpPath)
   }
 
   /**
@@ -360,15 +385,15 @@ class File {
    * @return {Promise}
    */
   async move (location, options = {}) {
-    options.name = options.name || this._clientName
+    options.name = options.name || this.clientName
 
     /**
      * Throw error when stream has been consumed but there
      * is no `tmp` file. Since after this there is no
      * way to move file anywhere.
      */
-    if (!this._tmpPath && this.ended) {
-      throw CE.FileMoveException.invalidMoveState(this._fieldName)
+    if (!this.tmpPath && this.ended) {
+      throw CE.FileMoveException.invalidMoveState(this.fieldName)
     }
 
     /**
@@ -389,10 +414,10 @@ class File {
     if (!this.ended) {
       try {
         await this._streamFile(path.join(location, options.name), this.validationOptions.size)
-        this._fileName = options.name
+        this.fileName = options.name
         this._location = location
-        this._status = 'moved'
-        debug('streamed file to final location %s - %s', this._fieldName, this._fileName)
+        this.status = 'moved'
+        debug('streamed file to final location %s - %s', this.fieldName, this.fileName)
       } catch (error) {
         this.setError(getError('size', { size: this.validationOptions.size }), 'size')
       }
@@ -403,11 +428,11 @@ class File {
      * Otherwise move the tmpFile to the user specified
      * location.
      */
-    await fs.move(this._tmpPath, path.join(location, options.name))
-    this._fileName = options.name
+    await fs.move(this.tmpPath, path.join(location, options.name))
+    this.fileName = options.name
     this._location = location
-    this._status = 'moved'
-    debug('moved file to final location %s - %s', this._fieldName, this._fileName)
+    this.status = 'moved'
+    debug('moved file to final location %s - %s', this.fieldName, this.fileName)
   }
 
   /**
@@ -442,14 +467,14 @@ class File {
    */
   toJSON () {
     return {
-      clientName: this._clientName,
-      fileName: this._fileName,
-      fieldName: this._fieldName,
+      clientName: this.clientName,
+      fileName: this.fileName,
+      fieldName: this.fieldName,
       tmpPath: this.tmpPath,
-      headers: this._headers,
+      headers: this.headers,
       size: this.size,
-      type: this._type,
-      subtype: this._subtype,
+      type: this.type,
+      subtype: this.subtype,
       status: this.status,
       error: this._error
     }
