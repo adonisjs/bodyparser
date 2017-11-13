@@ -1,3 +1,18 @@
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.8...v2.0.0) (2017-11-13)
+
+
+### Features
+
+* **file:** expose public file properties ([5d4a7df](https://github.com/adonisjs/adonis-bodyparser/commit/5d4a7df))
+
+
+### BREAKING CHANGES
+
+* **file:** All apps relying on private properties of the file instance will break
+
+
+
 <a name="1.0.8"></a>
 ## [1.0.8](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.7...v1.0.8) (2017-10-29)
 
