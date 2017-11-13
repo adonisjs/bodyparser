@@ -25,6 +25,17 @@ class FileJar {
   }
 
   /**
+   * An array of files inside the file jar
+   *
+   * @method files
+   *
+   * @return {Array<File>}
+   */
+  get files () {
+    return this._files
+  }
+
+  /**
    * Add a new file to the store
    *
    * @method track
