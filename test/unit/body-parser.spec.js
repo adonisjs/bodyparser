@@ -536,4 +536,24 @@ test.group('Body Parser', (group) => {
 
     assert.equal(body.tmpPath, path.join(os.tmpdir(), 'abc'))
   })
+
+  test('ingore fields with empty names', async (assert) => {
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const config = new Config()
+      const parser = new BodyParser(config)
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify({ fields: request.body, files: request._files.package }))
+      res.end()
+    }
+
+    const { body } = await supertest(app.server)
+      .post('/')
+      .field('', 'virk')
+
+    assert.deepEqual(body.fields, {})
+  })
 })

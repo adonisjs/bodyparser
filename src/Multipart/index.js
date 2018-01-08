@@ -179,7 +179,7 @@ class Multipart {
       })
 
       form.on('field', (name, value) => {
-        if (typeof (this._fieldsCallback) === 'function') {
+        if (name && typeof (this._fieldsCallback) === 'function') {
           this._fieldsCallback(name, value)
         }
       })
