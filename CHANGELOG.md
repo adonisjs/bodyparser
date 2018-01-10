@@ -1,3 +1,13 @@
+<a name="2.0.1"></a>
+## [2.0.1](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.0...v2.0.1) (2018-01-10)
+
+
+### Bug Fixes
+
+* **multipart:** ignore fields with no name ([6cc93e2](https://github.com/adonisjs/adonis-bodyparser/commit/6cc93e2)), closes [#3](https://github.com/adonisjs/adonis-bodyparser/issues/3)
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/adonisjs/adonis-bodyparser/compare/v1.0.8...v2.0.0) (2017-11-13)
 
