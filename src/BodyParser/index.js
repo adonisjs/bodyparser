@@ -13,7 +13,7 @@ const parse = require('co-body')
 const debug = require('debug')('adonis:bodyparser')
 const Multipart = require('../Multipart')
 const FormFields = require('../FormFields')
-const defaultConfig = require('../../examples/config.js')
+const defaultConfig = require('../../config/bodyParser.js')
 
 /**
  * @module Adonis
