@@ -14,7 +14,7 @@ const path = require('path')
 module.exports = async function (cli) {
   try {
     await cli.copy(
-      path.join(__dirname, './examples/config.js'),
+      path.join(__dirname, './config/bodyParser.js'),
       path.join(cli.helpers.configPath(), 'bodyParser.js')
     )
     cli.command.completed('create', 'config/bodyParser.js')
