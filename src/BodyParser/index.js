@@ -142,7 +142,8 @@ class BodyParser {
    */
   _parseForm (req) {
     return parse.form(req, {
-      limit: this.config.form.limit
+      limit: this.config.form.limit,
+      queryString: this.config.form.queryString || {}
     })
   }
 
