@@ -551,4 +551,40 @@ test.group('Body Parser', (group) => {
 
     assert.deepEqual(body.fields, {})
   })
+
+  test('pass queryString config co-body', async (assert) => {
+    /**
+     * Get method to render the form
+     */
+    app.get = function (req, res) {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write(`
+      <form method='POST' action='/'>
+        <input type='text' name='items[1]' value="foo" />
+        <input type='text' name='items[2]' value="bar" />
+        <button type='submit'> Submit </button>
+      </form>
+      `)
+      res.end()
+    }
+
+    /**
+     * Post method to handle the form submission
+     */
+    app.post = async function (request, res) {
+      const config = new Config()
+      config.set('bodyParser.form.queryString', { parseArrays: false })
+      const parser = new BodyParser(config)
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify(request.body))
+      res.end()
+    }
+
+    const browser = new Browser()
+    await browser.visit(TEST_URL)
+    await browser.pressButton('Submit')
+
+    assert.deepEqual(JSON.parse(browser.text()), { items: { '1': 'foo', '2': 'bar' } })
+  })
 })
