@@ -140,13 +140,13 @@ class Multipart {
       this._pendingPromises.add(filePromise)
 
       filePromise
-      .then(() => {
-        this._pendingPromises.delete(filePromise)
-        resolve()
-      }).catch((error) => {
-        this._pendingPromises.delete(filePromise)
-        reject(error)
-      })
+        .then(() => {
+          this._pendingPromises.delete(filePromise)
+          resolve()
+        }).catch((error) => {
+          this._pendingPromises.delete(filePromise)
+          reject(error)
+        })
     })
   }
 
@@ -169,13 +169,13 @@ class Multipart {
       form.on('error', reject)
       form.on('part', (part) => {
         this.onPart(part)
-        .then(() => {
-          part.resume()
-          if (form.flushing <= 0 && this._pendingPromises.size === 0) {
-            resolve()
-          }
-        })
-        .catch((error) => form.emit('error', error))
+          .then(() => {
+            part.resume()
+            if (form.flushing <= 0 && this._pendingPromises.size === 0) {
+              resolve()
+            }
+          })
+          .catch((error) => form.emit('error', error))
       })
 
       form.on('field', (name, value) => {

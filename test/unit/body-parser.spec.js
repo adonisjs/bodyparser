@@ -54,10 +54,9 @@ test.group('Body Parser', (group) => {
     const browser = new Browser()
     await browser.visit(TEST_URL)
 
-    await browser
-      .fill('name', 'virk')
-      .fill('email', 'foo@bar.com')
-      .pressButton('Submit')
+    browser.fill('name', 'virk')
+    browser.fill('email', 'foo@bar.com')
+    await browser.pressButton('Submit')
 
     assert.deepEqual(JSON.parse(browser.text()), { name: 'virk', email: 'foo@bar.com' })
   })
@@ -95,12 +94,11 @@ test.group('Body Parser', (group) => {
     const browser = new Browser()
     await browser.visit(TEST_URL)
 
-    await browser
-      .fill('#name1', 'virk')
-      .fill('#email1', 'foo@bar.com')
-      .fill('#name2', 'nikk')
-      .fill('#email2', 'nikk@bar.com')
-      .pressButton('Submit')
+    browser.fill('#name1', 'virk')
+    browser.fill('#email1', 'foo@bar.com')
+    browser.fill('#name2', 'nikk')
+    browser.fill('#email2', 'nikk@bar.com')
+    await browser.pressButton('Submit')
 
     assert.deepEqual(JSON.parse(browser.text()), { name: ['virk', 'nikk'], email: ['foo@bar.com', 'nikk@bar.com'] })
   })
@@ -138,10 +136,9 @@ test.group('Body Parser', (group) => {
     const browser = new Browser()
     await browser.visit(TEST_URL)
 
-    await browser
-      .fill('#name2', 'nikk')
-      .fill('#email2', 'nikk@bar.com')
-      .pressButton('Submit')
+    browser.fill('#name2', 'nikk')
+    browser.fill('#email2', 'nikk@bar.com')
+    await browser.pressButton('Submit')
 
     assert.deepEqual(JSON.parse(browser.text()), { name: ['', 'nikk'], email: ['', 'nikk@bar.com'] })
   })
@@ -216,10 +213,9 @@ test.group('Body Parser', (group) => {
     const browser = new Browser()
     await browser.visit(TEST_URL)
 
-    await browser
-      .fill('name', 'virk')
-      .fill('email', 'foo@bar.com')
-      .pressButton('Submit')
+    browser.fill('name', 'virk')
+    browser.fill('email', 'foo@bar.com')
+    await browser.pressButton('Submit')
 
     assert.deepEqual(JSON.parse(browser.text()), { name: 'virk', email: 'foo@bar.com' })
   })
@@ -286,9 +282,8 @@ test.group('Body Parser', (group) => {
     const browser = new Browser()
     await browser.visit(TEST_URL)
 
-    await browser
-      .attach('package', path.join(__dirname, '../../package.json'))
-      .pressButton('Submit')
+    browser.attach('package', path.join(__dirname, '../../package.json'))
+    await browser.pressButton('Submit')
 
     const file = JSON.parse(browser.text())
     assert.equal(file.clientName, 'package.json')
