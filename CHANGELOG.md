@@ -1,3 +1,13 @@
+<a name="2.0.3"></a>
+## [2.0.3](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.1...v2.0.3) (2018-04-26)
+
+
+### Bug Fixes
+
+* **qs:** pass queryString config to co-body ([2b4e5ec](https://github.com/adonisjs/adonis-bodyparser/commit/2b4e5ec))
+
+
+
 <a name="2.0.2"></a>
 ## [2.0.2](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.1...v2.0.2) (2018-02-07)
 
