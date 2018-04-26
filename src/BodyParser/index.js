@@ -124,7 +124,8 @@ class BodyParser {
   _parseJSON (req) {
     return parse.json(req, {
       limit: this.config.json.limit,
-      strict: this.config.json.strict
+      strict: this.config.json.strict,
+      queryString: this.config.json.queryString
     })
   }
 
@@ -142,7 +143,8 @@ class BodyParser {
    */
   _parseForm (req) {
     return parse.form(req, {
-      limit: this.config.form.limit
+      limit: this.config.form.limit,
+      queryString: this.config.form.queryString
     })
   }
 
@@ -160,7 +162,8 @@ class BodyParser {
    */
   _parseRaw (req) {
     return parse.text(req, {
-      limit: this.config.raw.limit
+      limit: this.config.raw.limit,
+      queryString: this.config.raw.queryString
     })
   }
 
