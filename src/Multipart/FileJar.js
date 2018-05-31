@@ -106,8 +106,8 @@ class FileJar {
    */
   moveAll (location, callback) {
     callback = typeof (callback) === 'function' ? callback : function () {}
-    return Promise.all(_.map(this._files, (file) => {
-      return file.move(location, callback(file))
+    return Promise.all(_.map(this._files, (file, index) => {
+      return file.move(location, callback(file, index))
     }))
   }
 
