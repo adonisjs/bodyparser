@@ -1,3 +1,14 @@
+<a name="2.0.4"></a>
+## [2.0.4](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.3...v2.0.4) (2018-07-16)
+
+
+### Features
+
+* **bodyparser:** set raw body along with parsed body ([d686e61](https://github.com/adonisjs/adonis-bodyparser/commit/d686e61)), closes [#11](https://github.com/adonisjs/adonis-bodyparser/issues/11)
+* **file:** add support for extension validation ([96cfb0c](https://github.com/adonisjs/adonis-bodyparser/commit/96cfb0c)), closes [#9](https://github.com/adonisjs/adonis-bodyparser/issues/9)
+
+
+
 <a name="2.0.3"></a>
 ## [2.0.3](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.1...v2.0.3) (2018-04-26)
 
