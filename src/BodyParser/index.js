@@ -125,7 +125,8 @@ class BodyParser {
     return parse.json(req, {
       limit: this.config.json.limit,
       strict: this.config.json.strict,
-      queryString: this.config.json.queryString
+      queryString: this.config.json.queryString,
+      returnRawBody: true
     })
   }
 
@@ -144,7 +145,8 @@ class BodyParser {
   _parseForm (req) {
     return parse.form(req, {
       limit: this.config.form.limit,
-      queryString: this.config.form.queryString
+      queryString: this.config.form.queryString,
+      returnRawBody: true
     })
   }
 
@@ -275,7 +277,11 @@ class BodyParser {
      */
     if (this._isType(request, this.jsonTypes)) {
       debug('detected json body')
-      request.body = await this._parseJSON(request.request)
+      const { parsed, raw } = await this._parseJSON(request.request)
+
+      request.body = parsed
+      request._raw = raw
+
       await next()
       return
     }
@@ -285,7 +291,11 @@ class BodyParser {
      */
     if (this._isType(request, this.formTypes)) {
       debug('detected form body')
-      request.body = await this._parseForm(request.request)
+      const { parsed, raw } = await this._parseForm(request.request)
+
+      request.body = parsed
+      request._raw = raw
+
       await next()
       return
     }

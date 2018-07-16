@@ -587,4 +587,16 @@ test.group('Body Parser', (group) => {
 
     assert.deepEqual(JSON.parse(browser.text()), { items: { '1': 'foo', '2': 'bar' } })
   })
+
+  test('set raw body along with json body', async (assert) => {
+    app.post = async function (request, res) {
+      const parser = new BodyParser(new Config())
+      await parser.handle({ request }, function () {})
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.write(JSON.stringify(request._raw))
+      res.end()
+    }
+    const { body } = await supertest(app.server).post('/').send({ name: 'virk', isJSON: true })
+    assert.deepEqual(body, JSON.stringify({ name: 'virk', isJSON: true }))
+  })
 })
