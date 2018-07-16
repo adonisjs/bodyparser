@@ -120,9 +120,9 @@ class FileJar {
    */
   errors () {
     return _(this.all())
-    .filter((file) => file.status !== 'moved' && file.error)
-    .map((file) => file.error)
-    .value()
+      .filter((file) => file.status !== 'moved' && file.error)
+      .map((file) => file.error)
+      .value()
   }
 }
 
