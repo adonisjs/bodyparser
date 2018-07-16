@@ -24,18 +24,16 @@ const sleep = function (time) {
 const exists = async function (location) {
   const fileExists = await fs.exists(location)
   if (!fileExists) {
-    throw new Error('File does not exists')
+    throw new Error(`File ${location} does not exists`)
   }
 }
 
 const notExists = async function (location) {
   const fileExists = await fs.exists(location)
   if (fileExists) {
-    throw new Error('File exists')
+    throw new Error(`File ${location} exists`)
   }
 }
-
-test.grep('@latest')
 
 test.group('Multipart', () => {
   test('do not process files unless instructed', async (assert) => {
@@ -44,12 +42,11 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          assert.deepEqual(multipart.jar._files, [])
+          assert.deepEqual(multipart.jar.files, [])
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
-          res.end()
+          res.end(error)
         })
     })
     await supertest(server).get('/').attach('package', path.join(__dirname, '../../package.json')).expect(200)
@@ -64,13 +61,12 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          assert.lengthOf(multipart.jar._files, 1)
-          assert.equal(multipart.jar._files[0].stream.name, 'package')
+          assert.lengthOf(multipart.jar.files, 1)
+          assert.equal(multipart.jar.files[0].stream.name, 'package')
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
-          res.end()
+          res.end(error)
         })
     })
     await supertest(server)
@@ -93,9 +89,8 @@ test.group('Multipart', () => {
         .then(() => {
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
-          res.end()
+          res.end(error)
         })
     })
     await supertest(server)
@@ -115,14 +110,13 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          assert.lengthOf(multipart.jar._files, 2)
-          assert.equal(multipart.jar._files[0].stream.name, 'package')
-          assert.equal(multipart.jar._files[1].stream.name, 'package1')
+          assert.lengthOf(multipart.jar.files, 2)
+          assert.equal(multipart.jar.files[0].stream.name, 'package')
+          assert.equal(multipart.jar.files[1].stream.name, 'package1')
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
-          res.end()
+          res.end(error)
         })
     })
     await supertest(server)
@@ -142,17 +136,17 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          assert.isTrue(multipart.jar._files[0].ended)
-          assert.isAbove(multipart.jar._files[0].size, 0)
-          return exists(multipart.jar._files[0]._tmpPath)
+          assert.isTrue(multipart.jar.files[0].ended)
+          assert.isAbove(multipart.jar.files[0].size, 0)
+          return exists(multipart.jar.files[0].tmpPath)
         }).then((s) => {
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
-          res.end()
+          res.end(error)
         })
     })
+
     await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
@@ -169,7 +163,7 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].moveToTmp()
+          return multipart.jar.files[0].moveToTmp()
         }).then((s) => {
           res.end()
         }).catch((error) => {
@@ -208,7 +202,7 @@ test.group('Multipart', () => {
       .attach('package', path.join(__dirname, '../../package.json'))
       .expect(500)
 
-    assert.equal(res.text, 'E_CANNOT_PROCESS_STREAM: Cannot process multipart stream twice. Make sure to disable files {autoProcess} when manually calling multipart.process')
+    assert.match(res.text, /E_CANNOT_PROCESS_STREAM: Cannot process multipart stream twice. Make sure to disable files {autoProcess} when manually calling multipart\.process/)
   }).timeout(0)
 
   test('move file from tmp directory', async (assert) => {
@@ -221,7 +215,7 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'))
+          return multipart.jar.files[0].move(path.join(__dirname, './'))
         }).then(() => {
           return exists(path.join(__dirname, './package.json'))
         }).then(() => {
@@ -229,7 +223,6 @@ test.group('Multipart', () => {
         }).then(() => {
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -252,7 +245,7 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
             name: 'foo.json'
           })
         }).then(() => {
@@ -262,7 +255,6 @@ test.group('Multipart', () => {
         }).then(() => {
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -283,7 +275,7 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
             name: 'foo.json'
           })
         }).then(() => {
@@ -315,15 +307,14 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
             name: 'foo.json'
           })
         }).then(() => {
           res.writeHead(200, { 'content-type': 'application/json' })
-          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.write(JSON.stringify(multipart.jar.files[0].error()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -343,7 +334,7 @@ test.group('Multipart', () => {
     })
   }).timeout(0)
 
-  test('validate file extensions before moving', async (assert) => {
+  test('validate file types before moving', async (assert) => {
     const server = http.createServer((req, res) => {
       const multipart = new Multipart({ request: req })
       multipart.file('*', {
@@ -355,15 +346,14 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
             name: 'foo.json'
           })
         }).then(() => {
           res.writeHead(200, { 'content-type': 'application/json' })
-          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.write(JSON.stringify(multipart.jar.files[0].error()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -383,6 +373,81 @@ test.group('Multipart', () => {
     })
   }).timeout(0)
 
+  test('validate file extensions before moving', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {
+        extnames: ['jpg', 'png']
+      }, async (file) => {
+        await file.moveToTmp()
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
+            name: 'foo.json'
+          })
+        }).then(() => {
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.write(JSON.stringify(multipart.jar.files[0].error()))
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    const { body } = await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .expect(200)
+
+    assert.deepEqual(body, {
+      clientName: 'package.json',
+      fieldName: 'package',
+      type: 'extname',
+      message: 'Invalid file extension json. Only jpg, png are allowed'
+    })
+  })
+
+  test('move file when extensions is correct', async (assert) => {
+    const server = http.createServer((req, res) => {
+      const multipart = new Multipart({ request: req })
+      multipart.file('*', {
+        extnames: ['json']
+      }, async (file) => {
+        await file.moveToTmp()
+      })
+
+      multipart
+        .process()
+        .then(() => {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
+            name: 'foo.json'
+          })
+        }).then(() => {
+          return exists(path.join(__dirname, './foo.json'))
+        }).then(() => {
+          return fs.remove(path.join(__dirname, './foo.json'))
+        }).then(() => {
+          res.writeHead(200, { 'content-type': 'text/plain' })
+          res.write(JSON.stringify(multipart.jar.files[0].fileName))
+          res.end()
+        }).catch((error) => {
+          res.writeHead(500)
+          res.write(error.message)
+          res.end()
+        })
+    })
+
+    await supertest(server)
+      .get('/')
+      .attach('package', path.join(__dirname, '../../package.json'))
+      .expect(200)
+  })
+
   test('add custom validate fn', async (assert) => {
     const server = http.createServer((req, res) => {
       const multipart = new Multipart({ request: req })
@@ -400,15 +465,14 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
             name: 'foo.json'
           })
         }).then(() => {
           res.writeHead(200, { 'content-type': 'application/json' })
-          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.write(JSON.stringify(multipart.jar.files[0].error()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -439,15 +503,14 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
             name: 'foo.json'
           })
         }).then(() => {
           res.writeHead(200, { 'content-type': 'application/json' })
-          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.write(JSON.stringify(multipart.jar.files[0].error()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -480,7 +543,7 @@ test.group('Multipart', () => {
       multipart
         .process()
         .then(() => {
-          return multipart.jar._files[0].move(path.join(__dirname, './'), {
+          return multipart.jar.files[0].move(path.join(__dirname, './'), {
             name: 'foo.json'
           })
         }).then(() => {
@@ -490,7 +553,6 @@ test.group('Multipart', () => {
         }).then(() => {
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -522,7 +584,6 @@ test.group('Multipart', () => {
         }).then(() => {
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -552,10 +613,9 @@ test.group('Multipart', () => {
         })
         .then(() => {
           res.writeHead(200, { 'content-type': 'application/json' })
-          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.write(JSON.stringify(multipart.jar.files[0].error()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -592,10 +652,9 @@ test.group('Multipart', () => {
         })
         .then(() => {
           res.writeHead(200, { 'content-type': 'application/json' })
-          res.write(JSON.stringify(multipart.jar._files[0].error()))
+          res.write(JSON.stringify(multipart.jar.files[0].error()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -638,7 +697,6 @@ test.group('Multipart', () => {
           res.write(String(multipart.jar.movedAll()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -648,7 +706,7 @@ test.group('Multipart', () => {
     const { text } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(200)
     assert.equal(text, 'false')
   }).timeout(0)
@@ -668,13 +726,13 @@ test.group('Multipart', () => {
         .then(() => {
           return Promise.all([
             exists(path.join(__dirname, './package.json')),
-            exists(path.join(__dirname, './LICENSE.txt'))
+            exists(path.join(__dirname, './LICENSE.md'))
           ])
         })
         .then(() => {
           return Promise.all([
             fs.remove(path.join(__dirname, './package.json')),
-            fs.remove(path.join(__dirname, './LICENSE.txt'))
+            fs.remove(path.join(__dirname, './LICENSE.md'))
           ])
         })
         .then(() => {
@@ -682,7 +740,6 @@ test.group('Multipart', () => {
           res.write(String(multipart.jar.movedAll()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -692,7 +749,7 @@ test.group('Multipart', () => {
     const { text } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(200)
     assert.equal(text, 'true')
   }).timeout(0)
@@ -720,7 +777,6 @@ test.group('Multipart', () => {
           res.write(JSON.stringify(multipart.jar.movedList()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -730,7 +786,7 @@ test.group('Multipart', () => {
     const { body } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(200)
 
     assert.lengthOf(body, 1)
@@ -763,7 +819,6 @@ test.group('Multipart', () => {
           res.write(JSON.stringify(multipart.jar.all()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -773,7 +828,7 @@ test.group('Multipart', () => {
     const { body } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(200)
 
     assert.lengthOf(body, 2)
@@ -785,7 +840,7 @@ test.group('Multipart', () => {
     assert.deepEqual(body[0].error, {})
 
     assert.equal(body[1].fieldName, 'license')
-    assert.equal(body[1].clientName, 'LICENSE.txt')
+    assert.equal(body[1].clientName, 'LICENSE.md')
     assert.isNull(body[1].fileName)
     assert.equal(body[1].status, 'error')
     assert.equal(body[1].size, 0)
@@ -815,7 +870,6 @@ test.group('Multipart', () => {
           res.write(JSON.stringify(multipart.jar.errors()))
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -825,14 +879,14 @@ test.group('Multipart', () => {
     const { body } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(200)
 
     assert.deepEqual(body, [{
-      clientName: 'LICENSE.txt',
+      clientName: 'LICENSE.md',
       fieldName: 'license',
       type: 'type',
-      message: 'Invalid file type plain or text. Only json is allowed'
+      message: 'Invalid file type markdown or text. Only json is allowed'
     }])
   }).timeout(0)
 
@@ -865,7 +919,7 @@ test.group('Multipart', () => {
     const { text } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(500)
 
     assert.equal(text, 'Something bad happened')
@@ -894,10 +948,10 @@ test.group('Multipart', () => {
     const { text } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(500)
 
-    assert.equal(text, 'E_INVALID_PARAMETER: file.validate expects a function')
+    assert.match(text, /E_INVALID_PARAMETER: file\.validate expects a function/)
   })
 
   test('reading stream as buffer should end the stream', async (assert) => {
@@ -911,7 +965,7 @@ test.group('Multipart', () => {
         .process()
         .then(() => {
           res.writeHead(200)
-          res.write(String(multipart.jar._files[0].ended))
+          res.write(String(multipart.jar.files[0].ended))
           res.end()
         }).catch((error) => {
           res.writeHead(500)
@@ -923,7 +977,7 @@ test.group('Multipart', () => {
     const { text } = await supertest(server)
       .get('/')
       .attach('package', path.join(__dirname, '../../package.json'))
-      .attach('license', path.join(__dirname, '../../LICENSE.txt'))
+      .attach('license', path.join(__dirname, '../../LICENSE.md'))
       .expect(200)
 
     assert.equal(text, 'true')
@@ -986,7 +1040,6 @@ test.group('Multipart', () => {
           res.writeHead(200)
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()
@@ -1073,7 +1126,6 @@ test.group('Multipart', () => {
           res.writeHead(200)
           res.end()
         }).catch((error) => {
-          console.log(error)
           res.writeHead(500)
           res.write(error.message)
           res.end()

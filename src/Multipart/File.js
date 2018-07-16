@@ -46,6 +46,11 @@ const getError = function (type, data) {
     const verb = data.types.length === 1 ? 'is' : 'are'
     return `Invalid file type ${data.subtype} or ${data.type}. Only ${data.types.join(', ')} ${verb} allowed`
   }
+
+  if (type === 'extname') {
+    const verb = data.extnames.length === 1 ? 'is' : 'are'
+    return `Invalid file extension ${data.extname}. Only ${data.extnames.join(', ')} ${verb} allowed`
+  }
 }
 
 /**
@@ -84,6 +89,15 @@ class File {
      * @type {String}
      */
     this.clientName = this.stream.filename
+
+    /**
+     * File extension
+     *
+     * @attribute extname
+     *
+     * @type {String}
+     */
+    this.extname = path.extname(this.clientName).replace(/^\./, '')
 
     /**
      * The field name using which file was
@@ -195,6 +209,11 @@ class File {
     const types = this.validationOptions.types
     if (_.size(types) && (!_.includes(types, this.type) && !_.includes(types, this.subtype))) {
       this.setError(getError('type', { types, type: this.type, subtype: this.subtype }), 'type')
+    }
+
+    const extnames = this.validationOptions.extnames
+    if (_.size(extnames) && !_.includes(extnames, this.extname)) {
+      this.setError(getError('extname', { extnames, extname: this.extname }), 'extname')
     }
   }
 
@@ -468,6 +487,7 @@ class File {
   toJSON () {
     return {
       clientName: this.clientName,
+      extname: this.extname,
       fileName: this.fileName,
       fieldName: this.fieldName,
       tmpPath: this.tmpPath,
