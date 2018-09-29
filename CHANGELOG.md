@@ -1,3 +1,11 @@
+<a name="2.0.5"></a>
+## [2.0.5](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.4...v2.0.5) (2018-09-29)
+
+### Bug Fixes
+
+* **dependency**: media-typer shouldn't be a devDeps ([7b465f7](https://github.com/adonisjs/adonis-bodyparser/commit/7b465f71a2195b24a49beb782695f3b9cf9fd584))
+
+
 <a name="2.0.4"></a>
 ## [2.0.4](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.3...v2.0.4) (2018-07-16)
 
