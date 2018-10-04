@@ -447,7 +447,7 @@ class File {
      * Otherwise move the tmpFile to the user specified
      * location.
      */
-    await fs.move(this.tmpPath, path.join(location, options.name), { overwrite: options.overwrite })
+    await fs.move(this.tmpPath, path.join(location, options.name), { overwrite: !!options.overwrite })
     this.fileName = options.name
     this._location = location
     this.status = 'moved'
