@@ -1,3 +1,13 @@
+<a name="2.0.6"></a>
+## [2.0.6](https://github.com/adonisjs/adonis-bodyparser/compare/2.0.5...2.0.6) (2018-10-11)
+
+
+### Features
+
+* **move:** accept option to overwrite the existing file ([41b661f](https://github.com/adonisjs/adonis-bodyparser/commit/41b661f))
+
+
+
 <a name="2.0.5"></a>
 ## [2.0.5](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.4...v2.0.5) (2018-09-29)
 
