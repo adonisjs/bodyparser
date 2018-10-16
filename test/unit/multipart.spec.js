@@ -454,7 +454,7 @@ test.group('Multipart', () => {
       multipart.file('*', {
         size: '10B'
       }, async (file) => {
-        file.validate(function () {
+        file.validateFn(function () {
           if (this.size > this.validationOptions.size) {
             this.setError('Max size execedded', 'size')
           }
@@ -929,7 +929,7 @@ test.group('Multipart', () => {
     const server = http.createServer((req, res) => {
       const multipart = new Multipart({ request: req })
       multipart.file('*', {}, async (file) => {
-        file.validate()
+        file.validateFn()
       })
 
       multipart

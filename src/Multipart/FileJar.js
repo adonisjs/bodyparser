@@ -112,6 +112,19 @@ class FileJar {
   }
 
   /**
+   * Run validations on all the files inside the File Jar
+   *
+   * @method runValidations
+   *
+   * @return {void}
+   */
+  async runValidations () {
+    return Promise.all(_.map(this._files, (file, index) => {
+      return file.runValidations()
+    }))
+  }
+
+  /**
    * Returns an array errors occured during file move.
    *
    * @method errors
