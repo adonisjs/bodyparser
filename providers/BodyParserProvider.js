@@ -28,11 +28,18 @@ class BodyParserProvider extends ServiceProvider {
     const Request = this.app.use('Adonis/Src/Request')
 
     /**
+     * Access all files as an object
+     */
+    Request.macro('files', function () {
+      return this._files
+    })
+
+    /**
      * Request macro to access a file from the uploaded
      * files.
      */
-    Request.macro('file', function (name, options = {}) {
-      const file = _.get(this._files, name)
+    Request.macro('file', function (name, options) {
+      const file = _.get(this.files(), name)
       /**
        * Return null when there is no file
        */
@@ -44,7 +51,10 @@ class BodyParserProvider extends ServiceProvider {
        * Return file when it's a single file
        */
       if (!_.isArray(file)) {
-        return file.setOptions(options)
+        if (options) {
+          file.setOptions(options)
+        }
+        return file
       }
 
       /**
@@ -52,9 +62,11 @@ class BodyParserProvider extends ServiceProvider {
        * array of files and instead return
        * the file jar
        */
-      file.forEach((eachFile) => {
-        eachFile.setOptions(options)
-      })
+      if (options) {
+        file.forEach((eachFile) => {
+          eachFile.setOptions(options)
+        })
+      }
 
       return new FileJar(file)
     })
