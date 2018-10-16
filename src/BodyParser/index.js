@@ -232,7 +232,6 @@ class BodyParser {
    */
   async handle ({ request }, next) {
     request._files = {}
-    request.body = {}
     request._raw = {}
 
     /**

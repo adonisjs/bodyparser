@@ -174,7 +174,7 @@ test.group('Body Parser', (group) => {
       const parser = new BodyParser(config)
       await parser.handle({ request }, function () {})
       res.writeHead(200, { 'content-type': 'application/json' })
-      res.write(JSON.stringify(request.body))
+      res.write(JSON.stringify(request.body || {}))
       res.end()
     }
     const { body } = await supertest(app.server).post('/').send({ name: 'virk', isJSON: true })
@@ -432,7 +432,7 @@ test.group('Body Parser', (group) => {
       .field('username', 'virk')
       .attach('package', path.join(__dirname, '../../package.json'))
 
-    assert.deepEqual(body.fields, {})
+    assert.isUndefined(body.fields)
     assert.deepEqual(body.files, {})
   })
 
@@ -459,7 +459,7 @@ test.group('Body Parser', (group) => {
       .field('username', 'virk')
       .attach('package', path.join(__dirname, '../../package.json'))
 
-    assert.deepEqual(body.fields, {})
+    assert.isUndefined(body.fields)
     assert.deepEqual(body.files, {})
   })
 
@@ -503,7 +503,7 @@ test.group('Body Parser', (group) => {
 
     const { body } = await supertest(app.server).get('/')
 
-    assert.deepEqual(body.fields, {})
+    assert.isUndefined(body.fields)
     assert.deepEqual(body.files, {})
     assert.deepEqual(body.raw, {})
   })
