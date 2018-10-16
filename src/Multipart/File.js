@@ -175,11 +175,41 @@ class File {
     /**
      * private properties
      */
-    this._validateFn = this._validateFile.bind(this)
+    this._validateFn = this._validateFile
     this._error = {}
     this._writeFd = null
     this._bindRequiredListeners()
     this.setOptions(options)
+  }
+
+  /**
+   * Define a custom file validation function
+   *
+   * @method validateFn
+   *
+   * @param {Function} callback
+   *
+   * @chainable
+   */
+  validateFn (callback) {
+    if (typeof (callback) !== 'function') {
+      throw GE.InvalidArgumentException.invalidParameter('file.validate expects a function', callback)
+    }
+
+    this._validateFn = callback
+    return this
+  }
+
+  /**
+   * Run the validations on the file. This method will set the errors
+   * on the file instance, instead of returning them back.
+   *
+   * @method runValidations
+   *
+   * @void
+   */
+  async runValidations () {
+    await this._validateFn.bind(this)()
   }
 
   /**
@@ -347,11 +377,10 @@ class File {
    * @chainable
    */
   validate (callback) {
-    if (typeof (callback) !== 'function') {
-      throw GE.InvalidArgumentException.invalidParameter('file.validate expects a function', callback)
-    }
-    this._validateFn = callback.bind(this)
-    return this
+    process.emitWarning('file.validate has been depreciated, instead use file.validateFn', {
+      code: 'ADONIS_DEPERCIATION'
+    })
+    this.validateFn(callback)
   }
 
   /**
@@ -421,7 +450,7 @@ class File {
      * file, since size is calculated once stream
      * is consumed.
      */
-    await this._validateFn()
+    await this.runValidations()
     if (_.size(this._error)) {
       return
     }

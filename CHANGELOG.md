@@ -1,3 +1,15 @@
+<a name="2.0.7"></a>
+## [2.0.7](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.6...v2.0.7) (2018-10-16)
+
+
+### Features
+
+* **file:** expose public runValidations method ([a362492](https://github.com/adonisjs/adonis-bodyparser/commit/a362492))
+* **requestMacro:** add files macro to access all files as an object ([a11aaff](https://github.com/adonisjs/adonis-bodyparser/commit/a11aaff))
+* **validations:** extend validator with files validations ([d0d0b68](https://github.com/adonisjs/adonis-bodyparser/commit/d0d0b68))
+
+
+
 <a name="2.0.6"></a>
 ## [2.0.6](https://github.com/adonisjs/adonis-bodyparser/compare/2.0.5...2.0.6) (2018-10-11)
 

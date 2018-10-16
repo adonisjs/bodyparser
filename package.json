@@ -1,6 +1,6 @@
 {
   "name": "@adonisjs/bodyparser",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Body parser middleware for Adonis 4.0 and above",
   "main": "index.js",
   "files": [
@@ -59,9 +59,11 @@
     "multiparty": "^4.2.1"
   },
   "devDependencies": {
+    "@adonisjs/ace": "^5.0.8",
     "@adonisjs/fold": "^4.0.9",
     "@adonisjs/mrm-preset": "^1.0.14",
     "@adonisjs/sink": "^1.0.17",
+    "@adonisjs/validator": "^5.0.6",
     "commitizen": "^3.0.2",
     "coveralls": "^3.0.2",
     "cz-conventional-changelog": "^2.1.0",
@@ -69,7 +71,7 @@
     "japa-cli": "^1.0.1",
     "mrm": "^1.2.1",
     "node-req": "^2.1.1",
-    "nyc": "^13.0.1",
+    "nyc": "^13.1.0",
     "pkg-ok": "^2.3.1",
     "semver": "^5.6.0",
     "standard": "^12.0.1",
