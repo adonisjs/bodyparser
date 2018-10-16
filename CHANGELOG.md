@@ -1,3 +1,13 @@
+<a name="2.0.8"></a>
+## [2.0.8](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.7...v2.0.8) (2018-10-16)
+
+
+### Bug Fixes
+
+* **bodyparser:** set request.body after parsing the request daya ([c06fdc7](https://github.com/adonisjs/adonis-bodyparser/commit/c06fdc7))
+
+
+
 <a name="2.0.7"></a>
 ## [2.0.7](https://github.com/adonisjs/adonis-bodyparser/compare/v2.0.6...v2.0.7) (2018-10-16)
 
