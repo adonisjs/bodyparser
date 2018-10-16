@@ -122,7 +122,7 @@ class Multipart {
     /**
      * No one wants to read this file, so simply advance it
      */
-    if (!handler || !handler.callback) {
+    if (!handler || !handler.callback || !part.filename) {
       return Promise.resolve()
     }
 
