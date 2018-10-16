@@ -73,6 +73,22 @@ class BodyParserProvider extends ServiceProvider {
   }
 
   /**
+   * Extends the validator by adding file related validations. Only when
+   * validator is used by the app
+   *
+   * @method _registerValidatorBindings
+   *
+   * @return {void}
+   *
+   * @private
+   */
+  _registerValidatorBindings () {
+    this.app.with(['Adonis/Addons/Validator'], function (Validator) {
+      require('../src/Bindings/Validations')(Validator)
+    })
+  }
+
+  /**
    * The boot method called by ioc container
    * as a life-cycle method
    *
@@ -82,6 +98,7 @@ class BodyParserProvider extends ServiceProvider {
    */
   boot () {
     this._defineRequestMacro()
+    this._registerValidatorBindings()
   }
 
   /**
