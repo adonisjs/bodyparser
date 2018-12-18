@@ -27,8 +27,8 @@ module.exports = {
     | strict
     |--------------------------------------------------------------------------
     |
-    | When `scrict` is set to true, body parser will only parse Arrays and
-    | Object. Otherwise everything parseable by `JSON.parse` is parsed.
+    | When `strict` is set to true, body parser will only parse Arrays and
+    | Object. Otherwise everything parsable by `JSON.parse` is parsed.
     |
     */
     strict: true,
@@ -39,7 +39,7 @@ module.exports = {
     |--------------------------------------------------------------------------
     |
     | Which content types are processed as JSON payloads. You are free to
-    | add your own types here, but the request body should be parseable
+    | add your own types here, but the request body should be parsable
     | by `JSON.parse` method.
     |
     */
@@ -119,7 +119,7 @@ module.exports = {
     | manually process the files when required.
     |
     | This value can contain a boolean or an array of route patterns
-    | to be autoprocessed.
+    | to be auto-processed.
     */
     autoProcess: true,
 
@@ -143,7 +143,7 @@ module.exports = {
     | Define a function, which should return a string to be used as the
     | tmp file name.
     |
-    | If not defined, Bodyparser will use `uuid` as the tmp file name.
+    | If not defined, BodyParser will use `uuid` as the tmp file name.
     |
     | To be defined as. If you are defining the function, then do make sure
     | to return a value from it.
