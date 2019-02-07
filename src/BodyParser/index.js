@@ -250,7 +250,7 @@ class BodyParser {
      */
     if (this._shouldBeProcessed(request) && this._isType(request, this.filesTypes)) {
       debug('detected multipart body')
-      request.multipart = new Multipart(request, true)
+      request.multipart = new Multipart(request, this.config, true)
 
       request.multipart.file('*', {}, async (file) => {
         this.files.add(file.fieldName, file)
@@ -269,7 +269,7 @@ class BodyParser {
       return
     }
 
-    request.multipart = new Multipart(request)
+    request.multipart = new Multipart(request, this.config)
 
     /**
      * Body is JSON, so parse it and move forward

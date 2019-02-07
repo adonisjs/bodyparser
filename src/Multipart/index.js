@@ -9,6 +9,7 @@
  * file that was distributed with this source code.
 */
 
+const _ = require('lodash')
 const multiparty = require('multiparty')
 const debug = require('debug')('adonis:bodyparser')
 
@@ -27,7 +28,7 @@ const GE = require('@adonisjs/generic-exceptions')
  * @constructor
  */
 class Multipart {
-  constructor (request, disableJar = false) {
+  constructor (request, config, disableJar = false) {
     this.req = request.request
 
     /**
@@ -56,7 +57,8 @@ class Multipart {
      */
     this._multipartyOptions = {
       autoFields: true,
-      autoFiles: false
+      autoFiles: false,
+      maxFields: _.get(config, 'form.maxFields', 1000)
     }
 
     /**

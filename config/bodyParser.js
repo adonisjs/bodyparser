@@ -76,7 +76,18 @@ module.exports = {
   form: {
     types: [
       'application/x-www-form-urlencoded'
-    ]
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Max Fields
+    |--------------------------------------------------------------------------
+    |
+    | Below value is the max number of fields that will be parsed
+    | before emitting an Error event.
+    |
+    */
+    maxFields: 1000
   },
 
   /*
@@ -120,6 +131,7 @@ module.exports = {
     |
     | This value can contain a boolean or an array of route patterns
     | to be auto-processed.
+    |
     */
     autoProcess: true,
 
