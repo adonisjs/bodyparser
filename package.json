@@ -56,7 +56,8 @@
     "get-stream": "^4.1.0",
     "lodash": "^4.17.11",
     "media-typer": "^0.3.0",
-    "multiparty": "^4.2.1"
+    "multiparty": "^4.2.1",
+    "simdjson": "0.0.3"
   },
   "devDependencies": {
     "@adonisjs/ace": "^5.0.8",

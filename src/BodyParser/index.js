@@ -10,6 +10,8 @@
 */
 
 const parse = require('co-body')
+const getStream = require('get-stream')
+const simdjson = require('simdjson')
 const debug = require('debug')('adonis:bodyparser')
 const Multipart = require('../Multipart')
 const FormFields = require('../FormFields')
@@ -121,7 +123,12 @@ class BodyParser {
    *
    * @private
    */
-  _parseJSON (req) {
+  async _parseJSON (req) {
+    if (this.config.json.simdjson) {
+      const reqBody = await getStream(req)
+      return { parsed: simdjson.parse(reqBody), raw: reqBody }
+    }
+
     return parse.json(req, {
       limit: this.config.json.limit,
       strict: this.config.json.strict,
