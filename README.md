@@ -1,3 +1,21 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of contents
+
+- [Adonis BodyParser 🎯](#adonis-bodyparser-)
+  - [Features](#features)
+  - [Usage](#usage)
+    - [Installation](#installation)
+    - [Setup](#setup)
+  - [Node/OS Target](#nodeos-target)
+  - [Development](#development)
+    - [Tests & Linting](#tests--linting)
+    - [General Practices](#general-practices)
+  - [Issues & PR](#issues--pr)
+  - [Regression Tests](#regression-tests)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # Adonis BodyParser 🎯
 
 This is the official body parser middleware for the Adonis framework. Apart from just reading the request body and files, it has really cool features.

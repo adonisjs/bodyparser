@@ -1,98 +1,63 @@
 {
   "name": "@adonisjs/bodyparser",
-  "version": "2.0.9",
-  "description": "Body parser middleware for Adonis 4.0 and above",
-  "main": "index.js",
-  "files": [
-    "config",
-    "providers",
-    "src",
-    "instructions.js",
-    "instructions.md"
-  ],
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
-    "test:local": "FORCE_COLOR=true node bin/index.js --local",
-    "test": "nyc node japaFile.js",
-    "test:win": "node ./node_modules/japa-cli/index.js",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "test": "node japaFile.js",
+    "clean": "del build",
+    "compile": "npm run lint && npm run clean && tsc",
+    "build": "npm run compile && typedoc --excludePrivate && git add docs",
+    "lint": "tslint --project tsconfig.json",
     "commit": "git-cz",
-    "lint": "standard"
-  },
-  "standard": {
-    "global": [
-      "use",
-      "it",
-      "describe",
-      "context",
-      "before",
-      "after"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/adonisjs/adonis-bodyparser.git"
-  },
-  "keywords": [
-    "adonis",
-    "http-middleware",
-    "middleware",
-    "adonisjs"
-  ],
-  "author": "adonisjs",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/adonisjs/adonis-bodyparser/issues"
-  },
-  "homepage": "https://github.com/adonisjs/adonis-bodyparser#readme",
-  "dependencies": {
-    "@adonisjs/generic-exceptions": "^2.0.1",
-    "bytes": "^3.1.0",
-    "co-body": "^6.0.0",
-    "debug": "^4.1.0",
-    "end-of-stream": "^1.4.1",
-    "fs-extra": "^7.0.0",
-    "get-stream": "^4.1.0",
-    "lodash": "^4.17.11",
-    "media-typer": "^0.3.0",
-    "multiparty": "^4.2.1"
+    "release": "np",
+    "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/ace": "^5.0.8",
-    "@adonisjs/fold": "^4.0.9",
-    "@adonisjs/mrm-preset": "^1.0.14",
-    "@adonisjs/sink": "^1.0.17",
-    "@adonisjs/validator": "^5.0.6",
-    "commitizen": "^3.0.2",
-    "coveralls": "^3.0.2",
+    "@adonisjs/mrm-preset": "^2.0.3",
+    "@types/node": "^12.0.2",
+    "commitizen": "^3.1.1",
     "cz-conventional-changelog": "^2.1.0",
-    "japa": "^2.0.5",
-    "japa-cli": "^1.0.1",
-    "mrm": "^1.2.1",
-    "node-req": "^2.1.1",
-    "nyc": "^13.1.0",
-    "pkg-ok": "^2.3.1",
-    "semver": "^5.6.0",
-    "standard": "^12.0.1",
-    "supertest": "^3.4.2",
-    "yorkie": "^2.0.0",
-    "zombie": "^6.1.4"
+    "del-cli": "^1.1.0",
+    "doctoc": "^1.4.0",
+    "husky": "^2.3.0",
+    "japa": "^2.0.10",
+    "mrm": "^1.2.2",
+    "np": "^5.0.2",
+    "ts-node": "^8.1.0",
+    "tslint": "^5.16.0",
+    "tslint-eslint-rules": "^5.4.0",
+    "typedoc": "^0.14.2",
+    "typedoc-plugin-external-module-name": "^2.1.0",
+    "typescript": "^3.4.5"
+  },
+  "nyc": {
+    "exclude": [
+      "test"
+    ],
+    "extension": [
+      ".ts"
+    ]
+  },
+  "license": "MIT",
+  "main": "build/index.js",
+  "files": [
+    "build/src",
+    "build/index.d.ts",
+    "build/index.js"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "doctoc README.md --title='## Table of contents' && git add README.md",
+      "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
+    }
   },
   "config": {
     "commitizen": {
       "path": "cz-conventional-changelog"
     }
   },
-  "nyc": {
-    "include": [
-      "src"
-    ],
-    "exclude": [
-      "test"
-    ]
-  },
-  "gitHooks": {
-    "commit-msg": "node ./node_modules/@adonisjs/mrm-preset/validateCommit/conventional/validate.js"
+  "np": {
+    "contents": ".",
+    "anyBranch": false
   }
 }
