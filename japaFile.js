@@ -2,5 +2,5 @@ require('ts-node/register')
 
 const { configure } = require('japa')
 configure({
-  files: ['test/**/*.spec.js']
+  files: ['test/**/body-parser.spec.ts']
 })
