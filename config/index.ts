@@ -143,8 +143,36 @@ export const config: BodyParserConfig = {
     tmpFileName () {
       return `ab-${uuid()}.tmp`
     },
+
+    /*
+    |--------------------------------------------------------------------------
+    | Encoding
+    |--------------------------------------------------------------------------
+    |
+    | Request body enconding
+    |
+    */
     encoding: 'utf-8',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Request body limit
+    |--------------------------------------------------------------------------
+    |
+    | The total limit to the multipart body. This includes all request files
+    | and fields data.
+    |
+    */
     limit: '20mb',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Types
+    |--------------------------------------------------------------------------
+    |
+    | The types that will be considered and parsed as multipart body.
+    |
+    */
     types: [
       'multipart/form-data',
     ],
