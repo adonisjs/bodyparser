@@ -15,7 +15,6 @@ import { createServer } from 'http'
 import { pathExists } from 'fs-extra'
 import * as supertest from 'supertest'
 import { HttpContext } from '@poppinss/http-server'
-
 import { BodyParserMiddleware } from '../src/BodyParser'
 import { Multipart } from '../src/Multipart'
 import { config } from '../config/index'

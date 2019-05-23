@@ -74,7 +74,7 @@ export class Multipart implements MultipartContract {
    * Returns a boolean telling whether all streams have been
    * consumed along with all handlers execution
    */
-  private _isClosed (form): boolean {
+  private _isClosed (form: any): boolean {
     return form.flushing <= 0 && this._pendingHandlers <= 0
   }
 
@@ -82,7 +82,7 @@ export class Multipart implements MultipartContract {
    * Removes array like expression from the part name to
    * find the handler
    */
-  private _getHandlerName (name): string {
+  private _getHandlerName (name: string): string {
     return name.replace(/\[\d*\]/, '')
   }
 

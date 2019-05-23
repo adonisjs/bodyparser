@@ -47,7 +47,7 @@ export async function processMultipart (multipart: Multipart, config: BodyParser
      * Stream the file to tmpPath, but also keep an
      * eye on total bytes
      */
-    await streamFile(part, tmpPath, (line: Buffer) => {
+    await streamFile(part, tmpPath, (line) => {
       const size = line.length
       bytes += size
       totalBytes += size

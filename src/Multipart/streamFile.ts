@@ -16,7 +16,11 @@ import { Readable } from 'stream'
  * and writable streams in case of any errors. Also an optional data listener
  * can listen for the `data` event.
  */
-export function streamFile (readStream: Readable, location: string, dataListener?): Promise<void> {
+export function streamFile (
+  readStream: Readable,
+  location: string,
+  dataListener?: (line: Buffer) => void,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     open(location, 'w')
       .then((fd) => {
@@ -30,7 +34,7 @@ export function streamFile (readStream: Readable, location: string, dataListener
         /**
          * Handle closing of read stream from multiple sources
          */
-        eos(readStream, (error) => {
+        eos(readStream, (error: Error) => {
           close(fd)
 
           /**

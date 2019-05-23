@@ -51,13 +51,13 @@ export class File implements MultipartFileContract {
    * Type and subtype are extracted from the `content-type`
    * header
    */
-  public type
-  public subtype
+  public type: string
+  public subtype: string
 
   /**
    * Filename is only set after the move operation
    */
-  public fileName
+  public fileName: string
 
   /**
    * Validation options for the file
