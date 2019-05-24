@@ -7,13 +7,15 @@
 * file that was distributed with this source code.
 */
 
+/// <reference path="../Contracts/index.ts" />
+
 import * as coBody from 'co-body'
 import { Exception } from '@poppinss/utils'
 import { RequestContract } from '@poppinss/request'
 import { HttpContextContract } from '@poppinss/http-server'
+import { BodyParserConfig } from '@ioc:Adonis/Src/BodyParser'
 
 import { Multipart } from '../Multipart'
-import { BodyParserConfig } from '../Contracts'
 import { processMultipart } from '../Multipart/processMultipart'
 
 /**

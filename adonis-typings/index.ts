@@ -7,7 +7,8 @@
 * file that was distributed with this source code.
 */
 
-import { FileValidationOptions, MultipartFileContract, MultipartContract } from '../src/Contracts'
+/// <reference path="../src/Contracts/index.ts" />
+import { FileValidationOptions, MultipartFileContract, MultipartContract } from '@ioc:Adonis/Src/BodyParser'
 
 declare module '@ioc:Adonis/Src/Request' {
   interface RequestContract {

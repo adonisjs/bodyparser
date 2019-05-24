@@ -7,11 +7,18 @@
 * file that was distributed with this source code.
 */
 
+/// <reference path="../Contracts/index.ts" />
+
 import * as multiparty from 'multiparty'
 import { Exception } from '@poppinss/utils'
 import { IncomingMessage } from 'http'
 
-import { MultipartContract, PartHandler, MultipartStream, FieldHandler } from '../Contracts'
+import {
+  MultipartContract,
+  PartHandler,
+  MultipartStream,
+  FieldHandler,
+} from '@ioc:Adonis/Src/BodyParser'
 
 /**
  * Multipart class offers a low level API to interact the incoming

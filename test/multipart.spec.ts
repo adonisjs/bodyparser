@@ -7,6 +7,8 @@
 * file that was distributed with this source code.
 */
 
+/// <reference path="../src/Contracts/index.ts" />
+
 import * as test from 'japa'
 import { createServer } from 'http'
 import * as supertest from 'supertest'
@@ -14,7 +16,7 @@ import { join } from 'path'
 import { pathExists, remove, createWriteStream } from 'fs-extra'
 
 import { Multipart } from '../src/Multipart'
-import { MultipartStream } from '../src/Contracts'
+import { MultipartStream } from '@ioc:Adonis/Src/BodyParser'
 
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time))

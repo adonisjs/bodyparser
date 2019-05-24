@@ -7,10 +7,17 @@
 * file that was distributed with this source code.
 */
 
+/// <reference path="../Contracts/index.ts" />
+
 import { extname } from 'path'
 import * as bytes from 'bytes'
 import * as mediaTyper from 'media-typer'
-import { MultipartFileContract, FileValidationOptions, FileUploadError, FileInputNode } from '../Contracts'
+import {
+  MultipartFileContract,
+  FileValidationOptions,
+  FileUploadError,
+  FileInputNode,
+} from '@ioc:Adonis/Src/BodyParser'
 
 /**
  * File class exposes a friendly API to validate or save uploaded

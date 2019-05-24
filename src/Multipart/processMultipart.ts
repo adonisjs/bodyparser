@@ -7,6 +7,8 @@
 * file that was distributed with this source code.
 */
 
+/// <reference path="../Contracts/index.ts" />
+
 import { join } from 'path'
 import { homedir } from 'os'
 import { Exception } from '@poppinss/utils'
@@ -15,7 +17,7 @@ import { File } from './File'
 import { Multipart } from './index'
 import { streamFile } from './streamFile'
 import { FormFields } from '../FormFields'
-import { BodyParserMultipartConfig } from '../Contracts'
+import { BodyParserMultipartConfig } from '@ioc:Adonis/Src/BodyParser'
 import { exceptionCodes } from '../../lib'
 
 /**

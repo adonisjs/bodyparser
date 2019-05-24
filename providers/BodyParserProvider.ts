@@ -7,8 +7,10 @@
 * file that was distributed with this source code.
 */
 
+/// <reference path="../src/Contracts/index.ts" />
+
 import { BodyParserMiddleware } from '../src/BodyParser/index'
-import { FileValidationOptions, MultipartFileContract } from '../src/Contracts'
+import { FileValidationOptions, MultipartFileContract } from '@ioc:Adonis/Src/BodyParser'
 
 export default class BodyParserProvider {
   constructor (protected $container: any) {
