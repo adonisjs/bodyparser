@@ -1,14 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of contents
-
-- [AdonisJs BodyParser](#adonisjs-bodyparser)
-  - [Features](#features)
-  - [Usage](#usage)
-    - [Register provider](#register-provider)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 <div align="center">
   <img src="https://res.cloudinary.com/adonisjs/image/upload/q_100/v1558612869/adonis-readme_zscycu.jpg" width="600px">
 </div>
@@ -24,6 +13,16 @@ The BodyParser middleware parses the incoming HTTP requests body and files, so t
 1. Support for `multipart/form-data`, `application/x-www-form-urlencoded` as well raw HTTP requests.
 2. Extensive support for JSON request body including `application/vnd.api+json`, `application/json-patch+json`, `application/csp-report` and `application/json` content type.
 3. Exposes API to stream file uploads without writing to the `tmp` directory.
+
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of contents
+
+- [Usage](#usage)
+  - [Register provider](#register-provider)
+- [License](#license)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 ## Usage
 Install the addon using `adonis cli` as follows:
@@ -56,3 +55,6 @@ HttpMiddleware.registerGlobal([
 
 [npm-image]: https://img.shields.io/npm/v/@adonisjs/bodyparser.svg?style=for-the-badge&logo=npm
 [npm-url]: https://npmjs.org/package/@adonisjs/bodyparser "npm"
+
+## License
+MIT
