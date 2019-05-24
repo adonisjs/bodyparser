@@ -18,7 +18,6 @@ import { Multipart } from './index'
 import { streamFile } from './streamFile'
 import { FormFields } from '../FormFields'
 import { BodyParserMultipartConfig } from '@ioc:Adonis/Src/BodyParser'
-import { exceptionCodes } from '../../lib'
 
 /**
  * Processes the incoming multipart stream by moving files to the
@@ -61,7 +60,7 @@ export async function processMultipart (multipart: Multipart, config: BodyParser
       if (totalBytes > config.limit) {
         part.emit(
           'error',
-          new Exception('request entity too large', 413, exceptionCodes.E_REQUEST_ENTITY_TOO_LARGE),
+          new Exception('request entity too large', 413, 'E_REQUEST_ENTITY_TOO_LARGE'),
         )
       }
     })
