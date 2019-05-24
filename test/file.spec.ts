@@ -22,7 +22,7 @@ test.group('File', () => {
     const server = createServer(async (req, res) => {
       let file: File | null = null
 
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (p) => {
         file = new File({
           fileName: p.filename,
@@ -67,7 +67,7 @@ test.group('File', () => {
     const server = createServer(async (req, res) => {
       let file: File | null = null
 
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (p) => {
         file = new File({
           fileName: p.filename,
@@ -94,7 +94,7 @@ test.group('File', () => {
     const server = createServer(async (req, res) => {
       let file: File | null = null
 
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (p) => {
         file = new File({
           fileName: p.filename,
@@ -138,7 +138,7 @@ test.group('File', () => {
     const server = createServer(async (req, res) => {
       let file: File | null = null
 
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (p) => {
         file = new File({
           fileName: p.filename,

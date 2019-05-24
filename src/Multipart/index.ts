@@ -74,7 +74,7 @@ export class Multipart implements MultipartContract {
    */
   public consumed = false
 
-  constructor (private _request: IncomingMessage) {
+  constructor (private _request: IncomingMessage, private _config: { maxFields: number }) {
   }
 
   /**
@@ -203,13 +203,19 @@ export class Multipart implements MultipartContract {
         return
       }
 
-      const form = new multiparty.Form()
+      const form = new multiparty.Form(this._config)
 
       /**
        * Raise error when form encounters an
        * error
        */
-      form.on('error', reject)
+      form.on('error', (error: Error) => {
+        if (error.message === 'maxFields 1 exceeded.') {
+          reject(new Exception('Max fields limit exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE'))
+        } else {
+          reject(error)
+        }
+      })
 
       /**
        * Process each part at a time and also resolve the

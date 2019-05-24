@@ -94,6 +94,7 @@ declare module '@ioc:Adonis/Src/BodyParser' {
    */
   type BodyParserMultipartConfig = BodyParserBaseConfig & {
     autoProcess: boolean,
+    maxFields: number,
     processManually: string[],
     tmpFileName (): string,
   }

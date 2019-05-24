@@ -99,7 +99,9 @@ export class BodyParserMiddleware {
     const multipartConfig = this._getConfigFor('multipart')
 
     if (this._isType(request, multipartConfig.types)) {
-      request['multipart'] = new Multipart(request.request)
+      request['multipart'] = new Multipart(request.request, {
+        maxFields: multipartConfig.maxFields,
+      })
 
       /**
        * Skip parsing when `autoProcess` is disabled or route matches one

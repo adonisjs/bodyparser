@@ -29,7 +29,7 @@ test.group('Multipart', () => {
     let part: null | MultipartStream = null
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (p) => {
         part = p
         part.resume()
@@ -49,7 +49,7 @@ test.group('Multipart', () => {
     let part: null | MultipartStream = null
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async () => {
         throw new Error('Cannot process')
       })
@@ -73,7 +73,7 @@ test.group('Multipart', () => {
     const stack: string[] = []
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (part) => {
         stack.push('before')
         part.resume()
@@ -94,7 +94,7 @@ test.group('Multipart', () => {
     const SAMPLE_FILE_PATH = join(__dirname, './sample.json')
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
 
       multipart.onFile('package', async (part) => {
         part.pipe(createWriteStream(SAMPLE_FILE_PATH))
@@ -115,7 +115,7 @@ test.group('Multipart', () => {
     const stack: string[] = []
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (part) => {
         stack.push('before')
         part.resume()
@@ -136,7 +136,7 @@ test.group('Multipart', () => {
     const stack: string[] = []
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('package', async (part) => {
         stack.push('before')
         part.resume()
@@ -157,7 +157,7 @@ test.group('Multipart', () => {
     const stack: string[] = []
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('*', async (part) => {
         stack.push('before')
         part.resume()
@@ -179,7 +179,7 @@ test.group('Multipart', () => {
     assert.plan(3)
 
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onFile('*', async (part) => {
         stack.push('file')
         part.resume()
@@ -206,7 +206,7 @@ test.group('Multipart', () => {
 
   test('pass errors from field handler to upstream', async (assert) => {
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       multipart.onField('name', () => {
         throw new Error('bad name')
       })
@@ -230,7 +230,7 @@ test.group('Multipart', () => {
 
   test('raise error when process is invoked multipart times', async (assert) => {
     const server = createServer(async (req, res) => {
-      const multipart = new Multipart(req)
+      const multipart = new Multipart(req, { maxFields: 1000 })
       try {
         await multipart.process()
         await multipart.process()
@@ -246,5 +246,28 @@ test.group('Multipart', () => {
       .field('name', 'virk')
 
     assert.equal(text, 'E_RUNTIME_EXCEPTION: multipart stream has already been consumed')
+  })
+
+  test('raise error when maxFields are crossed', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const multipart = new Multipart(req, { maxFields: 1 })
+      multipart.onField('*', async () => {
+      })
+
+      try {
+        await multipart.process()
+        res.end()
+      } catch (error) {
+        res.writeHead(500)
+        res.end(error.message)
+      }
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .field('name', 'virk')
+      .field('age', '22')
+
+    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Max fields limit exceeded')
   })
 })

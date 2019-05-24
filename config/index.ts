@@ -156,6 +156,17 @@ export const config: BodyParserConfig = {
 
     /*
     |--------------------------------------------------------------------------
+    | Max Fields
+    |--------------------------------------------------------------------------
+    |
+    | The maximum number of fields allowed in the request body. The field includes
+    | text inputs and files both.
+    |
+    */
+    maxFields: 1000,
+
+    /*
+    |--------------------------------------------------------------------------
     | Request body limit
     |--------------------------------------------------------------------------
     |
