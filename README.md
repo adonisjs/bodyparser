@@ -5,6 +5,7 @@
 - [AdonisJs BodyParser](#adonisjs-bodyparser)
   - [Features](#features)
   - [Usage](#usage)
+    - [Register provider](#register-provider)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -33,6 +34,22 @@ adonis install @adonisjs/bodyparser
 
 The command will create the `config/bodyparser.ts` config file. Also, you can manually copy the [config from here](config/index.ts).
 
+### Register provider
+Make sure to register the provider as follows inside `start/app.ts` file.
+
+```ts
+const providers = [
+  '@adonisjs/bodyparser/build/providers/BodyParserProvider'
+]
+```
+
+and also register the middleware inside `start/kernel.ts` file.
+
+```ts
+HttpMiddleware.registerGlobal([
+  'Adonis/Middleware/BodyParser'
+])
+```
 
 [circleci-image]: https://img.shields.io/circleci/project/github/adonisjs/adonis-bodyparser/master.svg?style=for-the-badge&logo=appveyor
 [circleci-url]: https://circleci.com/gh/adonisjs/adonis-bodyparser "circleci"
