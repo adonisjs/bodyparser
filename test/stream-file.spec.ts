@@ -48,5 +48,5 @@ test.group('streamFile', (group) => {
     } catch (error) {
       assert.equal(error, 'blowup')
     }
-  })
+  }).retry(2)
 })
