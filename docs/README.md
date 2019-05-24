@@ -17,6 +17,13 @@ Features
 2.  Extensive support for JSON request body including `application/vnd.api+json`, `application/json-patch+json`, `application/csp-report` and `application/json` content type.
 3.  Exposes API to stream file uploads without writing to the `tmp` directory.
 
+Table of contents
+-----------------
+
+*   [Usage](#usage)
+    *   [Register provider](#register-provider)
+*   [License](#license)
+
 Usage
 -----
 
@@ -28,13 +35,35 @@ adonis install @adonisjs/bodyparser
 
 The command will create the `config/bodyparser.ts` config file. Also, you can manually copy the [config from here](config/index.ts).
 
+### Register provider
+
+Make sure to register the provider as follows inside `start/app.ts` file.
+
+```ts
+const providers = [
+  '@adonisjs/bodyparser/build/providers/BodyParserProvider'
+]
+```
+
+and also register the middleware inside `start/kernel.ts` file.
+
+```ts
+HttpMiddleware.registerGlobal([
+  'Adonis/Middleware/BodyParser'
+])
+```
+
+License
+-------
+
+MIT
+
 ## Index
 
 ### External modules
 
 * ["adonis-typings/index"](modules/_adonis_typings_index_.md)
 * ["config/index"](modules/_config_index_.md)
-* ["lib/index"](modules/_lib_index_.md)
 * ["providers/BodyParserProvider"](modules/_providers_bodyparserprovider_.md)
 * ["src/BodyParser/index"](modules/_src_bodyparser_index_.md)
 * ["src/Contracts/index"](modules/_src_contracts_index_.md)

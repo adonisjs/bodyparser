@@ -55,13 +55,14 @@ try {
 
 ###  constructor
 
-⊕ **new Multipart**(_request: *`IncomingMessage`*): [Multipart](_src_multipart_index_.multipart.md)
+⊕ **new Multipart**(_request: *`IncomingMessage`*, _config: *`object`*): [Multipart](_src_multipart_index_.multipart.md)
 
 **Parameters:**
 
 | Name | Type |
 | ------ | ------ |
 | _request | `IncomingMessage` |
+| _config | `object` |
 
 **Returns:** [Multipart](_src_multipart_index_.multipart.md)
 

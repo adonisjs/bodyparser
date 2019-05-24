@@ -135,6 +135,13 @@ ___
 **● limit**: *`string`* = "20mb"
 
 ___
+<a id="config.multipart.maxfields"></a>
+
+####  maxFields
+
+**● maxFields**: *`number`* = 1000
+
+___
 <a id="config.multipart.processmanually"></a>
 
 ####  processManually
