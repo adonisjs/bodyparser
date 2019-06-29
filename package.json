@@ -22,7 +22,7 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/core": "^2.0.3",
+    "@adonisjs/core": "^2.0.4",
     "@adonisjs/dev-utils": "^1.4.0",
     "@adonisjs/mrm-preset": "^2.0.3",
     "@poppinss/logger": "^1.1.0",
