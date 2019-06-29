@@ -13,7 +13,7 @@ import * as coBody from 'co-body'
 import { Exception } from '@poppinss/utils'
 import { RequestContract } from '@poppinss/request'
 import { HttpContextContract } from '@poppinss/http-server'
-import { BodyParserConfig } from '@ioc:Adonis/Src/BodyParser'
+import { BodyParserConfig } from '@ioc:Adonis/Addons/BodyParser'
 
 import { Multipart } from '../Multipart'
 import { processMultipart } from '../Multipart/processMultipart'

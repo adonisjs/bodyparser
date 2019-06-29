@@ -1,214 +1,81 @@
-[@adonisjs/bodyparser](../README.md) > ["config/index"](../modules/_config_index_.md)
+> **[@adonisjs/bodyparser](../README.md)**
+
+[Globals](../globals.md) / ["config/index"](_config_index_.md) /
 
 # External module: "config/index"
 
-## Index
+### Index
 
-### Object literals
+#### Object literals
 
-* [config](_config_index_.md#config)
-
----
+* [config](_config_index_.md#const-config)
 
 ## Object literals
 
-<a id="config"></a>
+### `Const` config
 
-### `<Const>` config
+### ▪ **config**: *object*
 
-**config**: *`object`*
+Default config to be used. It will be deep merged
+with the user config
 
-Default config to be used. It will be deep merged with the user config
+###  whitelistedMethods
 
-<a id="config.whitelistedmethods"></a>
+• **whitelistedMethods**: *string[]* =  ['POST', 'PUT', 'PATCH', 'DELETE']
 
-####  whitelistedMethods
+▪ **form**: *object*
 
-**● whitelistedMethods**: *`string`[]* =  ['POST', 'PUT', 'PATCH', 'DELETE']
+* **encoding**: *string* = "utf-8"
 
-___
-<a id="config.form"></a>
+* **limit**: *string* = "1mb"
 
-####  form
+* **queryString**(): *object*
 
-**form**: *`object`*
-
-<a id="config.form.encoding"></a>
-
-####  encoding
-
-**● encoding**: *`string`* = "utf-8"
-
-___
-<a id="config.form.limit"></a>
-
-####  limit
-
-**● limit**: *`string`* = "1mb"
-
-___
-<a id="config.form.querystring"></a>
-
-####  queryString
-
-**● queryString**: *`object`*
-
-#### Type declaration
-
-___
-<a id="config.form.types"></a>
-
-####  types
-
-**● types**: *`string`[]* =  [
+* **types**: *string[]* =  [
       'application/x-www-form-urlencoded',
     ]
 
-___
+▪ **json**: *object*
 
-___
-<a id="config.json"></a>
+* **encoding**: *string* = "utf-8"
 
-####  json
+* **limit**: *string* = "1mb"
 
-**json**: *`object`*
+* **strict**: *true* = true
 
-<a id="config.json.encoding-1"></a>
-
-####  encoding
-
-**● encoding**: *`string`* = "utf-8"
-
-___
-<a id="config.json.limit-1"></a>
-
-####  limit
-
-**● limit**: *`string`* = "1mb"
-
-___
-<a id="config.json.strict"></a>
-
-####  strict
-
-**● strict**: *`true`* = true
-
-___
-<a id="config.json.types-1"></a>
-
-####  types
-
-**● types**: *`string`[]* =  [
+* **types**: *string[]* =  [
       'application/json',
       'application/json-patch+json',
       'application/vnd.api+json',
       'application/csp-report',
     ]
 
-___
+▪ **multipart**: *object*
 
-___
-<a id="config.multipart"></a>
+* **autoProcess**: *true* = true
 
-####  multipart
+* **encoding**: *string* = "utf-8"
 
-**multipart**: *`object`*
+* **limit**: *string* = "20mb"
 
-<a id="config.multipart.autoprocess"></a>
+* **maxFields**: *number* = 1000
 
-####  autoProcess
+* **processManually**: *never[]* =  []
 
-**● autoProcess**: *`true`* = true
-
-___
-<a id="config.multipart.encoding-2"></a>
-
-####  encoding
-
-**● encoding**: *`string`* = "utf-8"
-
-___
-<a id="config.multipart.limit-2"></a>
-
-####  limit
-
-**● limit**: *`string`* = "20mb"
-
-___
-<a id="config.multipart.maxfields"></a>
-
-####  maxFields
-
-**● maxFields**: *`number`* = 1000
-
-___
-<a id="config.multipart.processmanually"></a>
-
-####  processManually
-
-**● processManually**: *`never`[]* =  []
-
-___
-<a id="config.multipart.types-2"></a>
-
-####  types
-
-**● types**: *`string`[]* =  [
+* **types**: *string[]* =  [
       'multipart/form-data',
     ]
 
-___
-<a id="config.multipart.tmpfilename"></a>
+* **tmpFileName**(): *string*
 
-####  tmpFileName
+▪ **raw**: *object*
 
-▸ **tmpFileName**(): `string`
+* **encoding**: *string* = "utf-8"
 
-**Returns:** `string`
+* **limit**: *string* = "1mb"
 
-___
+* **queryString**(): *object*
 
-___
-<a id="config.raw"></a>
-
-####  raw
-
-**raw**: *`object`*
-
-<a id="config.raw.encoding-3"></a>
-
-####  encoding
-
-**● encoding**: *`string`* = "utf-8"
-
-___
-<a id="config.raw.limit-3"></a>
-
-####  limit
-
-**● limit**: *`string`* = "1mb"
-
-___
-<a id="config.raw.querystring-1"></a>
-
-####  queryString
-
-**● queryString**: *`object`*
-
-#### Type declaration
-
-___
-<a id="config.raw.types-3"></a>
-
-####  types
-
-**● types**: *`string`[]* =  [
+* **types**: *string[]* =  [
       'text/*',
     ]
-
-___
-
-___
-
-___
-

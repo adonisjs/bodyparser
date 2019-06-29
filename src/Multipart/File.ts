@@ -17,7 +17,7 @@ import {
   FileValidationOptions,
   FileUploadError,
   FileInputNode,
-} from '@ioc:Adonis/Src/BodyParser'
+} from '@ioc:Adonis/Addons/BodyParser'
 
 /**
  * File class exposes a friendly API to validate or save uploaded

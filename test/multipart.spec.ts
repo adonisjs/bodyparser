@@ -16,7 +16,7 @@ import { join } from 'path'
 import { pathExists, remove, createWriteStream } from 'fs-extra'
 
 import { Multipart } from '../src/Multipart'
-import { MultipartStream } from '@ioc:Adonis/Src/BodyParser'
+import { MultipartStream } from '@ioc:Adonis/Addons/BodyParser'
 
 function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time))

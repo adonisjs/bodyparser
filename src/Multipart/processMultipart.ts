@@ -17,7 +17,7 @@ import { File } from './File'
 import { Multipart } from './index'
 import { streamFile } from './streamFile'
 import { FormFields } from '../FormFields'
-import { BodyParserMultipartConfig } from '@ioc:Adonis/Src/BodyParser'
+import { BodyParserMultipartConfig } from '@ioc:Adonis/Addons/BodyParser'
 
 /**
  * Processes the incoming multipart stream by moving files to the

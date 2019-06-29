@@ -18,7 +18,7 @@ import {
   PartHandler,
   MultipartStream,
   FieldHandler,
-} from '@ioc:Adonis/Src/BodyParser'
+} from '@ioc:Adonis/Addons/BodyParser'
 
 /**
  * Multipart class offers a low level API to interact the incoming

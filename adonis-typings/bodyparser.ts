@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-declare module '@ioc:Adonis/Src/BodyParser' {
+declare module '@ioc:Adonis/Addons/BodyParser' {
   import { Readable } from 'stream'
 
   /**

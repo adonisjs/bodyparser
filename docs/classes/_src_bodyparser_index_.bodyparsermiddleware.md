@@ -1,61 +1,55 @@
-[@adonisjs/bodyparser](../README.md) > ["src/BodyParser/index"](../modules/_src_bodyparser_index_.md) > [BodyParserMiddleware](../classes/_src_bodyparser_index_.bodyparsermiddleware.md)
+> **[@adonisjs/bodyparser](../README.md)**
+
+[Globals](../globals.md) / ["src/BodyParser/index"](../modules/_src_bodyparser_index_.md) / [BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md) /
 
 # Class: BodyParserMiddleware
 
-BodyParser middleware parses the incoming request body and set it as request body to be read later in the request lifecycle.
+BodyParser middleware parses the incoming request body and set it as
+request body to be read later in the request lifecycle.
 
 ## Hierarchy
 
-**BodyParserMiddleware**
+* **BodyParserMiddleware**
 
-## Index
+### Index
 
-### Constructors
+#### Constructors
 
 * [constructor](_src_bodyparser_index_.bodyparsermiddleware.md#constructor)
 
-### Methods
+#### Methods
 
 * [handle](_src_bodyparser_index_.bodyparsermiddleware.md#handle)
 
----
-
 ## Constructors
-
-<a id="constructor"></a>
 
 ###  constructor
 
-⊕ **new BodyParserMiddleware**(_config: *`BodyParserConfig`*): [BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)
+\+ **new BodyParserMiddleware**(`_config`: *`BodyParserConfig`*): *[BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)*
 
 **Parameters:**
 
-| Name | Type |
-| ------ | ------ |
-| _config | `BodyParserConfig` |
+Name | Type |
+------ | ------ |
+`_config` | `BodyParserConfig` |
 
-**Returns:** [BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)
-
-___
+**Returns:** *[BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)*
 
 ## Methods
 
-<a id="handle"></a>
-
 ###  handle
 
-▸ **handle**(__namedParameters: *`object`*, next: *`function`*): `Promise`<`void`>
+▸ **handle**(`__namedParameters`: *object*, `next`: *function*): *`Promise<void>`*
 
-Handle HTTP request body by parsing it as per the user config
+Handle HTTP request body by parsing it as per the user
+config
 
 **Parameters:**
 
-| Name | Type |
-| ------ | ------ |
-| __namedParameters | `object` |
-| next | `function` |
+▪ **__namedParameters**: *object*
 
-**Returns:** `Promise`<`void`>
+▪ **next**: *function*
 
-___
+▸ (): *`Promise<void>`*
 
+**Returns:** *`Promise<void>`*

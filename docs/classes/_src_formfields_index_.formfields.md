@@ -1,34 +1,34 @@
-[@adonisjs/bodyparser](../README.md) > ["src/FormFields/index"](../modules/_src_formfields_index_.md) > [FormFields](../classes/_src_formfields_index_.formfields.md)
+> **[@adonisjs/bodyparser](../README.md)**
+
+[Globals](../globals.md) / ["src/FormFields/index"](../modules/_src_formfields_index_.md) / [FormFields](_src_formfields_index_.formfields.md) /
 
 # Class: FormFields
 
-A jar of form fields to store form data by handling array gracefully
+A jar of form fields to store form data by handling
+array gracefully
 
 ## Hierarchy
 
-**FormFields**
+* **FormFields**
 
-## Index
+### Index
 
-### Methods
+#### Methods
 
 * [add](_src_formfields_index_.formfields.md#add)
 * [get](_src_formfields_index_.formfields.md#get)
 
----
-
 ## Methods
-
-<a id="add"></a>
 
 ###  add
 
-▸ **add**(key: *`string`*, value: *`any`*): `void`
+▸ **add**(`key`: *string*, `value`: *any*): *void*
 
-Add a new key/value pair. The keys with array like expressions are handled properly.
+Add a new key/value pair. The keys with array like
+expressions are handled properly.
 
-*__example__*:
- ```
+**`example`** 
+```
 formfields.add('username', 'virk')
 
 // array
@@ -42,23 +42,19 @@ formfields.add('username[0]', 'nikk')
 
 **Parameters:**
 
-| Name | Type |
-| ------ | ------ |
-| key | `string` |
-| value | `any` |
+Name | Type |
+------ | ------ |
+`key` | string |
+`value` | any |
 
-**Returns:** `void`
+**Returns:** *void*
 
 ___
-<a id="get"></a>
 
 ###  get
 
-▸ **get**(): `any`
+▸ **get**(): *any*
 
 Returns the copy of form fields
 
-**Returns:** `any`
-
-___
-
+**Returns:** *any*

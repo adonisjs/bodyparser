@@ -1,12 +1,11 @@
-[@adonisjs/bodyparser](../README.md) > ["providers/BodyParserProvider"](../modules/_providers_bodyparserprovider_.md)
+> **[@adonisjs/bodyparser](../README.md)**
+
+[Globals](../globals.md) / ["providers/BodyParserProvider"](_providers_bodyparserprovider_.md) /
 
 # External module: "providers/BodyParserProvider"
 
-## Index
+### Index
 
-### Classes
+#### Classes
 
 * [BodyParserProvider](../classes/_providers_bodyparserprovider_.bodyparserprovider.md)
-
----
-

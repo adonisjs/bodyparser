@@ -8,7 +8,7 @@
 */
 
 import * as uuid from 'uuid/v1'
-import { BodyParserConfig } from '@ioc:Adonis/Src/BodyParser'
+import { BodyParserConfig } from '@ioc:Adonis/Addons/BodyParser'
 
 /**
  * Default config to be used. It will be deep merged

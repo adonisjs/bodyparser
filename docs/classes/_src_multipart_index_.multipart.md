@@ -1,8 +1,12 @@
-[@adonisjs/bodyparser](../README.md) > ["src/Multipart/index"](../modules/_src_multipart_index_.md) > [Multipart](../classes/_src_multipart_index_.multipart.md)
+> **[@adonisjs/bodyparser](../README.md)**
+
+[Globals](../globals.md) / ["src/Multipart/index"](../modules/_src_multipart_index_.md) / [Multipart](_src_multipart_index_.multipart.md) /
 
 # Class: Multipart
 
-Multipart class offers a low level API to interact the incoming HTTP request data as a stream. This makes it super easy to write files to s3 without saving them to the disk first.
+Multipart class offers a low level API to interact the incoming
+HTTP request data as a stream. This makes it super easy to
+write files to s3 without saving them to the disk first.
 
 ### Usage
 
@@ -25,73 +29,65 @@ try {
 
 ## Hierarchy
 
-**Multipart**
+* **Multipart**
 
 ## Implements
 
 * `MultipartContract`
 
-## Index
+### Index
 
-### Constructors
+#### Constructors
 
 * [constructor](_src_multipart_index_.multipart.md#constructor)
 
-### Properties
+#### Properties
 
 * [consumed](_src_multipart_index_.multipart.md#consumed)
 
-### Methods
+#### Methods
 
 * [onField](_src_multipart_index_.multipart.md#onfield)
 * [onFile](_src_multipart_index_.multipart.md#onfile)
 * [process](_src_multipart_index_.multipart.md#process)
 
----
-
 ## Constructors
-
-<a id="constructor"></a>
 
 ###  constructor
 
-⊕ **new Multipart**(_request: *`IncomingMessage`*, _config: *`object`*): [Multipart](_src_multipart_index_.multipart.md)
+\+ **new Multipart**(`_request`: *`IncomingMessage`*, `_config`: *object*): *[Multipart](_src_multipart_index_.multipart.md)*
 
 **Parameters:**
 
-| Name | Type |
-| ------ | ------ |
-| _request | `IncomingMessage` |
-| _config | `object` |
+Name | Type |
+------ | ------ |
+`_request` | `IncomingMessage` |
+`_config` | object |
 
-**Returns:** [Multipart](_src_multipart_index_.multipart.md)
-
-___
+**Returns:** *[Multipart](_src_multipart_index_.multipart.md)*
 
 ## Properties
 
-<a id="consumed"></a>
-
 ###  consumed
 
-**● consumed**: *`boolean`* = false
+• **consumed**: *boolean* = false
 
-Consumed is set to true when `process` is called. Calling process multiple times is not possible and hence this boolean must be checked first
-
-___
+Consumed is set to true when `process` is called. Calling
+process multiple times is not possible and hence this
+boolean must be checked first
 
 ## Methods
 
-<a id="onfield"></a>
-
 ###  onField
 
-▸ **onField**(name: *`string`*, handler: *`FieldHandler`*): `this`
+▸ **onField**(`name`: *string*, `handler`: *`FieldHandler`*): *this*
 
-Get notified on a given field or all fields. An exception inside the callback will abort the request body parsing and raises and exception.
+Get notified on a given field or all fields. An exception inside
+the callback will abort the request body parsing and raises
+and exception.
 
-*__example__*:
- ```
+**`example`** 
+```
 multipart.onField('username', (key, value) => {
 })
 
@@ -101,24 +97,26 @@ multipart.onField('*', (key, value) => {
 
 **Parameters:**
 
-| Name | Type |
-| ------ | ------ |
-| name | `string` |
-| handler | `FieldHandler` |
+Name | Type |
+------ | ------ |
+`name` | string |
+`handler` | `FieldHandler` |
 
-**Returns:** `this`
+**Returns:** *this*
 
 ___
-<a id="onfile"></a>
 
 ###  onFile
 
-▸ **onFile**(name: *`string`*, handler: *`PartHandler`*): `this`
+▸ **onFile**(`name`: *string*, `handler`: *`PartHandler`*): *this*
 
-Attach handler for a given file. To handle all files, you can attach a wildcard handler. Also only can handler can be defined, since processing a stream at multiple locations is not possible.
+Attach handler for a given file. To handle all files, you
+can attach a wildcard handler. Also only can handler
+can be defined, since processing a stream at multiple
+locations is not possible.
 
-*__example__*:
- ```
+**`example`** 
+```
 multipart.onFile('package', async (stream) => {
 })
 
@@ -128,23 +126,20 @@ multipart.onFile('*', async (stream) => {
 
 **Parameters:**
 
-| Name | Type |
-| ------ | ------ |
-| name | `string` |
-| handler | `PartHandler` |
+Name | Type |
+------ | ------ |
+`name` | string |
+`handler` | `PartHandler` |
 
-**Returns:** `this`
+**Returns:** *this*
 
 ___
-<a id="process"></a>
 
 ###  process
 
-▸ **process**(): `Promise`<`void`>
+▸ **process**(): *`Promise<void>`*
 
-Process the request by going all the file and field streams.
+Process the request by going all the file and field
+streams.
 
-**Returns:** `Promise`<`void`>
-
-___
-
+**Returns:** *`Promise<void>`*

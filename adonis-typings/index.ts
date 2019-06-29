@@ -8,7 +8,11 @@
 */
 
 /// <reference path="./bodyparser.ts" />
-import { FileValidationOptions, MultipartFileContract, MultipartContract } from '@ioc:Adonis/Src/BodyParser'
+import {
+  FileValidationOptions,
+  MultipartFileContract,
+  MultipartContract,
+} from '@ioc:Adonis/Addons/BodyParser'
 
 declare module '@ioc:Adonis/Core/Request' {
   interface RequestContract {

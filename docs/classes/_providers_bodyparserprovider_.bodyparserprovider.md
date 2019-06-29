@@ -1,78 +1,64 @@
-[@adonisjs/bodyparser](../README.md) > ["providers/BodyParserProvider"](../modules/_providers_bodyparserprovider_.md) > [BodyParserProvider](../classes/_providers_bodyparserprovider_.bodyparserprovider.md)
+> **[@adonisjs/bodyparser](../README.md)**
+
+[Globals](../globals.md) / ["providers/BodyParserProvider"](../modules/_providers_bodyparserprovider_.md) / [BodyParserProvider](_providers_bodyparserprovider_.bodyparserprovider.md) /
 
 # Class: BodyParserProvider
 
 ## Hierarchy
 
-**BodyParserProvider**
+* **BodyParserProvider**
 
-## Index
+### Index
 
-### Constructors
+#### Constructors
 
 * [constructor](_providers_bodyparserprovider_.bodyparserprovider.md#constructor)
 
-### Properties
+#### Properties
 
-* [$container](_providers_bodyparserprovider_.bodyparserprovider.md#_container)
+* [$container](_providers_bodyparserprovider_.bodyparserprovider.md#protected-$container)
 
-### Methods
+#### Methods
 
 * [boot](_providers_bodyparserprovider_.bodyparserprovider.md#boot)
 * [register](_providers_bodyparserprovider_.bodyparserprovider.md#register)
 
----
-
 ## Constructors
-
-<a id="constructor"></a>
 
 ###  constructor
 
-⊕ **new BodyParserProvider**($container: *`any`*): [BodyParserProvider](_providers_bodyparserprovider_.bodyparserprovider.md)
+\+ **new BodyParserProvider**(`$container`: *any*): *[BodyParserProvider](_providers_bodyparserprovider_.bodyparserprovider.md)*
 
 **Parameters:**
 
-| Name | Type |
-| ------ | ------ |
-| $container | `any` |
+Name | Type |
+------ | ------ |
+`$container` | any |
 
-**Returns:** [BodyParserProvider](_providers_bodyparserprovider_.bodyparserprovider.md)
-
-___
+**Returns:** *[BodyParserProvider](_providers_bodyparserprovider_.bodyparserprovider.md)*
 
 ## Properties
 
-<a id="_container"></a>
+### `Protected` $container
 
-### `<Protected>` $container
-
-**● $container**: *`any`*
-
-___
+• **$container**: *any*
 
 ## Methods
 
-<a id="boot"></a>
-
 ###  boot
 
-▸ **boot**(): `void`
+▸ **boot**(): *void*
 
 Adding the `file` macro to add support for reading request files.
 
-**Returns:** `void`
+**Returns:** *void*
 
 ___
-<a id="register"></a>
 
 ###  register
 
-▸ **register**(): `void`
+▸ **register**(): *void*
 
 Registers the bodyparser middleware namespace to the container.
 
-**Returns:** `void`
-
-___
-
+**Returns:** *void*

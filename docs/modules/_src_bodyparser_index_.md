@@ -1,12 +1,11 @@
-[@adonisjs/bodyparser](../README.md) > ["src/BodyParser/index"](../modules/_src_bodyparser_index_.md)
+> **[@adonisjs/bodyparser](../README.md)**
+
+[Globals](../globals.md) / ["src/BodyParser/index"](_src_bodyparser_index_.md) /
 
 # External module: "src/BodyParser/index"
 
-## Index
+### Index
 
-### Classes
+#### Classes
 
 * [BodyParserMiddleware](../classes/_src_bodyparser_index_.bodyparsermiddleware.md)
-
----
-

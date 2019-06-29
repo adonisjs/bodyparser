@@ -13,6 +13,7 @@ The BodyParser middleware parses the incoming HTTP requests body and files, so t
 1. Support for `multipart/form-data`, `application/x-www-form-urlencoded` as well raw HTTP requests.
 2. Extensive support for JSON request body including `application/vnd.api+json`, `application/json-patch+json`, `application/csp-report` and `application/json` content type.
 3. Exposes API to stream file uploads without writing to the `tmp` directory.
+4. Inbuilt protection from [JSON poisioning](https://medium.com/intrinsic/javascript-prototype-poisoning-vulnerabilities-in-the-wild-7bc15347c96)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
