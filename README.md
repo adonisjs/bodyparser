@@ -39,7 +39,7 @@ Make sure to register the provider as follows inside `start/app.ts` file.
 
 ```ts
 const providers = [
-  '@adonisjs/bodyparser/build/providers/BodyParserProvider'
+  '@adonisjs/bodyparser'
 ]
 ```
 
@@ -47,7 +47,7 @@ and also register the middleware inside `start/kernel.ts` file.
 
 ```ts
 HttpMiddleware.registerGlobal([
-  'Adonis/Middleware/BodyParser'
+  'Adonis/Addons/BodyParserMiddleware'
 ])
 ```
 

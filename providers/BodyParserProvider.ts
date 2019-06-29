@@ -20,8 +20,8 @@ export default class BodyParserProvider {
    * Registers the bodyparser middleware namespace to the container.
    */
   public register () {
-    this.$container.bind('Adonis/Middleware/BodyParser', () => {
-      const config = this.$container.use('Adonis/Src/Config')
+    this.$container.bind('Adonis/Addons/BodyParserMiddleware', () => {
+      const config = this.$container.use('Adonis/Core/Config')
       return new BodyParserMiddleware(config)
     })
   }
@@ -30,7 +30,7 @@ export default class BodyParserProvider {
    * Adding the `file` macro to add support for reading request files.
    */
   public boot () {
-    const Request = this.$container.use('Adonis/Src/Config')
+    const Request = this.$container.use('Adonis/Core/Config')
 
     /**
      * Adding `file` macro to the request class.
