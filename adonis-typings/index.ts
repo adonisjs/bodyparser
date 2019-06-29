@@ -10,7 +10,7 @@
 /// <reference path="../src/Contracts/index.ts" />
 import { FileValidationOptions, MultipartFileContract, MultipartContract } from '@ioc:Adonis/Src/BodyParser'
 
-declare module '@ioc:Adonis/Src/Request' {
+declare module '@ioc:Adonis/Core/Request' {
   interface RequestContract {
     file (key: string, options?: Partial<FileValidationOptions>): MultipartFileContract,
     multipart: MultipartContract,
