@@ -24,7 +24,7 @@ declare module '@ioc:Adonis/Src/BodyParser' {
   /**
    * File validation options
    */
-  type FileValidationOptions = {
+  export type FileValidationOptions = {
     size: string | number,
     types: string[],
     extnames: string[],
@@ -33,12 +33,12 @@ declare module '@ioc:Adonis/Src/BodyParser' {
   /**
    * Stream part handler
    */
-  type PartHandler = (part: MultipartStream) => Promise<void>
+  export type PartHandler = (part: MultipartStream) => Promise<void>
 
   /**
    * Field handler
    */
-  type FieldHandler = (key: string, value: string) => void
+  export type FieldHandler = (key: string, value: string) => void
 
   /**
    * Qs module config
@@ -102,7 +102,7 @@ declare module '@ioc:Adonis/Src/BodyParser' {
   /**
    * Body parser config for all different types
    */
-  type BodyParserConfig = {
+  export type BodyParserConfig = {
     whitelistedMethods: string[],
     json: BodyParserJSONConfig,
     form: BodyParserFormConfig,
@@ -125,7 +125,7 @@ declare module '@ioc:Adonis/Src/BodyParser' {
   /**
    * Error shape for file upload errors
    */
-  type FileUploadError = {
+  export type FileUploadError = {
     fieldName: string,
     clientName: string,
     message: string,
@@ -148,7 +148,7 @@ declare module '@ioc:Adonis/Src/BodyParser' {
   /**
    * Multipart file interface, used to loose coupling
    */
-  interface MultipartFileContract {
+  export interface MultipartFileContract {
     isValid: boolean,
     clientName: string,
     fileName?: string,

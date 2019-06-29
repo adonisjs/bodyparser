@@ -8,7 +8,7 @@
     "build/adonis-typings",
     "build/providers"
   ],
-  "types": "build/adonis-typings/index.d.ts",
+  "types": "./build/adonis-typings/index.d.ts",
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
