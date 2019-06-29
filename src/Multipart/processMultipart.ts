@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-/// <reference path="../Contracts/index.ts" />
+/// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import { join } from 'path'
 import { homedir } from 'os'

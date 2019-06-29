@@ -20,7 +20,10 @@ import { Multipart } from '../src/Multipart'
 import { config } from '../config/index'
 
 const PACKAGE_FILE_PATH = join(__dirname, '../package.json')
-const PACKAGE_FILE_SIZE = Buffer.from(JSON.stringify(require('../package.json'), null, 2), 'utf-8').length + 1
+const PACKAGE_FILE_SIZE = Buffer.from(
+  JSON.stringify(require('../package.json'), null, 2),
+  'utf-8',
+).length + 1
 
 test.group('BodyParser Middleware | generic', () => {
   test('do not parse get requests', async (assert) => {

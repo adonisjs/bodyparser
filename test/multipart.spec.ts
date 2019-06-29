@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-/// <reference path="../src/Contracts/index.ts" />
+/// <reference path="../adonis-typings/bodyparser.ts" />
 
 import * as test from 'japa'
 import { createServer } from 'http'

@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-/// <reference path="../src/Contracts/index.ts" />
+/// <reference path="./bodyparser.ts" />
 import { FileValidationOptions, MultipartFileContract, MultipartContract } from '@ioc:Adonis/Src/BodyParser'
 
 declare module '@ioc:Adonis/Core/Request' {
