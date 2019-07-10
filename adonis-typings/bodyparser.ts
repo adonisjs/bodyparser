@@ -9,6 +9,7 @@
 
 declare module '@ioc:Adonis/Addons/BodyParser' {
   import { Readable } from 'stream'
+  import { FileTypeResult } from 'file-type'
 
   /**
    * Readable stream along with some extra
@@ -143,6 +144,7 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
     headers: {
       [key: string]: string,
     },
+    fileType?: FileTypeResult,
   }
 
   /**

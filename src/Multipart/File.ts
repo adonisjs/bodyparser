@@ -12,6 +12,7 @@
 import { extname } from 'path'
 import * as bytes from 'bytes'
 import * as mediaTyper from 'media-typer'
+
 import {
   MultipartFileContract,
   FileValidationOptions,
@@ -45,9 +46,13 @@ export class File implements MultipartFileContract {
   public tmpPath = this._data.tmpPath
 
   /**
-   * The extname for the file
+   * The extname for the file. We pull the file extension from the file
+   * name when `fileType` is undefined. Check [[processMultipart]]
+   * method to known how fileType value is computed.
    */
-  public extname = extname(this.clientName).replace(/^\./, '')
+  public extname = this._data.fileType
+    ? this._data.fileType.ext
+    : extname(this.clientName).replace(/^\./, '')
 
   /**
    * Upload errors
@@ -81,7 +86,9 @@ export class File implements MultipartFileContract {
    */
   private _parseContentType () {
     try {
-      const parsed = mediaTyper.parse(this._data.headers['content-type'])
+      const parsed = mediaTyper.parse(
+        this._data.fileType ? this._data.fileType.mime : this._data.headers['content-type'],
+      )
       this.type = parsed.type
       this.subtype = parsed.subtype
     } catch (error) {

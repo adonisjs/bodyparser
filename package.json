@@ -79,6 +79,7 @@
     "bytes": "^3.1.0",
     "co-body": "git+https://github.com/thetutlage/co-body.git",
     "end-of-stream": "^1.4.1",
+    "file-type": "^12.0.1",
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.13",
     "media-typer": "^1.1.0",

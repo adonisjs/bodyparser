@@ -507,4 +507,37 @@ test.group('BodyParser Middleware | multipart', () => {
       .attach('package', PACKAGE_FILE_PATH)
       .field('username', 'virk')
   })
+
+  test('detect file ext and mime type using magic number', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(config)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify({
+          type: ctx.request['_files'].avatar.type,
+          subtype: ctx.request['_files'].avatar.subtype,
+          extname: ctx.request['_files'].avatar.extname,
+          fileType: ctx.request['_files'].avatar._data.fileType,
+        }))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('avatar', join(__dirname, '../unicorn.png'), {
+        contentType: 'application/json',
+      })
+
+    assert.deepEqual(body, {
+      type: 'image',
+      subtype: 'png',
+      extname: 'png',
+      fileType: {
+        ext: 'png',
+        mime: 'image/png',
+      },
+    })
+  })
 })

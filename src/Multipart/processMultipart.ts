@@ -11,6 +11,7 @@
 
 import { join } from 'path'
 import { homedir } from 'os'
+import * as fileType from 'file-type'
 import { Exception } from '@poppinss/utils'
 
 import { File } from './File'
@@ -42,16 +43,15 @@ export async function processMultipart (multipart: Multipart, config: BodyParser
    */
   multipart.onFile('*', async (part) => {
     const tmpPath = join(homedir(), config.tmpFileName())
-    let bytes = 0
+    let buff = Buffer.from('')
 
     /**
      * Stream the file to tmpPath, but also keep an
      * eye on total bytes
      */
     await streamFile(part, tmpPath, (line) => {
-      const size = line.length
-      bytes += size
-      totalBytes += size
+      buff = Buffer.concat([buff, line])
+      totalBytes += buff.length
 
       /**
        * Ensure request data isn't getting over the defined limit. Otherwise,
@@ -73,8 +73,9 @@ export async function processMultipart (multipart: Multipart, config: BodyParser
       fileName: part.filename,
       fieldName: part.name,
       tmpPath: tmpPath,
-      bytes: bytes,
+      bytes: buff.length,
       headers: part.headers,
+      fileType: fileType(buff),
     })
 
     files.add(file.fieldName, file)
