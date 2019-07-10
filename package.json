@@ -19,9 +19,7 @@
     "lint": "tslint --project tsconfig.json",
     "commit": "git-cz",
     "release": "np",
-    "version": "npm run build",
-    "snyk-protect": "snyk protect",
-    "prepublish": "npm run snyk-protect"
+    "version": "npm run build"
   },
   "devDependencies": {
     "@adonisjs/core": "^2.0.4",
@@ -84,12 +82,10 @@
     "lodash": "^4.17.13",
     "media-typer": "^1.1.0",
     "multiparty": "^4.2.1",
-    "snyk": "^1.192.4",
     "uuid": "^3.3.2"
   },
   "publishConfig": {
     "access": "public",
     "tag": "v5"
-  },
-  "snyk": true
+  }
 }
