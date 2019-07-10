@@ -8,3 +8,7 @@ patch:
         patched: '2019-07-03T23:07:49.877Z'
     - '@poppinss/http-server > lodash':
         patched: '2019-07-03T23:07:49.877Z'
+    - snyk > snyk-mvn-plugin > lodash:
+        patched: '2019-07-10T08:30:52.693Z'
+    - snyk > snyk-php-plugin > @snyk/composer-lockfile-parser > lodash:
+        patched: '2019-07-10T08:30:52.693Z'
