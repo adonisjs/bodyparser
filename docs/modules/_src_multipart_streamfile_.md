@@ -14,7 +14,7 @@
 
 ###  streamFile
 
-▸ **streamFile**(`readStream`: *`Readable`*, `location`: *string*, `dataListener?`: *undefined | function*): *`Promise<void>`*
+▸ **streamFile**(`readStream`: `Readable`, `location`: string, `dataListener?`: undefined | function): *`Promise<void>`*
 
 Writes readable stream to the given location by properly cleaning up readable
 and writable streams in case of any errors. Also an optional data listener

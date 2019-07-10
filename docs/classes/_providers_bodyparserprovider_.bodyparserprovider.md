@@ -27,7 +27,7 @@
 
 ###  constructor
 
-\+ **new BodyParserProvider**(`$container`: *any*): *[BodyParserProvider](_providers_bodyparserprovider_.bodyparserprovider.md)*
+\+ **new BodyParserProvider**(`$container`: any): *[BodyParserProvider](_providers_bodyparserprovider_.bodyparserprovider.md)*
 
 **Parameters:**
 

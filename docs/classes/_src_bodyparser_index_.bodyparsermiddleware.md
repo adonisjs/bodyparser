@@ -25,7 +25,7 @@ request body to be read later in the request lifecycle.
 
 ###  constructor
 
-\+ **new BodyParserMiddleware**(`_config`: *`BodyParserConfig`*): *[BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)*
+\+ **new BodyParserMiddleware**(`_config`: `BodyParserConfig`): *[BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)*
 
 **Parameters:**
 
@@ -39,7 +39,7 @@ Name | Type |
 
 ###  handle
 
-▸ **handle**(`__namedParameters`: *object*, `next`: *function*): *`Promise<void>`*
+▸ **handle**(`__namedParameters`: object, `next`: function): *`Promise<void>`*
 
 Handle HTTP request body by parsing it as per the user
 config

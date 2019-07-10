@@ -22,7 +22,7 @@ array gracefully
 
 ###  add
 
-▸ **add**(`key`: *string*, `value`: *any*): *void*
+▸ **add**(`key`: string, `value`: any): *void*
 
 Add a new key/value pair. The keys with array like
 expressions are handled properly.

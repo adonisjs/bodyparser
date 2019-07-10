@@ -55,7 +55,7 @@ try {
 
 ###  constructor
 
-\+ **new Multipart**(`_request`: *`IncomingMessage`*, `_config`: *object*): *[Multipart](_src_multipart_index_.multipart.md)*
+\+ **new Multipart**(`_request`: `IncomingMessage`, `_config`: object): *[Multipart](_src_multipart_index_.multipart.md)*
 
 **Parameters:**
 
@@ -80,7 +80,7 @@ boolean must be checked first
 
 ###  onField
 
-▸ **onField**(`name`: *string*, `handler`: *`FieldHandler`*): *this*
+▸ **onField**(`name`: string, `handler`: `FieldHandler`): *this*
 
 Get notified on a given field or all fields. An exception inside
 the callback will abort the request body parsing and raises
@@ -108,7 +108,7 @@ ___
 
 ###  onFile
 
-▸ **onFile**(`name`: *string*, `handler`: *`PartHandler`*): *this*
+▸ **onFile**(`name`: string, `handler`: `PartHandler`): *this*
 
 Attach handler for a given file. To handle all files, you
 can attach a wildcard handler. Also only can handler

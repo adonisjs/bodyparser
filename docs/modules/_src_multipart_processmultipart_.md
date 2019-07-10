@@ -14,7 +14,7 @@
 
 ###  processMultipart
 
-▸ **processMultipart**(`multipart`: *[Multipart](../classes/_src_multipart_index_.multipart.md)*, `config`: *`BodyParserMultipartConfig`*): *`Promise<object>`*
+▸ **processMultipart**(`multipart`: [Multipart](../classes/_src_multipart_index_.multipart.md), `config`: `BodyParserMultipartConfig`): *`Promise<object>`*
 
 Processes the incoming multipart stream by moving files to the
 tmp directory and return `files` and `fields` data map.

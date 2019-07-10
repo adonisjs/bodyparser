@@ -46,7 +46,7 @@ files.
 
 ###  constructor
 
-\+ **new File**(`_data`: *`FileInputNode`*): *[File](_src_multipart_file_.file.md)*
+\+ **new File**(`_data`: `FileInputNode`): *[File](_src_multipart_file_.file.md)*
 
 **Parameters:**
 
@@ -76,9 +76,13 @@ ___
 
 ###  extname
 
-• **extname**: *string* =  extname(this.clientName).replace(/^\./, '')
+• **extname**: *string* =  this._data.fileType
+    ? this._data.fileType.ext
+    : extname(this.clientName).replace(/^\./, '')
 
-The extname for the file
+The extname for the file. We pull the file extension from the file
+name when `fileType` is undefined. Check [processMultipart](../modules/_src_multipart_processmultipart_.md#processmultipart)
+method to known how fileType value is computed.
 
 ___
 
@@ -152,7 +156,7 @@ Current status of the file
 
 ###  setValidationOptions
 
-▸ **setValidationOptions**(`options`: *`Partial<FileValidationOptions>`*): *this*
+▸ **setValidationOptions**(`options`: `Partial<FileValidationOptions>`): *this*
 
 Set validation options to be used for
 validating the file
