@@ -9,9 +9,9 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
+import { IncomingMessage } from 'http'
 import * as multiparty from 'multiparty'
 import { Exception } from '@poppinss/utils'
-import { IncomingMessage } from 'http'
 
 import {
   MultipartContract,

@@ -15,7 +15,7 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
    * Readable stream along with some extra
    * data
    */
-  type MultipartStream = Readable & {
+  export type MultipartStream = Readable & {
     headers: any,
     name: string,
     filename: string,
@@ -116,7 +116,7 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
    * request object, we need the interface to extend
    * typings
    */
-  interface MultipartContract {
+  export interface MultipartContract {
     consumed: boolean,
     onFile (name: string, callback: PartHandler): this,
     onField (key: string, value: any): this,
@@ -136,7 +136,7 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   /**
    * New file constructor options shape
    */
-  type FileInputNode = {
+  export type FileInputNode = {
     fieldName: string,
     fileName: string,
     tmpPath: string,
