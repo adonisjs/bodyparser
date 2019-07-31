@@ -161,7 +161,7 @@ export class Multipart implements MultipartContract {
           /**
            * Shortcircuit the entire stream
            */
-          this._form.emit('error', error)
+          this.abort(error)
         }
 
         partHandler.reportProgress(line, lineLength)
@@ -200,7 +200,7 @@ export class Multipart implements MultipartContract {
 
     const error = this._validateProcessedBytes(value.length)
     if (error) {
-      this._form.emit('error', error)
+      this.abort(error)
     } else {
       this._fields.add(key, value)
     }
@@ -250,6 +250,13 @@ export class Multipart implements MultipartContract {
   ): this {
     this._handlers[name] = { handler, options }
     return this
+  }
+
+  /**
+   * Abort request by emitting error
+   */
+  public abort (error: any): void {
+    this._form.emit('error', error)
   }
 
   /**
@@ -314,7 +321,7 @@ export class Multipart implements MultipartContract {
         try {
           this._handleField(key, value)
         } catch (error) {
-          this._form.emit('error', error)
+          this.abort(error)
         }
       })
 

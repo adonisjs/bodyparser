@@ -116,6 +116,7 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
    */
   export interface MultipartContract {
     consumed: boolean,
+    abort (error: any): void,
     onFile (
       name: string,
       options: Partial<FileValidationOptions & { deferValidations: boolean }>,
