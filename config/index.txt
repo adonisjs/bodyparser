@@ -1,20 +1,13 @@
-/*
-* @adonisjs/bodyparser
-*
-* (c) Harminder Virk <virk@adonisjs.com>
-*
-* For the full copyright and license information, please view the LICENSE
-* file that was distributed with this source code.
-*/
+/**
+ * Config source: https://git.io/fjS7M
+ *
+ * Feel free to let us know via PR, if you find something broken in this config
+ * file.
+ */
 
-import * as uuid from 'uuid/v1'
 import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
 
-/**
- * Default config to be used. It will be deep merged
- * with the user config
- */
-export const config: BodyParserConfigContract = {
+const bodyParserConfig: BodyParserConfigContract = {
   /*
   |--------------------------------------------------------------------------
   | White listed methods
@@ -114,7 +107,7 @@ export const config: BodyParserConfigContract = {
     | Files to be processed manually
     |--------------------------------------------------------------------------
     |
-    | You can turn off `autoProcess` for certain routes as well by defining
+    | You can turn off `autoProcess` for certain routes by defining
     | routes inside the following array.
     |
     | NOTE: Make sure the route pattern starts with a leading slash.
@@ -137,12 +130,12 @@ export const config: BodyParserConfigContract = {
     |--------------------------------------------------------------------------
     |
     | When auto processing is on. We will use this method to compute the temporary
-    | file name.
+    | file name. AdonisJs will compute a unique `tmpPath` for you automatically,
+    | However, you can also define your own custom method.
     |
     */
-    tmpFileName () {
-      return `ab-${uuid()}.tmp`
-    },
+    // tmpFileName () {
+    // },
 
     /*
     |--------------------------------------------------------------------------
@@ -189,3 +182,5 @@ export const config: BodyParserConfigContract = {
     ],
   },
 }
+
+export default bodyParserConfig

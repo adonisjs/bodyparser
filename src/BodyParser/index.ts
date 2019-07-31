@@ -9,14 +9,15 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
-import { join } from 'path'
 import { tmpdir } from 'os'
+import * as uuid from 'uuid/v1'
 import * as coBody from 'co-body'
+import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
 
-import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import { RequestContract } from '@ioc:Adonis/Core/Request'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
 
 import { Multipart } from '../Multipart'
 import { streamFile } from '../Multipart/streamFile'
@@ -68,6 +69,18 @@ export class BodyParserMiddleware {
       default:
         return error
     }
+  }
+
+  /**
+   * Returns the tmp path for storing the files temporarly
+   */
+  private _getTmpPath (config: BodyParserConfigContract['multipart']) {
+    if (typeof (config.tmpFileName) === 'function') {
+      const tmpPath = config.tmpFileName()
+      return isAbsolute(tmpPath) ? tmpPath : join(tmpdir(), tmpPath)
+    }
+
+    return join(tmpdir(), uuid())
   }
 
   /**
@@ -126,7 +139,7 @@ export class BodyParserMiddleware {
        * method.
        */
       request.multipart.onFile('*', { deferValidations: true }, async (part, reporter) => {
-        const tmpPath = join(tmpdir(), multipartConfig.tmpFileName())
+        const tmpPath = this._getTmpPath(multipartConfig)
         await streamFile(part, tmpPath, reporter)
         return { tmpPath }
       })

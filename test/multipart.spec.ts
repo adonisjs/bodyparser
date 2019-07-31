@@ -11,11 +11,11 @@
 
 import { join } from 'path'
 import * as test from 'japa'
-import { createServer, IncomingMessage, ServerResponse } from 'http'
 import * as supertest from 'supertest'
 import { Exception } from '@poppinss/utils'
 import { Request as BaseRequest } from '@poppinss/request'
 import { pathExists, remove, createWriteStream } from 'fs-extra'
+import { createServer, IncomingMessage, ServerResponse } from 'http'
 import { RequestContract, RequestConfigContract } from '@ioc:Adonis/Core/Request'
 
 import { Multipart } from '../src/Multipart'

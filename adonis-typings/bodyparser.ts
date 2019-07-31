@@ -96,7 +96,7 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
     autoProcess: boolean,
     maxFields: number,
     processManually: string[],
-    tmpFileName (): string,
+    tmpFileName? (): string,
   }
 
   /**
