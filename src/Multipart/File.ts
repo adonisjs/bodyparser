@@ -49,8 +49,8 @@ export class File implements MultipartFileContract {
    * Type and subtype are extracted from the `content-type`
    * header or from the file magic number
    */
-  public type: string = this._data.fileType.type
-  public subtype: string = this._data.fileType.subtype
+  public type?: string = this._data.fileType.type
+  public subtype?: string = this._data.fileType.subtype
 
   /**
    * Filename is only set after the move operation

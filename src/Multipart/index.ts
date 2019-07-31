@@ -225,7 +225,7 @@ export class Multipart implements MultipartContract {
   /**
    * Set files and fields on the request class
    */
-  private _close () {
+  private _cleanup () {
     this._request['_files'] = this._files.get()
     this._request.setInitialBody(this._fields.get())
   }
@@ -302,7 +302,7 @@ export class Multipart implements MultipartContract {
          * check and resolve from here
          */
         if (this._isClosed()) {
-          this._close()
+          this._cleanup()
           resolve()
         }
       })
@@ -324,7 +324,7 @@ export class Multipart implements MultipartContract {
        */
       this._form.on('close', () => {
         if (this._isClosed()) {
-          this._close()
+          this._cleanup()
           resolve()
         }
       })

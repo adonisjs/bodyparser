@@ -40,6 +40,9 @@ export class PartHandler {
   private _clientName = this._part.filename
   private _headers = this._part.headers
 
+  private _sizeValidated = false
+  private _extValidated = false
+
   /**
    * Collected errors
    */
@@ -60,18 +63,17 @@ export class PartHandler {
    * Validates the file size when validations are not deferred.
    */
   private _validateSize () {
-    if (this._options.deferValidations) {
+    /**
+     * Do not revalidate for size, when an error for size
+     * already exists
+     */
+    if (this._sizeValidated) {
       return
     }
 
-    const error = validateSize(
-      this._fieldName,
-      this._clientName,
-      this._bufferLength,
-      this._options.size,
-    )
-
+    const error = validateSize(this._fieldName, this._clientName, this._bufferLength, this._options.size)
     if (error) {
+      this._sizeValidated = true
       this._errors.push(error)
     }
   }
@@ -81,7 +83,11 @@ export class PartHandler {
    * deferred and file type has been detected.
    */
   private _validateExtension () {
-    if (this._options.deferValidations || !this._fileType) {
+    /**
+     * Do not re-validate file type or ext when we are unable to detect the
+     * filetype or error for file ext already exists
+     */
+    if (this._extValidated || !this._fileType) {
       return
     }
 
@@ -93,7 +99,22 @@ export class PartHandler {
     )
 
     if (error) {
+      this._extValidated = true
       this._errors.push(error)
+    }
+  }
+
+  /**
+   * Detects the file type and extension and also validates it when validations
+   * are not deferred.
+   */
+  private _detectFileTypeAndExtension (force: boolean) {
+    if (!this._fileType) {
+      this._fileType = getFileType(this._buff, this._clientName, this._headers, force)
+    }
+
+    if (!this._options.deferValidations) {
+      this._validateExtension()
     }
   }
 
@@ -110,10 +131,7 @@ export class PartHandler {
      * If we failed to pull the file type earlier, then lets make
      * another attempt.
      */
-    if (!this._fileType) {
-      this._fileType = getFileType(this._buff, this._clientName, this._headers, true)
-      this._validateExtension()
-    }
+    this._detectFileTypeAndExtension(true)
 
     const { filePath, tmpPath, ...meta } = this._postProcessFileData
 
@@ -158,6 +176,14 @@ export class PartHandler {
     this._bufferLength = this._bufferLength + bufferLength
 
     /**
+     * Do not compute file type, ext or validate anything, when
+     * validations are deferred
+     */
+    if (this._options.deferValidations) {
+      return
+    }
+
+    /**
      * Attempt to validate the file size with every chunk of line
      */
     this._validateSize()
@@ -165,10 +191,7 @@ export class PartHandler {
     /**
      * Attempt to find the file type unless we are able to figure it out
      */
-    if (!this._fileType) {
-      this._fileType = getFileType(this._buff, this._clientName, this._headers)
-      this._validateExtension()
-    }
+    this._detectFileTypeAndExtension(false)
 
     /**
      * We need to emit the error, to shortcircuit the writable stream. Their will be
@@ -189,6 +212,13 @@ export class PartHandler {
    * due to some bad credentails.
    */
   public reportError (error: any) {
+    /**
+     * End the stream when an error has been encountered. We do not do it while emitting the
+     * validation errors, since we want the end user to decide, if they want to stop
+     * streaming or not, since many streaming API's doesn't offer abort feature.
+     */
+    this._part.emit('end')
+
     /**
      * Ignore self errors
      */

@@ -15,6 +15,15 @@ import * as fileType from 'file-type'
 import * as mediaTyper from 'media-typer'
 import { FileUploadError } from '@ioc:Adonis/Addons/BodyParser'
 
+function parseMimeType (mime): { type: string, subtype: string } | null {
+  try {
+    const { type, subtype } = mediaTyper.parse(mime)
+    return { type, subtype }
+  } catch (error) {
+    return null
+  }
+}
+
 /**
  * Returns an error when file size is over the expected
  * bytes.
@@ -85,15 +94,13 @@ export function getFileType (
   clientName: string,
   headers: { [key: string]: string },
   force: boolean = false,
-): null | { ext: string, subtype: string, type: string } {
+): null | { ext: string, subtype?: string, type?: string } {
   /**
    * Attempt to detect file type from it's content
    */
   const magicType = fileType(fileContents)
   if (magicType) {
-    return Object.assign(mediaTyper.parse(magicType.mime), {
-      ext: magicType.ext,
-    })
+    return Object.assign({ ext: magicType.ext }, parseMimeType(magicType.mime))
   }
 
   /**
@@ -110,7 +117,8 @@ export function getFileType (
    * Otherwise fallback to file extension from it's client name
    * and pull type/subtype from the headers content type.
    */
-  return Object.assign(mediaTyper.parse(headers['content-type']), {
-    ext: extname(clientName).replace(/^\./, ''),
-  })
+  return Object.assign(
+    { ext: extname(clientName).replace(/^\./, '') },
+    parseMimeType(headers['content-type']),
+  )
 }

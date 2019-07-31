@@ -405,6 +405,43 @@ test.group('Multipart', () => {
     }])
   })
 
+  test('validate stream only once', async (assert) => {
+    let files: null | { [key: string]: File } = null
+    assert.plan(4)
+
+    const server = createServer(async (req, res) => {
+      const request = new Request(req, res, requestConfig)
+      const multipart = new Multipart(request, { maxFields: 1000 })
+
+      multipart.onFile('*', {
+        size: 10,
+      }, async (part, reporter) => {
+        part.on('error', (error: Exception) => {
+          assert.equal(error.code, 'E_STREAM_VALIDATION_FAILURE')
+          part.off('data', reporter)
+        })
+        part.on('data', reporter)
+      })
+
+      await multipart.process()
+      files = request['_files'] || null
+      res.end()
+    })
+
+    await supertest(server)
+      .post('/')
+      .attach('profile', join(__dirname, '..', 'unicorn.png'))
+
+    assert.property(files, 'profile')
+    assert.isFalse(files!.profile.isValid)
+    assert.deepEqual(files!.profile.errors, [{
+      type: 'size',
+      clientName: 'unicorn.png',
+      fieldName: 'profile',
+      message: 'File size should be less than 10B',
+    }])
+  })
+
   test('report extension validation errors', async (assert) => {
     let files: null | { [key: string]: File } = null
 

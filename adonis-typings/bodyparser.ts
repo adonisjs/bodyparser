@@ -28,7 +28,6 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
    */
   export type FileValidationOptions = {
     size: string | number,
-    types: string[],
     extnames: string[],
   }
 
@@ -150,8 +149,8 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
     meta: any,
     fileType: {
       ext: string,
-      type: string,
-      subtype: string,
+      type?: string,
+      subtype?: string,
     },
   }
 
@@ -164,8 +163,8 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
     tmpPath?: string,
     filePath?: string,
     size: number,
-    type: string,
-    subtype: string,
+    type?: string,
+    subtype?: string,
     isValid: boolean,
     status: 'pending' | 'moved' | 'error',
     extname: string,
