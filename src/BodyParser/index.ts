@@ -136,9 +136,18 @@ export class BodyParserMiddleware {
        * method.
        */
       request.multipart.onFile('*', { deferValidations: true }, async (part, reporter) => {
-        const tmpPath = this._getTmpPath(multipartConfig)
-        await streamFile(part, tmpPath, reporter)
-        return { tmpPath }
+        /**
+         * We need to abort the main request when we are unable to process any
+         * file. Otherwise the error will endup on the file object, which
+         * is incorrect.
+         */
+        try {
+          const tmpPath = this._getTmpPath(multipartConfig)
+          await streamFile(part, tmpPath, reporter)
+          return { tmpPath }
+        } catch (error) {
+          request.multipart.abort(error)
+        }
       })
 
       await request.multipart.process()
