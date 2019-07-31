@@ -22,7 +22,7 @@ export default function instructions (
   { TemplateFile }: typeof sinkStatic,
 ) {
   templates.forEach((filename) => {
-    const dest = application.configPath(filename)
+    const dest = `${application.directoriesMap.get('config')}/${filename}`
     const src = join(__dirname, 'config', filename.replace(/.ts$/, '.txt'))
 
     new TemplateFile(projectRoot, dest, src)
