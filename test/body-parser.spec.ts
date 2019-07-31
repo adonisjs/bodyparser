@@ -11,7 +11,7 @@
 /// <reference path="../adonis-typings/index.ts" />
 
 import { join } from 'path'
-import { homedir } from 'os'
+import { tmpdir } from 'os'
 import * as test from 'japa'
 import { merge } from 'lodash'
 import { createServer } from 'http'
@@ -404,8 +404,8 @@ test.group('BodyParser Middleware | multipart', () => {
 
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
 
-    const file1 = await pathExists(join(homedir(), '0.tmp'))
-    const file2 = await pathExists(join(homedir(), '1.tmp'))
+    const file1 = await pathExists(join(tmpdir(), '0.tmp'))
+    const file2 = await pathExists(join(tmpdir(), '1.tmp'))
 
     assert.isTrue(file1)
     assert.isFalse(file2)
