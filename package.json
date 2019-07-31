@@ -6,7 +6,9 @@
   "files": [
     "build/src",
     "build/adonis-typings",
-    "build/providers"
+    "build/providers",
+    "build/config",
+    "build/instructions.js"
   ],
   "types": "./build/adonis-typings/index.d.ts",
   "scripts": {
@@ -15,7 +17,7 @@
     "test": "node japaFile.js",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
-    "build": "npm run compile",
+    "build": "npm run compile && copyfiles \"config/**/*.txt\" build",
     "lint": "tslint --project tsconfig.json",
     "commit": "git-cz",
     "release": "np",
@@ -34,6 +36,7 @@
     "@types/node": "^12.6.8",
     "@types/supertest": "^2.0.8",
     "commitizen": "^4.0.3",
+    "copyfiles": "^2.1.1",
     "cz-conventional-changelog": "^3.0.2",
     "del-cli": "^2.0.0",
     "doctoc": "^1.4.0",
