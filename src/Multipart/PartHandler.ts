@@ -217,7 +217,7 @@ export class PartHandler {
      * validation errors, since we want the end user to decide, if they want to stop
      * streaming or not, since many streaming API's doesn't offer abort feature.
      */
-    this._part.emit('end')
+    this._part['readableFlowing'] === null ? this._part.resume() : this._part.emit('end')
 
     /**
      * Ignore self errors
