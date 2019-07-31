@@ -12,6 +12,7 @@
 import { get } from 'lodash'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
 import { FileValidationOptions, MultipartFileContract } from '@ioc:Adonis/Addons/BodyParser'
+
 import { validateExtension, validateSize } from '../utils'
 
 /**
@@ -69,6 +70,10 @@ function getFile (
   }
 }
 
+/**
+ * Extend the Request class by adding `file` and `files` macro to read processed
+ * files
+ */
 export default function extendRequest (Request: RequestConstructorContract) {
   Request.macro('file', function file (key: string, options?: Partial<FileValidationOptions>) {
     return getFile(this._files, key, true, options)

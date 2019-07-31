@@ -87,10 +87,7 @@ export class BodyParserMiddleware {
    * Handle HTTP request body by parsing it as per the user
    * config
    */
-  public async handle (
-    { request, route }: HttpContextContract,
-    next: () => Promise<void>,
-  ): Promise<void> {
+  public async handle ({ request, route }: HttpContextContract, next: () => Promise<void>): Promise<void> {
     /**
      * Initiating the `_files` private property as an object
      */

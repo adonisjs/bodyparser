@@ -19,14 +19,8 @@ import {
  */
 declare module '@ioc:Adonis/Core/Request' {
   interface RequestContract {
-    file (
-      key: string,
-      options?: Partial<FileValidationOptions>,
-    ): MultipartFileContract | null,
-    files (
-      key: string,
-      options?: Partial<FileValidationOptions>,
-    ): MultipartFileContract[],
+    file (key: string, options?: Partial<FileValidationOptions>): MultipartFileContract | null,
+    files (key: string, options?: Partial<FileValidationOptions>): MultipartFileContract[],
     multipart: MultipartContract,
   }
 }

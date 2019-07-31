@@ -58,12 +58,6 @@ export class Multipart implements MultipartContract {
   private _pendingHandlers = 0
 
   /**
-   * Tracking the total size of files, so that we can enforce
-   * upper limit.
-   */
-  private _filesTotalSize = 0
-
-  /**
    * The reference to underlying multiparty form
    */
   private _form
@@ -73,6 +67,8 @@ export class Multipart implements MultipartContract {
    * this limit, then an exception will be raised.
    */
   private _upperLimit?: number
+
+  private _processedBytes: number = 0
 
   /**
    * Consumed is set to true when `process` is called. Calling
@@ -100,6 +96,21 @@ export class Multipart implements MultipartContract {
    */
   private _getHandlerName (name: string): string {
     return name.replace(/\[\d*\]/, '')
+  }
+
+  /**
+   * Validates and returns an error when upper limit is defined and
+   * processed bytes is over the upper limit
+   */
+  private _validateProcessedBytes (chunkLength: number) {
+    if (!this._upperLimit) {
+      return
+    }
+
+    this._processedBytes += chunkLength
+    if (this._processedBytes > this._upperLimit) {
+      return new Exception('request entity too large', 413, 'E_REQUEST_ENTITY_TOO_LARGE')
+    }
   }
 
   /**
@@ -137,25 +148,20 @@ export class Multipart implements MultipartContract {
         const lineLength = line.length
 
         /**
-         * If there is an upper limit for all the files, then we need to track
-         * the total processed bytes and shortcircuit in case of too much
-         * data
+         * Keeping an eye on total bytes processed so far and shortcircuiting
+         * request when more than expected bytes have been received.
          */
-        if (this._upperLimit) {
-          this._filesTotalSize += lineLength
-          if (this._filesTotalSize > this._upperLimit) {
-            const error = new Exception('request entity too large', 413, 'E_REQUEST_ENTITY_TOO_LARGE')
+        const error = this._validateProcessedBytes(lineLength)
+        if (error) {
+          /**
+           * Shortcircuit current part
+           */
+          part.emit('error', error)
 
-            /**
-             * Shortcircuit current part
-             */
-            part.emit('error', error)
-
-            /**
-             * Shortcircuit the entire stream
-             */
-            this._form.emit('error', error)
-          }
+          /**
+           * Shortcircuit the entire stream
+           */
+          this._form.emit('error', error)
         }
 
         partHandler.reportProgress(line, lineLength)
@@ -188,7 +194,14 @@ export class Multipart implements MultipartContract {
    * Record the fields inside multipart contract
    */
   private _handleField (key: string, value: string) {
-    if (key) {
+    if (!key) {
+      return
+    }
+
+    const error = this._validateProcessedBytes(value.length)
+    if (error) {
+      this._form.emit('error', error)
+    } else {
       this._fields.add(key, value)
     }
   }

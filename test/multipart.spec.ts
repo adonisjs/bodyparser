@@ -314,6 +314,61 @@ test.group('Multipart', () => {
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Max fields limit exceeded')
   })
 
+  test('raise error when bytes limit is crossed', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const request = new Request(req, res, requestConfig)
+      const multipart = new Multipart(request, { maxFields: 1000, limit: 2 })
+
+      try {
+        await multipart.process()
+        res.end()
+      } catch (error) {
+        res.writeHead(500)
+        res.end(error.message)
+      }
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .field('name', 'virk')
+      .field('age', '22')
+
+    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+  })
+
+  test('disrupt file uplods error when bytes limit is crossed', async (assert) => {
+    assert.plan(2)
+
+    const server = createServer(async (req, res) => {
+      const request = new Request(req, res, requestConfig)
+      const multipart = new Multipart(request, { maxFields: 1000, limit: 20 })
+
+      multipart.onFile('package', {}, async (part, report) => {
+        part.on('error', ({ message }) => {
+          assert.equal(message, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+        })
+
+        part.on('data', report)
+      })
+
+      try {
+        await multipart.process()
+        res.end()
+      } catch (error) {
+        res.writeHead(500)
+        res.end(error.message)
+      }
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .field('name', 'virk')
+      .field('age', '22')
+
+    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+  })
+
   test('report size validation errors', async (assert) => {
     let files: null | { [key: string]: File } = null
     assert.plan(4)
