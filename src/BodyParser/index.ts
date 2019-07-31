@@ -9,27 +9,30 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
+import { join } from 'path'
+import { tmpdir } from 'os'
 import * as coBody from 'co-body'
 import { Exception } from '@poppinss/utils'
-import { RequestContract } from '@poppinss/request'
-import { HttpContextContract } from '@poppinss/http-server'
-import { BodyParserConfig } from '@ioc:Adonis/Addons/BodyParser'
+
+import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { RequestContract } from '@ioc:Adonis/Core/Request'
 
 import { Multipart } from '../Multipart'
-import { processMultipart } from '../Multipart/processMultipart'
+import { streamFile } from '../Multipart/streamFile'
 
 /**
  * BodyParser middleware parses the incoming request body and set it as
  * request body to be read later in the request lifecycle.
  */
 export class BodyParserMiddleware {
-  constructor (private _config: BodyParserConfig) {
+  constructor (private _config: BodyParserConfigContract) {
   }
 
   /**
    * Returns config for a given type
    */
-  private _getConfigFor<K extends keyof BodyParserConfig> (type: K): BodyParserConfig[K] {
+  private _getConfigFor<K extends keyof BodyParserConfigContract> (type: K): BodyParserConfigContract[K] {
     const config = this._config[type]
     config['returnRawBody'] = true
     return config
@@ -76,9 +79,14 @@ export class BodyParserMiddleware {
     next: () => Promise<void>,
   ): Promise<void> {
     /**
+     * Initiating the `_files` private property as an object
+     */
+    request['_files'] = {}
+
+    /**
      * Only process for whitelisted nodes
      */
-    if (this._config.whitelistedMethods.indexOf(request.method()) === -1) {
+    if (!this._config.whitelistedMethods.includes(request.method())) {
       return next()
     }
 
@@ -99,8 +107,9 @@ export class BodyParserMiddleware {
     const multipartConfig = this._getConfigFor('multipart')
 
     if (this._isType(request, multipartConfig.types)) {
-      request['multipart'] = new Multipart(request.request, {
+      request.multipart = new Multipart(request, {
         maxFields: multipartConfig.maxFields,
+        limit: multipartConfig.limit,
       })
 
       /**
@@ -111,9 +120,18 @@ export class BodyParserMiddleware {
         return next()
       }
 
-      const { files, fields } = await processMultipart(request['multipart'], multipartConfig)
-      request.setInitialBody(fields)
-      request['_files'] = files
+      /**
+       * Make sure we are not running any validations on the uploaded files. They are
+       * deferred for the end user when they will access file using `request.file`
+       * method.
+       */
+      request.multipart.onFile('*', { deferValidations: true }, async (part, reporter) => {
+        const tmpPath = join(tmpdir(), multipartConfig.tmpFileName())
+        await streamFile(part, tmpPath, reporter)
+        return { tmpPath }
+      })
+
+      await request.multipart.process()
       return next()
     }
 

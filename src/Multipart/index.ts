@@ -9,49 +9,46 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
-import { IncomingMessage } from 'http'
+import * as bytes from 'bytes'
 import * as multiparty from 'multiparty'
 import { Exception } from '@poppinss/utils'
+import { RequestContract } from '@ioc:Adonis/Core/Request'
 
 import {
   MultipartContract,
-  PartHandler,
+  PartHandlerContract,
   MultipartStream,
-  FieldHandler,
 } from '@ioc:Adonis/Addons/BodyParser'
+
+import { FormFields } from '../FormFields'
+import { PartHandler } from './PartHandler'
 
 /**
  * Multipart class offers a low level API to interact the incoming
  * HTTP request data as a stream. This makes it super easy to
  * write files to s3 without saving them to the disk first.
- *
- * ### Usage
- *
- * ```js
- * const multipart = new Multipart(options)
- *
- * multipart.onFile('profile', async (stream) => {
- *  stream.pipe(fs.createWriteStream('./profile.jpg'))
- * })
- *
- * multipart.onField('*', async (key, value) => {
- * })
- *
- * try {
- *   await multipart.process()
- * } catch (error) {
- *   // all errors are sent to the process method
- * }
- * ```
  */
 export class Multipart implements MultipartContract {
+  /**
+   * The registered handlers to handle the file uploads
+   */
   private _handlers: {
-    files: { [key: string]: PartHandler },
-    fields: { [key: string]: FieldHandler },
-  } = {
-    files: {},
-    fields: {},
-  }
+    [key: string]: {
+      handler: PartHandlerContract,
+      options: Parameters<MultipartContract['onFile']>[1],
+    },
+  } = {}
+
+  /**
+   * Collected fields from the multipart stream
+   */
+  private _fields = new FormFields()
+
+  /**
+   * Collected files from the multipart stream. Files are only collected
+   * when there is an attached listener for a given file.
+   */
+  private _files = new FormFields()
 
   /**
    * We track the finishing of `this.onFile` async handlers
@@ -61,11 +58,21 @@ export class Multipart implements MultipartContract {
   private _pendingHandlers = 0
 
   /**
-   * A boolean to know, if there are any handlers defined
-   * to the read the request body. Otherwise avoid reading
-   * the body
+   * Tracking the total size of files, so that we can enforce
+   * upper limit.
    */
-  private _gotHandlers = false
+  private _filesTotalSize = 0
+
+  /**
+   * The reference to underlying multiparty form
+   */
+  private _form
+
+  /**
+   * Total size limit of the multipart stream. If it goes beyond
+   * this limit, then an exception will be raised.
+   */
+  private _upperLimit?: number
 
   /**
    * Consumed is set to true when `process` is called. Calling
@@ -74,15 +81,17 @@ export class Multipart implements MultipartContract {
    */
   public consumed = false
 
-  constructor (private _request: IncomingMessage, private _config: { maxFields: number }) {
-  }
+  constructor (
+    private _request: RequestContract,
+    private _config: Parameters<MultipartContract['process']>[0] = {},
+  ) {}
 
   /**
    * Returns a boolean telling whether all streams have been
    * consumed along with all handlers execution
    */
-  private _isClosed (form: any): boolean {
-    return form.flushing <= 0 && this._pendingHandlers <= 0
+  private _isClosed (): boolean {
+    return this._form.flushing <= 0 && this._pendingHandlers <= 0
   }
 
   /**
@@ -113,67 +122,120 @@ export class Multipart implements MultipartContract {
     /**
      * Skip, if their is no handler to consume the part.
      */
-    const handler = this._handlers.files[name] || this._handlers.files['*']
+    const handler = this._handlers[name] || this._handlers['*']
     if (!handler) {
       part.resume()
       return
     }
 
     this._pendingHandlers++
-    await handler(part)
+
+    const partHandler = new PartHandler(part, handler.options)
+
+    try {
+      const response = await handler.handler(part, (line) => {
+        const lineLength = line.length
+
+        /**
+         * If there is an upper limit for all the files, then we need to track
+         * the total processed bytes and shortcircuit in case of too much
+         * data
+         */
+        if (this._upperLimit) {
+          this._filesTotalSize += lineLength
+          if (this._filesTotalSize > this._upperLimit) {
+            const error = new Exception('request entity too large', 413, 'E_REQUEST_ENTITY_TOO_LARGE')
+
+            /**
+             * Shortcircuit current part
+             */
+            part.emit('error', error)
+
+            /**
+             * Shortcircuit the entire stream
+             */
+            this._form.emit('error', error)
+          }
+        }
+
+        partHandler.reportProgress(line, lineLength)
+      })
+
+      /**
+       * Reporting success to the partHandler, which ends up on the
+       * file instance
+       */
+      if (response) {
+        partHandler.reportSuccess(response)
+      }
+    } catch (error) {
+      partHandler.reportError(error)
+    }
+
+    /**
+     * Pull the file from the `partHandler`. The file can also be `null` when
+     * the part consumer doesn't report progress
+     */
+    const file = partHandler.getFile()
+    if (file) {
+      this._files.add(file.fieldName, file)
+    }
+
     this._pendingHandlers--
   }
 
   /**
-   * Passes field key value pair to the pre-defined handler
+   * Record the fields inside multipart contract
    */
   private _handleField (key: string, value: string) {
-    const handler = this._handlers.fields[key] || this._handlers.fields['*']
-    if (!handler) {
-      return
+    if (key) {
+      this._fields.add(key, value)
     }
+  }
 
-    handler(key, value)
+  /**
+   * Processes the user config and computes the `upperLimit` value from
+   * it.
+   */
+  private _processConfig (config?: Parameters<MultipartContract['process']>[0]) {
+    this._config = Object.assign(this._config, config)
+
+    /**
+     * Getting bytes from the `config.limit` option, which can
+     * also be a string
+     */
+    this._upperLimit = typeof (this._config!.limit) === 'string'
+      ? bytes(this._config!.limit)
+      : this._config!.limit
+  }
+
+  /**
+   * Set files and fields on the request class
+   */
+  private _close () {
+    this._request['_files'] = this._files.get()
+    this._request.setInitialBody(this._fields.get())
   }
 
   /**
    * Attach handler for a given file. To handle all files, you
-   * can attach a wildcard handler. Also only can handler
-   * can be defined, since processing a stream at multiple
-   * locations is not possible.
+   * can attach a wildcard handler.
    *
    * @example
-   * ```
-   * multipart.onFile('package', async (stream) => {
+   * ```ts
+   * multipart.onFile('package', {}, async (stream) => {
    * })
    *
-   * multipart.onFile('*', async (stream) => {
+   * multipart.onFile('*', {}, async (stream) => {
    * })
    * ```
    */
-  public onFile (name: string, handler: PartHandler): this {
-    this._gotHandlers = true
-    this._handlers.files[name] = handler
-    return this
-  }
-
-  /**
-   * Get notified on a given field or all fields. An exception inside
-   * the callback will abort the request body parsing and raises
-   * and exception.
-   *
-   * @example
-   * ```
-   * multipart.onField('username', (key, value) => {
-   * })
-   *
-   * multipart.onField('*', (key, value) => {
-   * })
-   * ```
-   */
-  public onField (name: string, handler: FieldHandler): this {
-    this._gotHandlers = true
-    this._handlers.fields[name] = handler
+  public onFile (
+    name: string,
+    options: Parameters<MultipartContract['onFile']>[1],
+    handler: PartHandlerContract,
+  ): this {
+    this._handlers[name] = { handler, options }
     return this
   }
 
@@ -181,10 +243,14 @@ export class Multipart implements MultipartContract {
    * Process the request by going all the file and field
    * streams.
    */
-  public process (): Promise<void> {
+  public process (config?: Parameters<MultipartContract['process']>[0]): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.consumed) {
-        reject(new Exception('multipart stream has already been consumed', 500, 'E_RUNTIME_EXCEPTION'))
+        reject(new Exception(
+          'multipart stream has already been consumed',
+          500,
+          'E_RUNTIME_EXCEPTION',
+        ))
         return
       }
 
@@ -193,23 +259,15 @@ export class Multipart implements MultipartContract {
        * to the `process` method
        */
       this.consumed = true
+      this._processConfig(config)
 
-      /**
-       * Do not get into the process of parsing the request, when
-       * no one is listening for the fields or files.
-       */
-      if (!this._gotHandlers) {
-        resolve()
-        return
-      }
-
-      const form = new multiparty.Form(this._config)
+      this._form = new multiparty.Form({ maxFields: this._config!.maxFields })
 
       /**
        * Raise error when form encounters an
        * error
        */
-      form.on('error', (error: Error) => {
+      this._form.on('error', (error: Error) => {
         if (error.message === 'maxFields 1 exceeded.') {
           reject(new Exception('Max fields limit exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE'))
         } else {
@@ -222,31 +280,28 @@ export class Multipart implements MultipartContract {
        * promise when all parts are consumed and processed
        * by their handlers
        */
-      form.on('part', async (part: MultipartStream) => {
-        try {
-          await this._handlePart(part)
+      this._form.on('part', async (part: MultipartStream) => {
+        await this._handlePart(part)
 
-          /**
-           * When a stream finishes before the handler, the close `event`
-           * will not resolve the current Promise. So in that case, we
-           * check and resolve from here
-           */
-          if (this._isClosed(form)) {
-            resolve()
-          }
-        } catch (error) {
-          form.emit('error', error)
+        /**
+         * When a stream finishes before the handler, the close `event`
+         * will not resolve the current Promise. So in that case, we
+         * check and resolve from here
+         */
+        if (this._isClosed()) {
+          this._close()
+          resolve()
         }
       })
 
       /**
        * Listen for fields
        */
-      form.on('field', (key: string, value: any) => {
+      this._form.on('field', (key: string, value: any) => {
         try {
           this._handleField(key, value)
         } catch (error) {
-          form.emit('error', error)
+          this._form.emit('error', error)
         }
       })
 
@@ -254,13 +309,14 @@ export class Multipart implements MultipartContract {
        * Resolve promise on close, when all internal
        * file handlers are done processing files
        */
-      form.on('close', () => {
-        if (this._isClosed(form)) {
+      this._form.on('close', () => {
+        if (this._isClosed()) {
+          this._close()
           resolve()
         }
       })
 
-      form.parse(this._request)
+      this._form.parse(this._request.request)
     })
   }
 }

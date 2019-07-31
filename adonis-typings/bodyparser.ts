@@ -12,8 +12,8 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   import { FileTypeResult } from 'file-type'
 
   /**
-   * Readable stream along with some extra
-   * data
+   * Readable stream along with some extra data. This is what
+   * is passed to `onFile` handlers.
    */
   export type MultipartStream = Readable & {
     headers: any,
@@ -23,7 +23,8 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   }
 
   /**
-   * File validation options
+   * The options that can be used to validate a given
+   * file
    */
   export type FileValidationOptions = {
     size: string | number,
@@ -32,14 +33,12 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   }
 
   /**
-   * Stream part handler
+   * The callback handler for a given file part
    */
-  export type PartHandler = (part: MultipartStream) => Promise<void>
-
-  /**
-   * Field handler
-   */
-  export type FieldHandler = (key: string, value: string) => void
+  export type PartHandlerContract = (
+    part: MultipartStream,
+    reportChunk: (chunk: Buffer) => void,
+  ) => Promise<({ filePath?: string, tmpPath?: string } & { [key: string]: any }) | void>
 
   /**
    * Qs module config
@@ -72,28 +71,28 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   /**
    * Body parser config for parsing JSON requests
    */
-  type BodyParserJSONConfig = BodyParserBaseConfig & {
+  export type BodyParserJSONConfigContract = BodyParserBaseConfig & {
     strict: boolean,
   }
 
   /**
    * Parser config for parsing form data
    */
-  type BodyParserFormConfig = BodyParserBaseConfig & {
+  export type BodyParserFormConfigContract = BodyParserBaseConfig & {
     queryString: QueryStringConfig,
   }
 
   /**
    * Parser config for parsing raw body (untouched)
    */
-  type BodyParserRawConfig = BodyParserBaseConfig & {
+  export type BodyParserRawConfigContract = BodyParserBaseConfig & {
     queryString: QueryStringConfig,
   }
 
   /**
    * Parser config for parsing multipart requests
    */
-  type BodyParserMultipartConfig = BodyParserBaseConfig & {
+  export type BodyParserMultipartConfigContract = BodyParserBaseConfig & {
     autoProcess: boolean,
     maxFields: number,
     processManually: string[],
@@ -103,24 +102,27 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   /**
    * Body parser config for all different types
    */
-  export type BodyParserConfig = {
+  export type BodyParserConfigContract = {
     whitelistedMethods: string[],
-    json: BodyParserJSONConfig,
-    form: BodyParserFormConfig,
-    raw: BodyParserRawConfig,
-    multipart: BodyParserMultipartConfig,
+    json: BodyParserJSONConfigContract,
+    form: BodyParserFormConfigContract,
+    raw: BodyParserRawConfigContract,
+    multipart: BodyParserMultipartConfigContract,
   }
 
   /**
-   * Multipart class contract, since it's exposed on the
+   * Multipart class contract, since it is exposed on the
    * request object, we need the interface to extend
    * typings
    */
   export interface MultipartContract {
     consumed: boolean,
-    onFile (name: string, callback: PartHandler): this,
-    onField (key: string, value: any): this,
-    process (): Promise<void>,
+    onFile (
+      name: string,
+      options: Partial<FileValidationOptions & { deferValidations: boolean }>,
+      callback: PartHandlerContract,
+    ): this,
+    process (config?: Partial<{ limit: string | number, maxFields: number }>): Promise<void>,
   }
 
   /**
@@ -130,7 +132,7 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
     fieldName: string,
     clientName: string,
     message: string,
-    type: 'size' | 'extname',
+    type: 'size' | 'extname' | 'fatal',
   }
 
   /**
@@ -138,30 +140,36 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
    */
   export type FileInputNode = {
     fieldName: string,
-    fileName: string,
-    tmpPath: string,
+    clientName: string,
     bytes: number,
     headers: {
       [key: string]: string,
     },
-    fileType?: FileTypeResult,
+    filePath?: string,
+    tmpPath?: string,
+    meta: any,
+    fileType: {
+      ext: string,
+      type: string,
+      subtype: string,
+    },
   }
 
   /**
-   * Multipart file interface, used to loose coupling
+   * Multipart file interface
    */
   export interface MultipartFileContract {
-    isValid: boolean,
-    clientName: string,
-    fileName?: string,
     fieldName: string,
-    tmpPath: string,
+    clientName: string,
+    tmpPath?: string,
+    filePath?: string,
     size: number,
-    type?: string,
-    subtype?: string,
+    type: string,
+    subtype: string,
+    isValid: boolean,
     status: 'pending' | 'moved' | 'error',
     extname: string,
-    setValidationOptions (options: Partial<FileValidationOptions>): this,
+    validated: boolean,
     errors: FileUploadError[],
   }
 }

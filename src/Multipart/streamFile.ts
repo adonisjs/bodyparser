@@ -7,9 +7,9 @@
 * file that was distributed with this source code.
 */
 
+import { Readable } from 'stream'
 import * as eos from 'end-of-stream'
 import { open, close, createWriteStream, unlink } from 'fs-extra'
-import { Readable } from 'stream'
 
 /**
  * Writes readable stream to the given location by properly cleaning up readable

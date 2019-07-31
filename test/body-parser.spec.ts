@@ -7,6 +7,9 @@
 * file that was distributed with this source code.
 */
 
+/// <reference path="../adonis-typings/bodyparser.ts" />
+/// <reference path="../adonis-typings/index.ts" />
+
 import { join } from 'path'
 import { homedir } from 'os'
 import * as test from 'japa'
@@ -14,16 +17,23 @@ import { merge } from 'lodash'
 import { createServer } from 'http'
 import { pathExists } from 'fs-extra'
 import * as supertest from 'supertest'
-import { HttpContext } from '@poppinss/http-server'
-import { BodyParserMiddleware } from '../src/BodyParser'
-import { Multipart } from '../src/Multipart'
-import { config } from '../config/index'
+import { Request } from '@poppinss/request'
+import { HttpContext as BaseHttpContext } from '@poppinss/http-server'
+import { HttpContextConstructorContract } from '@ioc:Adonis/Core/HttpContext'
 
-const PACKAGE_FILE_PATH = join(__dirname, '../package.json')
-const PACKAGE_FILE_SIZE = Buffer.from(
-  JSON.stringify(require('../package.json'), null, 2),
-  'utf-8',
-).length + 1
+import { config } from '../config/index'
+import { Multipart } from '../src/Multipart'
+import { BodyParserMiddleware } from '../src/BodyParser'
+import extendRequest from '../src/Bindings/Request'
+
+import { packageFilePath, packageFileSize } from '../test-helpers'
+extendRequest(Request)
+
+/**
+ * The shape of `AdonisJs HTTP context` is bit different from `@poppinss/http-server`. So
+ * we need to cast the types here for TS to work.
+ */
+const HttpContext = BaseHttpContext as unknown as HttpContextConstructorContract
 
 test.group('BodyParser Middleware | generic', () => {
   test('do not parse get requests', async (assert) => {
@@ -303,16 +313,18 @@ test.group('BodyParser Middleware | multipart', () => {
         res.end(JSON.stringify({
           tmpPath: ctx.request['_files'].package.tmpPath,
           size: ctx.request['_files'].package.size,
+          validated: ctx.request['_files'].package.validated,
         }))
       })
     })
 
     const { body } = await supertest(server)
       .post('/')
-      .attach('package', PACKAGE_FILE_PATH)
+      .attach('package', packageFilePath)
 
     assert.isAbove(body.size, 0)
     assert.exists(body.tmpPath)
+    assert.isFalse(body.validated)
   })
 
   test('handle request with files and fields', async (assert) => {
@@ -324,6 +336,7 @@ test.group('BodyParser Middleware | multipart', () => {
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify({
           size: ctx.request['_files'].package.size,
+          validated: ctx.request['_files'].package.validated,
           username: ctx.request.input('username'),
         }))
       })
@@ -331,11 +344,12 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const { body } = await supertest(server)
       .post('/')
-      .attach('package', PACKAGE_FILE_PATH)
+      .attach('package', packageFilePath)
       .field('username', 'virk')
 
     assert.isAbove(body.size, 0)
     assert.equal(body.username, 'virk')
+    assert.isFalse(body.validated)
   })
 
   test('handle request array of files', async (assert) => {
@@ -353,8 +367,8 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const { body } = await supertest(server)
       .post('/')
-      .attach('package[]', PACKAGE_FILE_PATH)
-      .attach('package[]', PACKAGE_FILE_PATH)
+      .attach('package[]', packageFilePath)
+      .attach('package[]', packageFilePath)
 
     assert.deepEqual(body, { multiple: true })
   })
@@ -371,7 +385,7 @@ test.group('BodyParser Middleware | multipart', () => {
             return `${index++}.tmp`
           },
           types: ['multipart/form-data'],
-          limit: (PACKAGE_FILE_SIZE * 2) - 10,
+          limit: (packageFileSize * 2) - 10,
         },
       }))
 
@@ -385,8 +399,8 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const { text } = await supertest(server)
       .post('/')
-      .attach('package[]', PACKAGE_FILE_PATH)
-      .attach('package[]', PACKAGE_FILE_PATH)
+      .attach('package[]', packageFilePath)
+      .attach('package[]', packageFilePath)
 
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
 
@@ -410,7 +424,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const { body } = await supertest(server)
       .post('/')
-      .attach('package', PACKAGE_FILE_PATH)
+      .attach('package', packageFilePath)
       .field('', 'virk')
 
     assert.deepEqual(body, {})
@@ -429,7 +443,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const { text } = await supertest(server)
       .post('/')
-      .attach('', PACKAGE_FILE_PATH)
+      .attach('', packageFilePath)
 
     assert.deepEqual(text, '0')
   })
@@ -446,7 +460,7 @@ test.group('BodyParser Middleware | multipart', () => {
       }))
 
       await middleware.handle(ctx, async () => {
-        assert.isUndefined(ctx.request['_files'])
+        assert.deepEqual(ctx.request['_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
         res.end()
       })
@@ -454,7 +468,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     await supertest(server)
       .post('/')
-      .attach('package', PACKAGE_FILE_PATH)
+      .attach('package', packageFilePath)
       .field('username', 'virk')
   })
 
@@ -471,7 +485,7 @@ test.group('BodyParser Middleware | multipart', () => {
       }))
 
       await middleware.handle(ctx, async () => {
-        assert.isUndefined(ctx.request['_files'])
+        assert.deepEqual(ctx.request['_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
         res.end()
       })
@@ -479,7 +493,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     await supertest(server)
       .post('/')
-      .attach('package', PACKAGE_FILE_PATH)
+      .attach('package', packageFilePath)
       .field('username', 'virk')
   })
 
@@ -496,7 +510,7 @@ test.group('BodyParser Middleware | multipart', () => {
       }))
 
       await middleware.handle(ctx, async () => {
-        assert.isUndefined(ctx.request['_files'])
+        assert.deepEqual(ctx.request['_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
         res.end()
       })
@@ -504,7 +518,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     await supertest(server)
       .post('/')
-      .attach('package', PACKAGE_FILE_PATH)
+      .attach('package', packageFilePath)
       .field('username', 'virk')
   })
 
@@ -519,7 +533,6 @@ test.group('BodyParser Middleware | multipart', () => {
           type: ctx.request['_files'].avatar.type,
           subtype: ctx.request['_files'].avatar.subtype,
           extname: ctx.request['_files'].avatar.extname,
-          fileType: ctx.request['_files'].avatar._data.fileType,
         }))
       })
     })
@@ -534,10 +547,193 @@ test.group('BodyParser Middleware | multipart', () => {
       type: 'image',
       subtype: 'png',
       extname: 'png',
-      fileType: {
-        ext: 'png',
-        mime: 'image/png',
-      },
     })
+  })
+
+  test('validate file when access via request.file method', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(config)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package', { size: 10 })!
+
+        res.end(JSON.stringify({
+          tmpPath: pkgFile.tmpPath!,
+          size: pkgFile.size,
+          validated: pkgFile.validated,
+          isValid: pkgFile.isValid,
+          errors: pkgFile.errors,
+        }))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+
+    assert.equal(body.size, packageFileSize)
+    assert.exists(body.tmpPath)
+    assert.isTrue(body.validated)
+    assert.isFalse(body.isValid)
+    assert.deepEqual(body.errors, [{
+      fieldName: 'package',
+      clientName: 'package.json',
+      message: 'File size should be less than 10B',
+      type: 'size',
+    }])
+  })
+
+  test('validate array of files when access via request.file method', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(config)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFiles = ctx.request.files('package', { size: 10 }).map((pkgFile) => {
+          return {
+            tmpPath: pkgFile.tmpPath!,
+            size: pkgFile.size,
+            validated: pkgFile.validated,
+            isValid: pkgFile.isValid,
+            errors: pkgFile.errors,
+          }
+        })
+
+        res.end(JSON.stringify(pkgFiles))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package[0]', packageFilePath)
+      .attach('package[1]', packageFilePath)
+
+    assert.lengthOf(body, 2)
+    assert.equal(body[0].size, packageFileSize)
+    assert.equal(body[1].size, packageFileSize)
+
+    assert.exists(body[0].tmpPath)
+    assert.exists(body[1].tmpPath)
+
+    assert.isTrue(body[0].validated)
+    assert.isTrue(body[1].validated)
+
+    assert.isFalse(body[0].isValid)
+    assert.isFalse(body[1].isValid)
+
+    assert.deepEqual(body[0].errors, [{
+      fieldName: 'package[0]',
+      clientName: 'package.json',
+      message: 'File size should be less than 10B',
+      type: 'size',
+    }])
+
+    assert.deepEqual(body[1].errors, [{
+      fieldName: 'package[1]',
+      clientName: 'package.json',
+      message: 'File size should be less than 10B',
+      type: 'size',
+    }])
+  })
+
+  test('pull first file even when source is an array', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(config)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package', { size: 10 })!
+
+        res.end(JSON.stringify({
+          tmpPath: pkgFile.tmpPath!,
+          size: pkgFile.size,
+          validated: pkgFile.validated,
+          isValid: pkgFile.isValid,
+          errors: pkgFile.errors,
+        }))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package[0]', packageFilePath)
+      .attach('package[1]', packageFilePath)
+
+    assert.equal(body.size, packageFileSize)
+    assert.exists(body.tmpPath)
+    assert.isTrue(body.validated)
+    assert.isFalse(body.isValid)
+    assert.deepEqual(body.errors, [{
+      fieldName: 'package[0]',
+      clientName: 'package.json',
+      message: 'File size should be less than 10B',
+      type: 'size',
+    }])
+  })
+
+  test('return null when file doesn\'t exists', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(config)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package', { size: 10 })
+        res.end(JSON.stringify(pkgFile))
+      })
+    })
+
+    const { body } = await supertest(server).post('/')
+    assert.isNull(body)
+  })
+
+  test('return empty array file doesn\'t exists', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(config)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.files('package', { size: 10 })
+        res.end(JSON.stringify(pkgFile))
+      })
+    })
+
+    const { body } = await supertest(server).post('/')
+    assert.deepEqual(body, [])
+  })
+
+  test('get file from nested object', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(config)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('user.package')!
+
+        res.end(JSON.stringify({
+          tmpPath: pkgFile.tmpPath!,
+          size: pkgFile.size,
+          validated: pkgFile.validated,
+          isValid: pkgFile.isValid,
+          errors: pkgFile.errors,
+        }))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('user.package', packageFilePath)
+
+    assert.equal(body.size, packageFileSize)
+    assert.exists(body.tmpPath)
+    assert.isTrue(body.validated)
+    assert.isTrue(body.isValid)
+    assert.deepEqual(body.errors, [])
   })
 })

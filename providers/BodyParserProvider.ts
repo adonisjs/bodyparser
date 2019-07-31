@@ -7,10 +7,8 @@
 * file that was distributed with this source code.
 */
 
-/// <reference path="../adonis-typings/bodyparser.ts" />
-
 import { BodyParserMiddleware } from '../src/BodyParser/index'
-import { FileValidationOptions, MultipartFileContract } from '@ioc:Adonis/Addons/BodyParser'
+import extendRequest from '../src/Bindings/Request'
 
 export default class BodyParserProvider {
   constructor (protected $container: any) {
@@ -21,8 +19,8 @@ export default class BodyParserProvider {
    */
   public register () {
     this.$container.bind('Adonis/Addons/BodyParserMiddleware', () => {
-      const config = this.$container.use('Adonis/Core/Config')
-      return new BodyParserMiddleware(config)
+      const Config = this.$container.use('Adonis/Core/Config')
+      return new BodyParserMiddleware(Config.get('bodyparser', {}))
     })
   }
 
@@ -30,26 +28,6 @@ export default class BodyParserProvider {
    * Adding the `file` macro to add support for reading request files.
    */
   public boot () {
-    const Request = this.$container.use('Adonis/Core/Config')
-
-    /**
-     * Adding `file` macro to the request class.
-     */
-    Request.macro('file', function getFile (key: string, options?: Partial<FileValidationOptions>) {
-      const file = this._files[key]
-      if (!file) {
-        return null
-      }
-
-      if (options) {
-        if (file instanceof Array) {
-          (file as MultipartFileContract[]).forEach((one) => one.setValidationOptions(options))
-        } else {
-          (file as MultipartFileContract).setValidationOptions(options)
-        }
-      }
-
-      return file
-    })
+    extendRequest(this.$container.use('Adonis/Core/Request'))
   }
 }

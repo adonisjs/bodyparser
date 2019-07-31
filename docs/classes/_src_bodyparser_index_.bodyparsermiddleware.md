@@ -11,13 +11,13 @@ request body to be read later in the request lifecycle.
 
 * **BodyParserMiddleware**
 
-### Index
+## Index
 
-#### Constructors
+### Constructors
 
 * [constructor](_src_bodyparser_index_.bodyparsermiddleware.md#constructor)
 
-#### Methods
+### Methods
 
 * [handle](_src_bodyparser_index_.bodyparsermiddleware.md#handle)
 
@@ -25,13 +25,13 @@ request body to be read later in the request lifecycle.
 
 ###  constructor
 
-\+ **new BodyParserMiddleware**(`_config`: `BodyParserConfig`): *[BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)*
+\+ **new BodyParserMiddleware**(`_config`: `BodyParserConfigContract`): *[BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)*
 
 **Parameters:**
 
 Name | Type |
 ------ | ------ |
-`_config` | `BodyParserConfig` |
+`_config` | `BodyParserConfigContract` |
 
 **Returns:** *[BodyParserMiddleware](_src_bodyparser_index_.bodyparsermiddleware.md)*
 

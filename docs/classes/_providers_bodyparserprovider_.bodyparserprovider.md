@@ -8,17 +8,17 @@
 
 * **BodyParserProvider**
 
-### Index
+## Index
 
-#### Constructors
+### Constructors
 
 * [constructor](_providers_bodyparserprovider_.bodyparserprovider.md#constructor)
 
-#### Properties
+### Properties
 
 * [$container](_providers_bodyparserprovider_.bodyparserprovider.md#protected-$container)
 
-#### Methods
+### Methods
 
 * [boot](_providers_bodyparserprovider_.bodyparserprovider.md#boot)
 * [register](_providers_bodyparserprovider_.bodyparserprovider.md#register)

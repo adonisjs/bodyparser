@@ -4,9 +4,9 @@
 
 # External module: "config/index"
 
-### Index
+## Index
 
-#### Object literals
+### Object literals
 
 * [config](_config_index_.md#const-config)
 

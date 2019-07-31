@@ -8,13 +8,13 @@
 */
 
 import * as uuid from 'uuid/v1'
-import { BodyParserConfig } from '@ioc:Adonis/Addons/BodyParser'
+import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
 
 /**
  * Default config to be used. It will be deep merged
  * with the user config
  */
-export const config: BodyParserConfig = {
+export const config: BodyParserConfigContract = {
   /*
   |--------------------------------------------------------------------------
   | White listed methods
