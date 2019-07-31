@@ -97,5 +97,22 @@
   },
   "adonisjs": {
     "instructions": "./build/instructions.js"
-  }
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adonisjs/adonis-bodyparser.git"
+  },
+  "keywords": [
+    "adonisjs",
+    "bodyparser",
+    "multipart"
+  ],
+  "author": "virk,adonisjs",
+  "bugs": {
+    "url": "https://github.com/adonisjs/adonis-bodyparser/issues"
+  },
+  "homepage": "https://github.com/adonisjs/adonis-bodyparser#readme"
 }
