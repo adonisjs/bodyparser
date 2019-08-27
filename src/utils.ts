@@ -15,6 +15,9 @@ import * as fileType from 'file-type'
 import * as mediaTyper from 'media-typer'
 import { FileUploadError } from '@ioc:Adonis/Addons/BodyParser'
 
+/**
+ * Attempts to parse the file mime type using the file magic number
+ */
 function parseMimeType (mime): { type: string, subtype: string } | null {
   try {
     const { type, subtype } = mediaTyper.parse(mime)
