@@ -87,7 +87,10 @@ export class BodyParserMiddleware {
    * Handle HTTP request body by parsing it as per the user
    * config
    */
-  public async handle ({ request, route }: HttpContextContract, next: () => Promise<void>): Promise<void> {
+  public async handle (
+    { request, route, profiler }: HttpContextContract,
+    next: () => Promise<void>,
+  ): Promise<void> {
     /**
      * Initiating the `_files` private property as an object
      */
@@ -150,8 +153,16 @@ export class BodyParserMiddleware {
         }
       })
 
-      await request.multipart.process()
-      return next()
+      const action = profiler.profile('bodyparser:multipart')
+
+      try {
+        await request.multipart.process()
+        action.end()
+        return next()
+      } catch (error) {
+        action.end({ error })
+        throw error
+      }
     }
 
     /**
@@ -159,12 +170,16 @@ export class BodyParserMiddleware {
      */
     const formConfig = this._getConfigFor('form')
     if (this._isType(request, formConfig.types)) {
+      const action = profiler.profile('bodyparser:urlencoded')
+
       try {
         const { parsed, raw } = await coBody.form(request.request, formConfig)
         request.setInitialBody(parsed)
         request.updateRawBody(raw)
+        action.end()
         return next()
       } catch (error) {
+        action.end({ error })
         throw this._getExceptionFor(error)
       }
     }
@@ -174,12 +189,16 @@ export class BodyParserMiddleware {
      */
     const jsonConfig = this._getConfigFor('json')
     if (this._isType(request, jsonConfig.types)) {
+      const action = profiler.profile('bodyparser:json')
+
       try {
         const { parsed, raw } = await coBody.json(request.request, jsonConfig)
         request.setInitialBody(parsed)
         request.updateRawBody(raw)
+        action.end()
         return next()
       } catch (error) {
+        action.end({ error })
         throw this._getExceptionFor(error)
       }
     }
@@ -189,12 +208,16 @@ export class BodyParserMiddleware {
      */
     const rawConfig = this._getConfigFor('raw')
     if (this._isType(request, rawConfig.types)) {
+      const action = profiler.profile('bodyparser:json')
+
       try {
         const { raw } = await coBody.text(request.request, rawConfig)
         request.setInitialBody({})
         request.updateRawBody(raw)
+        action.end()
         return next()
       } catch (error) {
+        action.end({ error })
         throw this._getExceptionFor(error)
       }
     }
