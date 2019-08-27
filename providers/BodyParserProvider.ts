@@ -7,11 +7,12 @@
 * file that was distributed with this source code.
 */
 
+import { IocContract } from '@adonisjs/fold'
 import { BodyParserMiddleware } from '../src/BodyParser/index'
 import extendRequest from '../src/Bindings/Request'
 
 export default class BodyParserProvider {
-  constructor (protected $container: any) {
+  constructor (protected $container: IocContract) {
   }
 
   /**
