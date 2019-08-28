@@ -24,12 +24,12 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/core": "^2.0.13",
+    "@adonisjs/core": "^2.0.14",
     "@adonisjs/dev-utils": "^1.4.0",
     "@adonisjs/fold": "^6.1.3",
     "@adonisjs/mrm-preset": "^2.0.3",
     "@adonisjs/sink": "^2.1.3",
-    "@poppinss/http-server": "^1.2.1",
+    "@poppinss/http-server": "^1.2.2",
     "@poppinss/logger": "^1.1.2",
     "@poppinss/request": "^1.0.13",
     "@types/fs-extra": "^8.0.0",
@@ -41,7 +41,7 @@
     "del-cli": "^2.0.0",
     "doctoc": "^1.4.0",
     "husky": "^3.0.4",
-    "japa": "^2.0.10",
+    "japa": "^3.0.0",
     "mrm": "^1.2.2",
     "np": "^5.0.3",
     "supertest": "^4.0.2",
