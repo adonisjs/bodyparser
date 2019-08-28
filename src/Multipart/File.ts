@@ -9,6 +9,10 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
+import { join } from 'path'
+import { outputFile } from 'fs-extra'
+import { Exception } from '@poppinss/utils'
+
 import {
   MultipartFileContract,
   FileUploadError,
@@ -89,5 +93,20 @@ export class File implements MultipartFileContract {
    */
   public get status (): 'pending' | 'moved' | 'error' {
     return this.errors.length ? 'error' : (this.filePath ? 'moved' : 'pending')
+  }
+
+  /**
+   * Moves the file to a given location. Multiple calls to the `move` method are allowed,
+   * incase you want to move a file to multiple locations.
+   */
+  public async move (location: string, options?: { name?: string, overwrite?: boolean }): Promise<void> {
+    if (!this.tmpPath) {
+      throw new Exception('tmpPath must be set on the file before moving it', 500, 'E_MISSING_FILE_TMP_PATH')
+    }
+
+    options = Object.assign({ name: this.clientName, overwrite: false }, options)
+
+    this.filePath = join(location, options!.name!)
+    await outputFile(this.filePath, { overwrite: options!.overwrite! })
   }
 }

@@ -171,5 +171,6 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
     extname: string,
     validated: boolean,
     errors: FileUploadError[],
+    move (location: string, options?: { name?: string, overwrite?: boolean }): Promise<void>
   }
 }

@@ -15,7 +15,7 @@ import { tmpdir } from 'os'
 import * as test from 'japa'
 import { merge } from 'lodash'
 import { createServer } from 'http'
-import { pathExists } from 'fs-extra'
+import { pathExists, remove } from 'fs-extra'
 import * as supertest from 'supertest'
 import { Request } from '@poppinss/request'
 import { HttpContext as BaseHttpContext } from '@poppinss/http-server'
@@ -734,5 +734,73 @@ test.group('BodyParser Middleware | multipart', () => {
     assert.isTrue(body.validated)
     assert.isTrue(body.isValid)
     assert.deepEqual(body.errors, [])
+  })
+
+  test('move file to a given location', async (assert) => {
+    const uploadsDir = join(__dirname, 'uploads')
+
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        const pkgFile = ctx.request.file('package')!
+
+        try {
+          await pkgFile.move(uploadsDir)
+          assert.equal(pkgFile.status, 'moved')
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.end()
+        } catch (error) {
+          res.writeHead(500, { 'content-type': 'application/json' })
+          res.end(error.message)
+        }
+      })
+    })
+
+    await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .expect(200)
+
+    const hasFile = await pathExists(join(uploadsDir, 'package.json'))
+    assert.isTrue(hasFile)
+
+    await remove(uploadsDir)
+  })
+
+  test('move file with custom name', async (assert) => {
+    const uploadsDir = join(__dirname, 'uploads')
+
+    const server = createServer(async (req, res) => {
+      const ctx = HttpContext.create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        const pkgFile = ctx.request.file('package')!
+
+        try {
+          await pkgFile.move(uploadsDir, {
+            name: `myapp.${pkgFile.subtype}`,
+          })
+          assert.equal(pkgFile.status, 'moved')
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.end()
+        } catch (error) {
+          res.writeHead(500, { 'content-type': 'application/json' })
+          res.end(error.message)
+        }
+      })
+    })
+
+    await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .expect(200)
+
+    const hasFile = await pathExists(join(uploadsDir, 'myapp.json'))
+    assert.isTrue(hasFile)
+
+    await remove(uploadsDir)
   })
 })
