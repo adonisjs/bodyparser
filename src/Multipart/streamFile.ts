@@ -7,8 +7,8 @@
 * file that was distributed with this source code.
 */
 
+import eos from 'end-of-stream'
 import { Readable } from 'stream'
-import * as eos from 'end-of-stream'
 import { open, close, createWriteStream, unlink } from 'fs-extra'
 
 /**

@@ -10,8 +10,8 @@
 /// <reference path="../adonis-typings/bodyparser.ts" />
 
 import { join } from 'path'
-import * as test from 'japa'
-import * as supertest from 'supertest'
+import test from 'japa'
+import supertest from 'supertest'
 import { Exception } from '@poppinss/utils'
 import { Request as BaseRequest } from '@poppinss/request'
 import { pathExists, remove, createWriteStream } from 'fs-extra'

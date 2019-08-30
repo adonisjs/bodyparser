@@ -10,8 +10,8 @@
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import { tmpdir } from 'os'
-import * as uuid from 'uuid/v1'
-import * as coBody from 'co-body'
+import uuid from 'uuid/v1'
+import coBody from 'co-body'
 import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
 

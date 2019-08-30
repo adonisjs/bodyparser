@@ -9,8 +9,8 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
-import * as bytes from 'bytes'
-import * as multiparty from 'multiparty'
+import bytes from 'bytes'
+import multiparty from 'multiparty'
 import { Exception } from '@poppinss/utils'
 import { RequestContract } from '@ioc:Adonis/Core/Request'
 
@@ -60,7 +60,7 @@ export class Multipart implements MultipartContract {
   /**
    * The reference to underlying multiparty form
    */
-  private _form
+  private _form: multiparty.Form
 
   /**
    * Total size limit of the multipart stream. If it goes beyond
@@ -87,7 +87,7 @@ export class Multipart implements MultipartContract {
    * consumed along with all handlers execution
    */
   private _isClosed (): boolean {
-    return this._form.flushing <= 0 && this._pendingHandlers <= 0
+    return this._form['flushing'] <= 0 && this._pendingHandlers <= 0
   }
 
   /**

@@ -10,22 +10,23 @@
 /// <reference path="../adonis-typings/bodyparser.ts" />
 /// <reference path="../adonis-typings/index.ts" />
 
+import test from 'japa'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import * as test from 'japa'
 import { merge } from 'lodash'
+import supertest from 'supertest'
 import { createServer } from 'http'
-import { pathExists, remove } from 'fs-extra'
-import * as supertest from 'supertest'
 import { Request } from '@poppinss/request'
+import { pathExists, remove } from 'fs-extra'
 import { HttpContext as BaseHttpContext } from '@poppinss/http-server'
 import { HttpContextConstructorContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { Multipart } from '../src/Multipart'
-import { BodyParserMiddleware } from '../src/BodyParser'
 import extendRequest from '../src/Bindings/Request'
+import { BodyParserMiddleware } from '../src/BodyParser'
 
 import { packageFilePath, packageFileSize, bodyParserConfig } from '../test-helpers'
+
 extendRequest(Request)
 
 /**

@@ -9,16 +9,16 @@
 
 /// <reference path="../adonis-typings/bodyparser.ts" />
 
-import * as bytes from 'bytes'
+import bytes from 'bytes'
 import { extname } from 'path'
-import * as fileType from 'file-type'
-import * as mediaTyper from 'media-typer'
+import fileType from 'file-type'
+import mediaTyper from 'media-typer'
 import { FileUploadError } from '@ioc:Adonis/Addons/BodyParser'
 
 /**
  * Attempts to parse the file mime type using the file magic number
  */
-function parseMimeType (mime): { type: string, subtype: string } | null {
+function parseMimeType (mime: string): { type: string, subtype: string } | null {
   try {
     const { type, subtype } = mediaTyper.parse(mime)
     return { type, subtype }

@@ -7,9 +7,9 @@
 * file that was distributed with this source code.
 */
 
-import * as test from 'japa'
-import { Filesystem } from '@adonisjs/dev-utils'
+import test from 'japa'
 import { join } from 'path'
+import { Filesystem } from '@adonisjs/dev-utils'
 import { createReadStream, pathExists } from 'fs-extra'
 
 import { streamFile } from '../src/Multipart/streamFile'
