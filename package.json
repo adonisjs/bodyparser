@@ -7,8 +7,7 @@
     "build/src",
     "build/adonis-typings",
     "build/providers",
-    "build/config",
-    "build/instructions.js"
+    "build/config"
   ],
   "types": "./build/adonis-typings/index.d.ts",
   "scripts": {
@@ -101,7 +100,10 @@
     "tag": "next"
   },
   "adonisjs": {
-    "instructions": "./build/instructions.js"
+    "templates": {
+      "basePath": "./build/config",
+      "config": ["bodyparser.txt"]
+    }
   },
   "directories": {
     "test": "test"
