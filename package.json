@@ -102,7 +102,9 @@
   "adonisjs": {
     "templates": {
       "basePath": "./build/config",
-      "config": ["bodyparser.txt"]
+      "config": [
+        "bodyparser.txt"
+      ]
     }
   },
   "directories": {
