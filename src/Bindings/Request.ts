@@ -24,7 +24,6 @@ function validateFile (file: MultipartFileContract, options?: Partial<FileValida
   }
 
   file.validated = true
-
   if (!options) {
     return
   }

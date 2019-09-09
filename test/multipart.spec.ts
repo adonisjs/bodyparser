@@ -9,29 +9,29 @@
 
 /// <reference path="../adonis-typings/bodyparser.ts" />
 
-import { join } from 'path'
 import test from 'japa'
+import { join } from 'path'
 import supertest from 'supertest'
+import { createServer } from 'http'
 import { Exception } from '@poppinss/utils'
-import { Request as BaseRequest } from '@poppinss/request'
 import { pathExists, remove, createWriteStream } from 'fs-extra'
-import { createServer, IncomingMessage, ServerResponse } from 'http'
-import { RequestContract, RequestConfigContract } from '@ioc:Adonis/Core/Request'
+import { Encryption } from '@adonisjs/encryption/build/standalone'
+import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
+import { Request as BaseRequest } from '@adonisjs/http-server/build/src/Request'
 
 import { Multipart } from '../src/Multipart'
 import { File } from '../src/Multipart/File'
 import { sleep, requestConfig, packageFilePath, packageFileSize } from '../test-helpers'
 
-const Request = BaseRequest as unknown as {
-  new (req: IncomingMessage, res: ServerResponse, config: RequestConfigContract): RequestContract,
-}
+const encryption = new Encryption('verylongandrandom32charsecretkey')
+const Request = BaseRequest as unknown as RequestConstructorContract
 
 test.group('Multipart', () => {
   test('process file by attaching handler on field name', async (assert) => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('package', {}, async (part, reporter) => {
@@ -55,7 +55,7 @@ test.group('Multipart', () => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('package', {}, async (part, reporter) => {
@@ -86,7 +86,7 @@ test.group('Multipart', () => {
     const stack: string[] = []
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('package', {}, async (part, reporter) => {
@@ -118,7 +118,7 @@ test.group('Multipart', () => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('package', {}, async (part, reporter) => {
@@ -150,7 +150,7 @@ test.group('Multipart', () => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('package', {}, async (part, reporter) => {
@@ -181,7 +181,7 @@ test.group('Multipart', () => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('package', {}, async (part, reporter) => {
@@ -211,7 +211,7 @@ test.group('Multipart', () => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('*', {}, async (part, reporter) => {
@@ -242,7 +242,7 @@ test.group('Multipart', () => {
     let fields: null | { [key: string]: any } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('*', {}, async (part, reporter) => {
@@ -272,7 +272,7 @@ test.group('Multipart', () => {
 
   test('raise error when process is invoked multiple times', async (assert) => {
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       try {
@@ -294,7 +294,7 @@ test.group('Multipart', () => {
 
   test('raise error when maxFields are crossed', async (assert) => {
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1, limit: 4000 })
 
       try {
@@ -316,7 +316,7 @@ test.group('Multipart', () => {
 
   test('raise error when bytes limit is crossed', async (assert) => {
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 2 })
 
       try {
@@ -340,7 +340,7 @@ test.group('Multipart', () => {
     assert.plan(2)
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 20 })
 
       multipart.onFile('package', {}, async (part, report) => {
@@ -374,7 +374,7 @@ test.group('Multipart', () => {
     assert.plan(4)
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('*', {
@@ -410,7 +410,7 @@ test.group('Multipart', () => {
     assert.plan(4)
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000 })
 
       multipart.onFile('*', {
@@ -446,7 +446,7 @@ test.group('Multipart', () => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('*', {
@@ -479,7 +479,7 @@ test.group('Multipart', () => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
-      const request = new Request(req, res, requestConfig)
+      const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
       multipart.onFile('*', {

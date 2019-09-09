@@ -10,8 +10,13 @@
 /// <reference path="../adonis-typings/index.ts" />
 
 import { join } from 'path'
-import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
+import { IncomingMessage, ServerResponse } from 'http'
+import { Logger } from '@adonisjs/logger/build/standalone'
+import { Profiler } from '@adonisjs/profiler/build/standalone'
 import { RequestConfigContract } from '@ioc:Adonis/Core/Request'
+import { Encryption } from '@adonisjs/encryption/build/standalone'
+import { HttpContext } from '@adonisjs/http-server/build/standalone'
+import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
 
 const contents = JSON.stringify(require('../package.json'), null, 2)
 
@@ -65,4 +70,16 @@ export const bodyParserConfig: BodyParserConfigContract = {
       'multipart/form-data',
     ],
   },
+}
+
+export function getContext (
+  url: string,
+  params: any,
+  req?: IncomingMessage,
+  res?: ServerResponse,
+) {
+  const logger = new Logger({ enabled: true, level: 'trace', name: 'adonis' })
+  const profiler = new Profiler({}).create('')
+  const encryption = new Encryption('verylongandrandom32charsecretkey')
+  return HttpContext.create(url, params, logger, profiler, encryption, req, res)
 }
