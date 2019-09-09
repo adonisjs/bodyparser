@@ -23,7 +23,7 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/core": "^2.0.17",
+    "@adonisjs/core": "^2.0.18",
     "@adonisjs/dev-utils": "^1.4.0",
     "@adonisjs/fold": "^6.1.9",
     "@adonisjs/mrm-preset": "^2.1.0",
