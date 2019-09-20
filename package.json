@@ -23,18 +23,18 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/core": "^2.0.18",
+    "@adonisjs/core": "^2.1.2",
     "@adonisjs/dev-utils": "^1.4.0",
-    "@adonisjs/fold": "^6.1.9",
+    "@adonisjs/fold": "^6.2.0",
     "@adonisjs/mrm-preset": "^2.1.0",
-    "@adonisjs/sink": "^2.1.10",
+    "@adonisjs/sink": "^2.2.0",
     "@types/bytes": "^3.0.0",
     "@types/end-of-stream": "^1.4.0",
     "@types/fs-extra": "^8.0.0",
     "@types/lodash": "^4.14.138",
     "@types/media-typer": "^0.3.0",
     "@types/multiparty": "0.0.32",
-    "@types/node": "^12.7.4",
+    "@types/node": "^12.7.5",
     "@types/supertest": "^2.0.8",
     "@types/uuid": "^3.4.5",
     "commitizen": "^4.0.3",
@@ -45,15 +45,15 @@
     "husky": "^3.0.5",
     "japa": "^3.0.1",
     "mrm": "^1.2.2",
-    "np": "^5.0.3",
+    "np": "^5.1.0",
     "proxy-addr": "^2.0.5",
     "supertest": "^4.0.2",
-    "ts-node": "^8.3.0",
-    "tslint": "^5.19.0",
+    "ts-node": "^8.4.1",
+    "tslint": "^5.20.0",
     "tslint-eslint-rules": "^5.4.0",
     "typedoc-plugin-external-module-name": "^2.1.0",
-    "typedoc-plugin-markdown": "^2.1.11",
-    "typescript": "^3.6.2"
+    "typedoc-plugin-markdown": "^2.2.6",
+    "typescript": "^3.6.3"
   },
   "peerDependencies": {
     "@adonisjs/core": "2.x.x"
