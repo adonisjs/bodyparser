@@ -104,7 +104,8 @@
       "config": [
         "bodyparser.txt"
       ]
-    }
+    },
+    "types": "@adonisjs/bodyparser"
   },
   "directories": {
     "test": "test"
