@@ -40,7 +40,9 @@ test.group('streamFile', (group) => {
 
     const file = createReadStream(MAIN_FILE)
     file.on('readable', () => {
-      file.emit('error', 'blowup')
+      setTimeout(() => {
+        file.emit('error', 'blowup')
+      })
     })
 
     try {
