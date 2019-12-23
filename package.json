@@ -17,7 +17,7 @@
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "build": "npm run compile && copyfiles \"config/**/*.txt\" build",
-    "lint": "tslint --project tsconfig.json",
+    "lint": "eslint . --ext=.ts",
     "commit": "git-cz",
     "release": "np",
     "version": "npm run build"
@@ -41,6 +41,8 @@
     "cz-conventional-changelog": "^3.0.2",
     "del-cli": "^3.0.0",
     "doctoc": "^1.4.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-adonis": "^1.0.4",
     "husky": "^3.1.0",
     "japa": "^3.0.1",
     "mrm": "^2.0.2",
@@ -48,8 +50,6 @@
     "proxy-addr": "^2.0.5",
     "supertest": "^4.0.2",
     "ts-node": "^8.5.4",
-    "tslint": "^5.20.1",
-    "tslint-eslint-rules": "^5.4.0",
     "typedoc-plugin-external-module-name": "^2.1.0",
     "typedoc-plugin-markdown": "^2.2.14",
     "typescript": "^3.7.4"

@@ -78,7 +78,7 @@ export default function extendRequest (Request: RequestConstructorContract) {
     return getFile(this['_files'], key, true, options)
   })
 
-  Request.macro('files', function files (key: string, options?: Partial<FileValidationOptions>) {
+  Request.macro('files', function filesList (key: string, options?: Partial<FileValidationOptions>) {
     const files = getFile(this['_files'], key, false, options)
     if (!files) {
       return []

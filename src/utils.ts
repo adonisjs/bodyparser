@@ -64,20 +64,20 @@ export function validateSize (
 export function validateExtension (
   fieldName: string,
   clientName: string,
-  extname: string,
+  extension: string,
   allowedExtensions?: string[],
 ): FileUploadError | null {
   if (!Array.isArray(allowedExtensions) || allowedExtensions.length === 0) {
     return null
   }
 
-  if (allowedExtensions.includes(extname)) {
+  if (allowedExtensions.includes(extension)) {
     return null
   }
 
   const suffix = allowedExtensions.length === 1 ? 'is' : 'are'
   const message = [
-    `Invalid file extension ${extname}.`,
+    `Invalid file extension ${extension}.`,
     `Only ${allowedExtensions.join(', ')} ${suffix} allowed`,
   ].join(' ')
 
