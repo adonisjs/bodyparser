@@ -27,14 +27,14 @@ import { streamFile } from '../Multipart/streamFile'
  * request body to be read later in the request lifecycle.
  */
 export class BodyParserMiddleware {
-  constructor (private _config: BodyParserConfigContract) {
+  constructor (private config: BodyParserConfigContract) {
   }
 
   /**
    * Returns config for a given type
    */
-  private _getConfigFor<K extends keyof BodyParserConfigContract> (type: K): BodyParserConfigContract[K] {
-    const config = this._config[type]
+  private getConfigFor<K extends keyof BodyParserConfigContract> (type: K): BodyParserConfigContract[K] {
+    const config = this.config[type]
     config['returnRawBody'] = true
     return config
   }
@@ -42,7 +42,7 @@ export class BodyParserMiddleware {
   /**
    * Ensures that types exists and have length
    */
-  private _ensureTypes (types: string[]): boolean {
+  private ensureTypes (types: string[]): boolean {
     return !!(types && types.length)
   }
 
@@ -50,15 +50,15 @@ export class BodyParserMiddleware {
    * Returns a boolean telling if request `content-type` header
    * matches the expected types or not
    */
-  private _isType (request: RequestContract, types: string[]): boolean {
-    return !!(this._ensureTypes(types) && request.is(types))
+  private isType (request: RequestContract, types: string[]): boolean {
+    return !!(this.ensureTypes(types) && request.is(types))
   }
 
   /**
    * Returns a proper Adonis style exception for popular error codes
    * returned by https://github.com/stream-utils/raw-body#readme.
    */
-  private _getExceptionFor (error) {
+  private getExceptionFor (error) {
     switch (error.type) {
       case 'encoding.unsupported':
         return new Exception(error.message, error.status, 'E_ENCODING_UNSUPPORTED')
@@ -74,7 +74,7 @@ export class BodyParserMiddleware {
   /**
    * Returns the tmp path for storing the files temporarly
    */
-  private _getTmpPath (config: BodyParserConfigContract['multipart']) {
+  private getTmpPath (config: BodyParserConfigContract['multipart']) {
     if (typeof (config.tmpFileName) === 'function') {
       const tmpPath = config.tmpFileName()
       return isAbsolute(tmpPath) ? tmpPath : join(tmpdir(), tmpPath)
@@ -92,14 +92,14 @@ export class BodyParserMiddleware {
     next: () => Promise<void>,
   ): Promise<void> {
     /**
-     * Initiating the `_files` private property as an object
+     * Initiating the `__raw_files` private property as an object
      */
-    request['_files'] = {}
+    request['__raw_files'] = {}
 
     /**
      * Only process for whitelisted nodes
      */
-    if (!this._config.whitelistedMethods.includes(request.method())) {
+    if (!this.config.whitelistedMethods.includes(request.method())) {
       return next()
     }
 
@@ -117,9 +117,9 @@ export class BodyParserMiddleware {
     /**
      * Handle multipart form
      */
-    const multipartConfig = this._getConfigFor('multipart')
+    const multipartConfig = this.getConfigFor('multipart')
 
-    if (this._isType(request, multipartConfig.types)) {
+    if (this.isType(request, multipartConfig.types)) {
       request.multipart = new Multipart(request, {
         maxFields: multipartConfig.maxFields,
         limit: multipartConfig.limit,
@@ -145,7 +145,7 @@ export class BodyParserMiddleware {
          * is incorrect.
          */
         try {
-          const tmpPath = this._getTmpPath(multipartConfig)
+          const tmpPath = this.getTmpPath(multipartConfig)
           await streamFile(part, tmpPath, reporter)
           return { tmpPath }
         } catch (error) {
@@ -168,8 +168,8 @@ export class BodyParserMiddleware {
     /**
      * Handle url-encoded form data
      */
-    const formConfig = this._getConfigFor('form')
-    if (this._isType(request, formConfig.types)) {
+    const formConfig = this.getConfigFor('form')
+    if (this.isType(request, formConfig.types)) {
       const action = profiler.profile('bodyparser:urlencoded')
 
       try {
@@ -180,15 +180,15 @@ export class BodyParserMiddleware {
         return next()
       } catch (error) {
         action.end({ error })
-        throw this._getExceptionFor(error)
+        throw this.getExceptionFor(error)
       }
     }
 
     /**
      * Handle content with JSON types
      */
-    const jsonConfig = this._getConfigFor('json')
-    if (this._isType(request, jsonConfig.types)) {
+    const jsonConfig = this.getConfigFor('json')
+    if (this.isType(request, jsonConfig.types)) {
       const action = profiler.profile('bodyparser:json')
 
       try {
@@ -199,15 +199,15 @@ export class BodyParserMiddleware {
         return next()
       } catch (error) {
         action.end({ error })
-        throw this._getExceptionFor(error)
+        throw this.getExceptionFor(error)
       }
     }
 
     /**
      * Handles raw request body
      */
-    const rawConfig = this._getConfigFor('raw')
-    if (this._isType(request, rawConfig.types)) {
+    const rawConfig = this.getConfigFor('raw')
+    if (this.isType(request, rawConfig.types)) {
       const action = profiler.profile('bodyparser:json')
 
       try {
@@ -218,7 +218,7 @@ export class BodyParserMiddleware {
         return next()
       } catch (error) {
         action.end({ error })
-        throw this._getExceptionFor(error)
+        throw this.getExceptionFor(error)
       }
     }
 

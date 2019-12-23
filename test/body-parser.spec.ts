@@ -307,9 +307,9 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify({
-          tmpPath: ctx.request['_files'].package.tmpPath,
-          size: ctx.request['_files'].package.size,
-          validated: ctx.request['_files'].package.validated,
+          tmpPath: ctx.request['__raw_files'].package.tmpPath,
+          size: ctx.request['__raw_files'].package.size,
+          validated: ctx.request['__raw_files'].package.validated,
         }))
       })
     })
@@ -331,8 +331,8 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify({
-          size: ctx.request['_files'].package.size,
-          validated: ctx.request['_files'].package.validated,
+          size: ctx.request['__raw_files'].package.size,
+          validated: ctx.request['__raw_files'].package.validated,
           username: ctx.request.input('username'),
         }))
       })
@@ -356,7 +356,7 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify({
-          multiple: Array.isArray(ctx.request['_files'].package),
+          multiple: Array.isArray(ctx.request['__raw_files'].package),
         }))
       })
     })
@@ -433,7 +433,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200)
-        res.end(String(Object.keys(ctx.request['_files']).length))
+        res.end(String(Object.keys(ctx.request['__raw_files']).length))
       })
     })
 
@@ -456,7 +456,7 @@ test.group('BodyParser Middleware | multipart', () => {
       }))
 
       await middleware.handle(ctx, async () => {
-        assert.deepEqual(ctx.request['_files'], {})
+        assert.deepEqual(ctx.request['__raw_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
         res.end()
       })
@@ -481,7 +481,7 @@ test.group('BodyParser Middleware | multipart', () => {
       }))
 
       await middleware.handle(ctx, async () => {
-        assert.deepEqual(ctx.request['_files'], {})
+        assert.deepEqual(ctx.request['__raw_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
         res.end()
       })
@@ -506,7 +506,7 @@ test.group('BodyParser Middleware | multipart', () => {
       }))
 
       await middleware.handle(ctx, async () => {
-        assert.deepEqual(ctx.request['_files'], {})
+        assert.deepEqual(ctx.request['__raw_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
         res.end()
       })
@@ -526,9 +526,9 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify({
-          type: ctx.request['_files'].avatar.type,
-          subtype: ctx.request['_files'].avatar.subtype,
-          extname: ctx.request['_files'].avatar.extname,
+          type: ctx.request['__raw_files'].avatar.type,
+          subtype: ctx.request['__raw_files'].avatar.subtype,
+          extname: ctx.request['__raw_files'].avatar.extname,
         }))
       })
     })

@@ -41,7 +41,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files']
+      files = request['__raw_files']
       res.end()
     })
 
@@ -66,7 +66,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files'] || null
+      files = request['__raw_files'] || null
       res.end()
     })
 
@@ -101,7 +101,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files']
+      files = request['__raw_files']
       stack.push('ended')
       res.end()
     })
@@ -129,7 +129,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files']
+      files = request['__raw_files']
 
       const hasFile = await pathExists(SAMPLE_FILE_PATH)
       res.end(String(hasFile))
@@ -163,7 +163,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files']
+      files = request['__raw_files']
       stack.push('ended')
       res.end()
     })
@@ -194,7 +194,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files']
+      files = request['__raw_files']
       stack.push('ended')
       res.end()
     })
@@ -224,7 +224,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files']
+      files = request['__raw_files']
       stack.push('ended')
       res.end()
     })
@@ -252,7 +252,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files']
+      files = request['__raw_files']
       fields = request.all()
       stack.push('ended')
       res.end()
@@ -387,7 +387,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files'] || null
+      files = request['__raw_files'] || null
       res.end()
     })
 
@@ -424,7 +424,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files'] || null
+      files = request['__raw_files'] || null
       res.end()
     })
 
@@ -457,7 +457,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files'] || null
+      files = request['__raw_files'] || null
       res.end()
     })
 
@@ -490,7 +490,7 @@ test.group('Multipart', () => {
       })
 
       await multipart.process()
-      files = request['_files'] || null
+      files = request['__raw_files'] || null
       res.end()
     })
 

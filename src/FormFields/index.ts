@@ -14,7 +14,7 @@ import { set, get } from 'lodash'
  * array gracefully
  */
 export class FormFields {
-  private _fields: any = {}
+  private fields: any = {}
 
   /**
    * Add a new key/value pair. The keys with array like
@@ -48,10 +48,10 @@ export class FormFields {
     /**
      * Check to see if value exists or set it (if missing)
      */
-    const existingValue = get(this._fields, key)
+    const existingValue = get(this.fields, key)
 
     if (!existingValue) {
-      set(this._fields, key, isArray ? [value] : value)
+      set(this.fields, key, isArray ? [value] : value)
       return
     }
 
@@ -66,13 +66,13 @@ export class FormFields {
     /**
      * Set new value + existing value
      */
-    set(this._fields, key, [existingValue, value])
+    set(this.fields, key, [existingValue, value])
   }
 
   /**
    * Returns the copy of form fields
    */
   public get () {
-    return this._fields
+    return this.fields
   }
 }

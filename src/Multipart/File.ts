@@ -27,22 +27,22 @@ export class File implements MultipartFileContract {
   /**
    * Field name is the name of the field
    */
-  public fieldName = this._data.fieldName
+  public fieldName = this.data.fieldName
 
   /**
    * Client name is the file name on the user client
    */
-  public clientName = this._data.clientName
+  public clientName = this.data.clientName
 
   /**
    * File size in bytes
    */
-  public size = this._data.bytes
+  public size = this.data.bytes
 
   /**
    * The extname for the file.
    */
-  public extname = this._data.fileType.ext
+  public extname = this.data.fileType.ext
 
   /**
    * Upload errors
@@ -53,31 +53,31 @@ export class File implements MultipartFileContract {
    * Type and subtype are extracted from the `content-type`
    * header or from the file magic number
    */
-  public type?: string = this._data.fileType.type
-  public subtype?: string = this._data.fileType.subtype
+  public type?: string = this.data.fileType.type
+  public subtype?: string = this.data.fileType.subtype
 
   /**
    * Filename is only set after the move operation
    */
-  public filePath?: string = this._data.filePath
+  public filePath?: string = this.data.filePath
 
   /**
    * Tmp path, only exists when file is uploaded using the
    * classic mode.
    */
-  public tmpPath?: string = this._data.tmpPath
+  public tmpPath?: string = this.data.tmpPath
 
   /**
    * The file meta data
    */
-  public meta: string = this._data.meta
+  public meta: string = this.data.meta
 
   /**
    * Whether or not this file has been validated
    */
   public validated: boolean = false
 
-  constructor (private _data: FileInputNode) {
+  constructor (private data: FileInputNode) {
   }
 
   /**
