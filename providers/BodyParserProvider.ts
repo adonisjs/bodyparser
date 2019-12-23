@@ -8,8 +8,8 @@
 */
 
 import { IocContract } from '@adonisjs/fold'
-import { BodyParserMiddleware } from '../src/BodyParser/index'
 import extendRequest from '../src/Bindings/Request'
+import { BodyParserMiddleware } from '../src/BodyParser/index'
 
 export default class BodyParserProvider {
   constructor (protected $container: IocContract) {

@@ -7,7 +7,8 @@
 * file that was distributed with this source code.
 */
 
-import { set, get } from 'lodash'
+import get from 'lodash.get'
+import set from 'lodash.set'
 
 /**
  * A jar of form fields to store form data by handling

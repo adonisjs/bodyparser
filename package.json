@@ -23,14 +23,16 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/core": "^2.6.2",
     "@adonisjs/dev-utils": "^1.4.0",
+    "@adonisjs/encryption": "^1.0.3",
     "@adonisjs/fold": "^6.2.3",
+    "@adonisjs/http-server": "^1.6.0",
+    "@adonisjs/logger": "^1.1.7",
     "@adonisjs/mrm-preset": "^2.2.3",
+    "@adonisjs/profiler": "^1.2.4",
     "@types/bytes": "^3.1.0",
     "@types/end-of-stream": "^1.4.0",
     "@types/fs-extra": "^8.0.1",
-    "@types/lodash": "^4.14.149",
     "@types/media-typer": "^0.3.0",
     "@types/multiparty": "0.0.32",
     "@types/node": "^12.12.21",
@@ -50,12 +52,10 @@
     "proxy-addr": "^2.0.5",
     "supertest": "^4.0.2",
     "ts-node": "^8.5.4",
-    "typedoc-plugin-external-module-name": "^2.1.0",
-    "typedoc-plugin-markdown": "^2.2.14",
     "typescript": "^3.7.4"
   },
   "peerDependencies": {
-    "@adonisjs/core": "^2.0.0"
+    "@adonisjs/http-server": "^1.0.0"
   },
   "nyc": {
     "exclude": [
@@ -88,7 +88,8 @@
     "end-of-stream": "^1.4.4",
     "file-type": "^12.4.2",
     "fs-extra": "^8.1.0",
-    "lodash": "^4.17.15",
+    "lodash.get": "^4.4.2",
+    "lodash.set": "^4.3.2",
     "media-typer": "^1.1.0",
     "multiparty": "^4.2.1",
     "uuid": "^3.3.3"
