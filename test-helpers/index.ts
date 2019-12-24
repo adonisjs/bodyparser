@@ -10,6 +10,7 @@
 /// <reference path="../adonis-typings/index.ts" />
 
 import { join } from 'path'
+import { EOL } from 'os'
 import { IncomingMessage, ServerResponse } from 'http'
 import { Logger } from '@adonisjs/logger/build/standalone'
 import { Profiler } from '@adonisjs/profiler/build/standalone'
@@ -18,10 +19,10 @@ import { Encryption } from '@adonisjs/encryption/build/standalone'
 import { HttpContext } from '@adonisjs/http-server/build/standalone'
 import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
 
-const contents = JSON.stringify(require('../package.json'), null, 2)
+const contents = JSON.stringify(require('../package.json'), null, 2).split('\n').join(EOL)
 
 export const packageFilePath = join(__dirname, '../package.json')
-export const packageFileSize = Buffer.from(contents, 'utf-8').length + 1
+export const packageFileSize = Buffer.from(contents, 'utf-8').length + EOL.length
 export const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
 
 export const requestConfig: RequestConfigContract = {
