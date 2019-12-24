@@ -1,7 +1,4 @@
-version: 2.1
-
-orbs:
-  win: circleci/windows@2.2.0
+version: 2
 
 jobs:
   build_12:
@@ -36,16 +33,9 @@ jobs:
             - node_modules
           key: 'v1-dependencies-{{ checksum "package.json" }}'
       - run: npm test
-  build_windows:
-    executor: win/default
-    working_directory: ~/app
-    steps:
-      - checkout
-      - run: npm test
 workflows:
-  version: 2.1
+  version: 2
   workflow:
     jobs:
       - build_12
       - build_latest
-      - build_windows
