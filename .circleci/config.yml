@@ -43,7 +43,7 @@ jobs:
       - checkout
       - run: npm test
 workflows:
-  version: 2
+  version: 2.1
   workflow:
     jobs:
       - build_12
