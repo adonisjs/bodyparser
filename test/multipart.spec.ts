@@ -368,6 +368,7 @@ test.group('Multipart', () => {
       multipart.onFile('package', {}, (part, report) => {
         return new Promise((resolve, reject) => {
           part.on('error', (error) => {
+            part.removeAllListeners()
             assert.equal(error.message, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
             reject(error)
           })
