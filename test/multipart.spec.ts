@@ -396,7 +396,7 @@ test.group('Multipart', () => {
 
       assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
     } catch (error) {
-      assert.equal(error.code, 'ECONNABORTED')
+      assert.oneOf(error.code, ['ECONNABORTED', 'ECONNRESET'])
     }
   })
 
