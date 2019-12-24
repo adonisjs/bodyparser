@@ -1,10 +1,10 @@
 {
   "extends": "./node_modules/@adonisjs/mrm-preset/_tsconfig",
   "compilerOptions": {
-    "skipLibCheck": true,
-    "types": [
-      "@types/node",
-      "@adonisjs/core"
-    ]
-  }
+    "skipLibCheck": true
+  },
+  "files": [
+    "./node_modules/@adonisjs/encryption/build/adonis-typings/encryption.d.ts",
+    "./node_modules/@adonisjs/profiler/build/adonis-typings/profiler.d.ts"
+  ]
 }
