@@ -96,7 +96,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "next"
+    "tag": "alpha"
   },
   "adonisjs": {
     "templates": {
