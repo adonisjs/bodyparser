@@ -183,7 +183,16 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     validated: boolean,
     errors: FileUploadError[],
     validationOptions: Partial<FileValidationOptions>,
+
+    /**
+     * Run validations on the file
+     */
     validate (): void
+
+    /**
+     * Move file from temporary path to a different location. Self consumed
+     * streams cannot be moved unless `tmpPath` is defined explicitly.
+     */
     move (location: string, options?: { name?: string, overwrite?: boolean }): Promise<void>
   }
 }
