@@ -50,6 +50,14 @@ export class PartHandler {
     extnames: this.options.extnames,
   })
 
+  /**
+   * A boolean to know, if we have emitted the error event after one or
+   * more validation errors. We need this flag, since the race conditions
+   * between `data` and `error` events will trigger multiple `error`
+   * emit.
+   */
+  private emittedValidationError = false
+
   constructor (
     private part: MultipartStream,
     private options: Partial<FileValidationOptions & { deferValidations: boolean }>,
@@ -148,9 +156,9 @@ export class PartHandler {
      * call `reportError`.
      */
     this.file.validate()
-    if (!this.file.isValid) {
+    if (!this.file.isValid && !this.emittedValidationError) {
+      this.emittedValidationError = true
       this.part.emit('error', new Exception('one or more validations failed', 400, 'E_STREAM_VALIDATION_FAILURE'))
-      this.finish()
     }
   }
 
