@@ -18,7 +18,7 @@ import {
   FileUploadError,
   FileValidationOptions,
   MultipartFileContract,
-} from '@ioc:Adonis/Addons/BodyParser'
+} from '@ioc:Adonis/Core/BodyParser'
 
 import { validateExtension, validateSize } from '../utils'
 

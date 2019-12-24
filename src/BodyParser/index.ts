@@ -17,7 +17,7 @@ import { Exception } from '@poppinss/utils'
 
 import { RequestContract } from '@ioc:Adonis/Core/Request'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
+import { BodyParserConfigContract } from '@ioc:Adonis/Core/BodyParser'
 
 import { Multipart } from '../Multipart'
 import { streamFile } from '../Multipart/streamFile'
@@ -208,7 +208,7 @@ export class BodyParserMiddleware {
      */
     const rawConfig = this.getConfigFor('raw')
     if (this.isType(request, rawConfig.types)) {
-      const action = profiler.profile('bodyparser:json')
+      const action = profiler.profile('bodyparser:raw')
 
       try {
         const { raw } = await coBody.text(request.request, rawConfig)

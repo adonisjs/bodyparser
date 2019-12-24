@@ -18,7 +18,7 @@ import {
   MultipartStream,
   MultipartContract,
   PartHandlerContract,
-} from '@ioc:Adonis/Addons/BodyParser'
+} from '@ioc:Adonis/Core/BodyParser'
 
 import { FormFields } from '../FormFields'
 import { PartHandler } from './PartHandler'
@@ -156,6 +156,10 @@ export class Multipart implements MultipartContract {
 
     try {
       const response = await handler.handler(part, (line) => {
+        if (this.state !== 'processing') {
+          return
+        }
+
         const lineLength = line.length
 
         /**
@@ -164,14 +168,7 @@ export class Multipart implements MultipartContract {
          */
         const error = this.validateProcessedBytes(lineLength)
         if (error) {
-          /**
-           * Shortcircuit current part
-           */
           part.emit('error', error)
-
-          /**
-           * Shortcircuit the entire stream
-           */
           this.abort(error)
           return
         }

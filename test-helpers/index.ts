@@ -17,7 +17,7 @@ import { Profiler } from '@adonisjs/profiler/build/standalone'
 import { RequestConfigContract } from '@ioc:Adonis/Core/Request'
 import { Encryption } from '@adonisjs/encryption/build/standalone'
 import { HttpContext } from '@adonisjs/http-server/build/standalone'
-import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
+import { BodyParserConfigContract } from '@ioc:Adonis/Core/BodyParser'
 
 const contents = JSON.stringify(require('../package.json'), null, 2).split('\n').join(EOL)
 

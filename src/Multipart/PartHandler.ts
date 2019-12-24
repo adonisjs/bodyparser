@@ -10,14 +10,10 @@
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import { Exception } from '@poppinss/utils'
-import { getFileType } from '../utils'
-
-import {
-  MultipartStream,
-  FileValidationOptions,
-} from '@ioc:Adonis/Addons/BodyParser'
+import { MultipartStream, FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
 
 import { File } from './File'
+import { getFileType } from '../utils'
 
 /**
  * Part handler handles the progress of a stream and also internally validates

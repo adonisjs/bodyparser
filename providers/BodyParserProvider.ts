@@ -19,7 +19,7 @@ export default class BodyParserProvider {
    * Registers the bodyparser middleware namespace to the container.
    */
   public register () {
-    this.$container.bind('Adonis/Addons/BodyParserMiddleware', () => {
+    this.$container.bind('Adonis/Core/BodyParserMiddleware', () => {
       const Config = this.$container.use('Adonis/Core/Config')
       return new BodyParserMiddleware(Config.get('bodyparser', {}))
     })

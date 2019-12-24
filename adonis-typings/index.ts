@@ -12,7 +12,7 @@ import {
   FileValidationOptions,
   MultipartFileContract,
   MultipartContract,
-} from '@ioc:Adonis/Addons/BodyParser'
+} from '@ioc:Adonis/Core/BodyParser'
 
 /**
  * Extending the `request` interface on the core module

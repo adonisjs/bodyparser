@@ -13,7 +13,7 @@ import bytes from 'bytes'
 import { extname } from 'path'
 import fileType from 'file-type'
 import mediaTyper from 'media-typer'
-import { FileUploadError, DetectedFileType } from '@ioc:Adonis/Addons/BodyParser'
+import { FileUploadError, DetectedFileType } from '@ioc:Adonis/Core/BodyParser'
 
 /**
  * Attempts to parse the file mime type using the file magic number

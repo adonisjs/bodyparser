@@ -9,59 +9,48 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
-import { get } from 'lodash'
+import get from 'lodash.get'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
-import { FileValidationOptions, MultipartFileContract } from '@ioc:Adonis/Addons/BodyParser'
-
-/**
- * Validates and returns a file for a given key
- */
-function getFile (
-  files: { [key: string]: MultipartFileContract | MultipartFileContract[] },
-  key: string,
-  getOne: boolean,
-  options?: Partial<FileValidationOptions>,
-) {
-  const file = get(files, key)
-
-  /**
-   * Return null when there is no file
-   */
-  if (!file) {
-    return null
-  }
-
-  if (Array.isArray(file) && getOne) {
-    file[0].validationOptions = options || {}
-    file[0].validate()
-    return file[0]
-  } else if (Array.isArray(file)) {
-    file.forEach((one) => {
-      one.validationOptions = options || {}
-      one.validate()
-    })
-    return file
-  } else {
-    file.validationOptions = options || {}
-    file.validate()
-    return file
-  }
-}
+import { FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
+import { File } from '../Multipart/File'
 
 /**
  * Extend the Request class by adding `file` and `files` macro to read processed
  * files
  */
 export default function extendRequest (Request: RequestConstructorContract) {
-  Request.macro('file', function file (key: string, options?: Partial<FileValidationOptions>) {
-    return getFile(this['__raw_files'], key, true, options)
+  /**
+   * Fetch a single file
+   */
+  Request.macro('file', function getFile (key: string, options?: Partial<FileValidationOptions>) {
+    let file: File | File[] = get(this['__raw_files'], key)
+    file = Array.isArray(file) ? file[0] : file
+
+    if (!file || file instanceof File === false) {
+      return null
+    }
+
+    if (!file.validated) {
+      file.validationOptions = options || file.validationOptions
+      file.validate()
+    }
+
+    return file
   })
 
-  Request.macro('files', function filesList (key: string, options?: Partial<FileValidationOptions>) {
-    const files = getFile(this['__raw_files'], key, false, options)
-    if (!files) {
-      return []
-    }
-    return Array.isArray(files) ? files : [files]
+  /**
+   * Fetch an array of files
+   */
+  Request.macro('files', function getFiles (key: string, options?: Partial<FileValidationOptions>) {
+    let files: File | File[] = get(this['__raw_files'], key)
+    files = Array.isArray(files) ? files: files ? [files] : []
+
+    return files.map((file) => {
+      if (!file.validated) {
+        file.validationOptions = options || file.validationOptions
+        file.validate()
+      }
+      return file
+    })
   })
 }

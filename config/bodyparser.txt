@@ -5,7 +5,7 @@
  * file.
  */
 
-import { BodyParserConfigContract } from '@ioc:Adonis/Addons/BodyParser'
+import { BodyParserConfigContract } from '@ioc:Adonis/Core/BodyParser'
 
 const bodyParserConfig: BodyParserConfigContract = {
   /*

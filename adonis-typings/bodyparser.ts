@@ -7,7 +7,7 @@
 * file that was distributed with this source code.
 */
 
-declare module '@ioc:Adonis/Addons/BodyParser' {
+declare module '@ioc:Adonis/Core/BodyParser' {
   import { Readable } from 'stream'
   import { FileTypeResult } from 'file-type'
 
@@ -80,6 +80,12 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
     raw: BodyParserRawConfigContract,
     multipart: BodyParserMultipartConfigContract,
   }
+
+  /**
+   * ------------------------------------
+   * Multipart related options
+   * ------------------------------------
+   */
 
   /**
    * Readable stream along with some extra data. This is what
