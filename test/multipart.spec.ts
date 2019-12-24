@@ -358,7 +358,7 @@ test.group('Multipart', () => {
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
   })
 
-  test('disrupt file uploads error when bytes limit is crossed', async (assert) => {
+  test('disrupt file uploads error when total bytes limit is crossed', async (assert) => {
     assert.plan(2)
 
     const server = createServer(async (req, res) => {
@@ -386,13 +386,17 @@ test.group('Multipart', () => {
       }
     })
 
-    const { text } = await supertest(server)
-      .post('/')
-      .attach('package', packageFilePath)
-      .field('name', 'virk')
-      .field('age', '22')
+    try {
+      const { text } = await supertest(server)
+        .post('/')
+        .attach('package', packageFilePath)
+        .field('name', 'virk')
+        .field('age', '22')
 
-    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+      assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+    } catch (error) {
+      assert.equal(error.code, 'ECONNABORTED')
+    }
   })
 
   test('disrupt part streaming when validation fails', async (assert) => {
@@ -525,8 +529,12 @@ test.group('Multipart', () => {
       multipart.onFile('*', {
         size: 10,
         deferValidations: true,
-      }, async (part, reporter) => {
-        part.on('data', reporter)
+      }, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', reporter)
+          part.on('end', resolve)
+          part.on('error', reject)
+        })
       })
 
       await multipart.process()

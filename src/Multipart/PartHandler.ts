@@ -150,6 +150,7 @@ export class PartHandler {
     this.file.validate()
     if (!this.file.isValid) {
       this.part.emit('error', new Exception('one or more validations failed', 400, 'E_STREAM_VALIDATION_FAILURE'))
+      this.finish()
     }
   }
 
@@ -159,6 +160,10 @@ export class PartHandler {
    * due to some bad credentails.
    */
   public reportError (error: any) {
+    if (this.file.state !== 'streaming') {
+      return
+    }
+
     this.skipEndStream()
     this.finish()
 
@@ -181,6 +186,10 @@ export class PartHandler {
    * Report success data about the file.
    */
   public reportSuccess (data?: { filePath?: string, tmpPath?: string } & { [key: string]: any }) {
+    if (this.file.state !== 'streaming') {
+      return
+    }
+
     /**
      * Re-attempt to detect the file extension after we are done
      * consuming the stream
