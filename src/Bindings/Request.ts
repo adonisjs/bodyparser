@@ -13,32 +13,6 @@ import { get } from 'lodash'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
 import { FileValidationOptions, MultipartFileContract } from '@ioc:Adonis/Addons/BodyParser'
 
-import { validateExtension, validateSize } from '../utils'
-
-/**
- * Validating a given file.
- */
-function validateFile (file: MultipartFileContract, options?: Partial<FileValidationOptions>) {
-  if (file.validated) {
-    return
-  }
-
-  file.validated = true
-  if (!options) {
-    return
-  }
-
-  const sizeError = validateSize(file.fieldName, file.clientName, file.size, options.size)
-  if (sizeError) {
-    file.errors.push(sizeError)
-  }
-
-  const extError = validateExtension(file.fieldName, file.clientName, file.extname, options.extnames)
-  if (extError) {
-    file.errors.push(extError)
-  }
-}
-
 /**
  * Validates and returns a file for a given key
  */
@@ -58,13 +32,18 @@ function getFile (
   }
 
   if (Array.isArray(file) && getOne) {
-    validateFile(file[0], options)
+    file[0].validationOptions = options || {}
+    file[0].validate()
     return file[0]
   } else if (Array.isArray(file)) {
-    file.forEach((one) => validateFile(one, options))
+    file.forEach((one) => {
+      one.validationOptions = options || {}
+      one.validate()
+    })
     return file
   } else {
-    validateFile(file, options)
+    file.validationOptions = options || {}
+    file.validate()
     return file
   }
 }

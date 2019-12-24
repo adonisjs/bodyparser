@@ -12,34 +12,6 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   import { FileTypeResult } from 'file-type'
 
   /**
-   * Readable stream along with some extra data. This is what
-   * is passed to `onFile` handlers.
-   */
-  export type MultipartStream = Readable & {
-    headers: any,
-    name: string,
-    filename: string,
-    bytes: number,
-  }
-
-  /**
-   * The options that can be used to validate a given
-   * file
-   */
-  export type FileValidationOptions = {
-    size: string | number,
-    extnames: string[],
-  }
-
-  /**
-   * The callback handler for a given file part
-   */
-  export type PartHandlerContract = (
-    part: MultipartStream,
-    reportChunk: (chunk: Buffer) => void,
-  ) => Promise<({ filePath?: string, tmpPath?: string } & { [key: string]: any }) | void>
-
-  /**
    * Qs module config
    */
   type QueryStringConfig = {
@@ -110,12 +82,42 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   }
 
   /**
+   * Readable stream along with some extra data. This is what
+   * is passed to `onFile` handlers.
+   */
+  export type MultipartStream = Readable & {
+    headers: {
+      [key: string]: string,
+    },
+    name: string,
+    filename: string,
+    bytes: number,
+  }
+
+  /**
+   * The options that can be used to validate a given
+   * file
+   */
+  export type FileValidationOptions = {
+    size: string | number,
+    extnames: string[],
+  }
+
+  /**
+   * The callback handler for a given file part
+   */
+  export type PartHandlerContract = (
+    part: MultipartStream,
+    reportChunk: (chunk: Buffer) => void,
+  ) => Promise<({ filePath?: string, tmpPath?: string } & { [key: string]: any }) | void>
+
+  /**
    * Multipart class contract, since it is exposed on the
    * request object, we need the interface to extend
    * typings
    */
   export interface MultipartContract {
-    consumed: boolean,
+    state: 'idle' | 'processing' | 'error' | 'success',
     abort (error: any): void,
     onFile (
       name: string,
@@ -141,18 +143,18 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   export type FileInputNode = {
     fieldName: string,
     clientName: string,
-    bytes: number,
     headers: {
       [key: string]: string,
     },
-    filePath?: string,
-    tmpPath?: string,
-    meta: any,
-    fileType: {
-      ext: string,
-      type?: string,
-      subtype?: string,
-    },
+  }
+
+  /**
+   * Shape of the detect file type
+   */
+  export type DetectedFileType = {
+    ext: string,
+    type?: string,
+    subtype?: string,
   }
 
   /**
@@ -161,16 +163,21 @@ declare module '@ioc:Adonis/Addons/BodyParser' {
   export interface MultipartFileContract {
     fieldName: string,
     clientName: string,
+    size: number,
+    headers: {
+      [key: string]: string,
+    }
     tmpPath?: string,
     filePath?: string,
-    size: number,
     type?: string,
+    extname?: string,
     subtype?: string,
+    state: 'idle' | 'streaming' | 'consumed' | 'moved',
     isValid: boolean,
-    status: 'pending' | 'moved' | 'error',
-    extname: string,
     validated: boolean,
     errors: FileUploadError[],
+    validationOptions: Partial<FileValidationOptions>,
+    validate (): void
     move (location: string, options?: { name?: string, overwrite?: boolean }): Promise<void>
   }
 }

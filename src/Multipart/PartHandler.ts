@@ -10,12 +10,11 @@
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import { Exception } from '@poppinss/utils'
-import { validateExtension, validateSize, getFileType } from '../utils'
+import { getFileType } from '../utils'
 
 import {
   MultipartStream,
   FileValidationOptions,
-  FileUploadError,
 } from '@ioc:Adonis/Addons/BodyParser'
 
 import { File } from './File'
@@ -32,27 +31,24 @@ import { File } from './File'
  * stream by themselves and report each chunk to this class.
  */
 export class PartHandler {
-  private buff: Buffer
-  private bufferLength: number = 0
-  private fileType: ReturnType<typeof getFileType>
-
-  private fieldName = this.part.name
-  private clientName = this.part.filename
-  private headers = this.part.headers
-
-  private sizeValidated = false
-  private extValidated = false
+  /**
+   * The stream buffer reported by the stream consumer. We hold the buffer until are
+   * able to detect the file extension and then buff memory is released
+   */
+  private buff?: Buffer
 
   /**
-   * Collected errors
+   * Creating a new file object for each part inside the multipart
+   * form data
    */
-  private errors: FileUploadError[] = []
-
-  /**
-   * The data that we want to forward to the file after successfully
-   * handling it's upload
-   */
-  private postProcessFileData: any = {}
+  public file = new File({
+    clientName: this.part.filename,
+    fieldName: this.part.name,
+    headers: this.part.headers,
+  }, {
+    size: this.options.size,
+    extnames: this.options.extnames,
+  })
 
   constructor (
     private part: MultipartStream,
@@ -60,111 +56,52 @@ export class PartHandler {
   ) {}
 
   /**
-   * Validates the file size when validations are not deferred.
-   */
-  private validateSize () {
-    /**
-     * Do not revalidate for size, when an error for size
-     * already exists
-     */
-    if (this.sizeValidated) {
-      return
-    }
-
-    const error = validateSize(this.fieldName, this.clientName, this.bufferLength, this.options.size)
-    if (error) {
-      this.sizeValidated = true
-      this.errors.push(error)
-    }
-  }
-
-  /**
-   * Validates the file extension when validation is not
-   * deferred and file type has been detected.
-   */
-  private validateExtension () {
-    /**
-     * Do not re-validate file type or ext when we are unable to detect the
-     * filetype or error for file ext already exists
-     */
-    if (this.extValidated || !this.fileType) {
-      return
-    }
-
-    const error = validateExtension(
-      this.fieldName,
-      this.clientName,
-      this.fileType.ext,
-      this.options.extnames,
-    )
-
-    if (error) {
-      this.extValidated = true
-      this.errors.push(error)
-    }
-  }
-
-  /**
    * Detects the file type and extension and also validates it when validations
    * are not deferred.
    */
   private detectFileTypeAndExtension (force: boolean) {
-    if (!this.fileType) {
-      this.fileType = getFileType(this.buff, this.clientName, this.headers, force)
+    if (!this.buff) {
+      return
     }
 
-    if (!this.options.deferValidations) {
-      this.validateExtension()
+    const fileType = getFileType(this.buff, this.file.clientName, this.file.headers, force)
+    if (fileType) {
+      this.file.extname = fileType.ext
+      this.file.type = fileType.type
+      this.file.subtype = fileType.subtype
     }
   }
 
   /**
-   * Returns the file instance only when the progress of
-   * the file has been reported atleast once.
+   * Skip the stream or end it forcefully. This is invoked when the
+   * streaming consumer reports an error
    */
-  public getFile (): File | null {
-    if (!this.buff) {
-      return null
-    }
-
+  private skipEndStream () {
     /**
-     * If we failed to pull the file type earlier, then lets make
-     * another attempt.
+     * End the stream when an error has been encountered. We do not do it while emitting the
+     * validation errors, since we want the end user to decide, if they want to stop
+     * streaming or not, since many streaming API's doesn't offer abort feature.
      */
-    this.detectFileTypeAndExtension(true)
+    this.part['readableFlowing'] === null ? this.part.resume() : this.part.emit('end')
+  }
 
-    const { filePath, tmpPath, ...meta } = this.postProcessFileData
-
-    /**
-     * Create a new file instance
-     */
-    const file = new File({
-      clientName: this.part.filename,
-      fieldName: this.part.name,
-      bytes: this.bufferLength,
-      headers: this.part.headers,
-      fileType: this.fileType!,
-      filePath: filePath,
-      tmpPath: tmpPath,
-      meta: meta,
-    })
-
-    /**
-     * Set file errors, if we have encountered any
-     */
-    if (this.errors.length) {
-      file.errors = this.errors
-    }
-
-    /**
-     * Mark file as being already validated, when the validations have
-     * not been deferred
-     */
+  /**
+   * Finish the process of listening for any more events and mark the
+   * file state as consumed.
+   */
+  private finish () {
+    this.file.state = 'consumed'
     if (!this.options.deferValidations) {
-      file.validated = true
+      this.file.validate()
     }
+  }
 
-    return file
+  /**
+   * Start the process the updating the file state
+   * to streaming mode.
+   */
+  public begin () {
+    this.file.state = 'streaming'
   }
 
   /**
@@ -172,37 +109,47 @@ export class PartHandler {
    * extension.
    */
   public reportProgress (line: Buffer, bufferLength: number) {
-    this.buff = this.buff ? Buffer.concat([this.buff, line]) : line
-    this.bufferLength = this.bufferLength + bufferLength
+    /**
+     * Do not consume stream data when file state is not `streaming`. Stream
+     * events race conditions may emit the `data` event after the `error`
+     * event in some cases, so we have to restrict it here.
+     */
+    if (this.file.state !== 'streaming') {
+      return
+    }
 
     /**
-     * Do not compute file type, ext or validate anything, when
-     * validations are deferred
+     * Detect the file type and extension when it's null, otherwise
+     * empty out the buffer. We only need the buffer to find the
+     * file extension from it's content.
+     */
+    if (this.file.extname === undefined) {
+      this.buff = this.buff ? Buffer.concat([this.buff, line]) : line
+      this.detectFileTypeAndExtension(false)
+    } else {
+      this.buff = undefined
+    }
+
+    /**
+     * The length of stream buffer
+     */
+    this.file.size = this.file.size + bufferLength
+
+    /**
+     * Validate the file on every chunk, unless validations have been deferred.
      */
     if (this.options.deferValidations) {
       return
     }
 
     /**
-     * Attempt to validate the file size with every chunk of line
+     * Attempt to validate the file after every chunk and report error
+     * when it has one or more failures. After this the consumer must
+     * call `reportError`.
      */
-    this.validateSize()
-
-    /**
-     * Attempt to find the file type unless we are able to figure it out
-     */
-    this.detectFileTypeAndExtension(false)
-
-    /**
-     * We need to emit the error, to shortcircuit the writable stream. Their will be
-     * more than one error only when `deferValidations=false` and size of ext
-     * checks were failed.
-     */
-    if (this.errors.length) {
-      this.part.emit(
-        'error',
-        new Exception('stream validation failed', 413, 'E_STREAM_VALIDATION_FAILURE'),
-      )
+    this.file.validate()
+    if (!this.file.isValid) {
+      this.part.emit('error', new Exception('one or more validations failed', 400, 'E_STREAM_VALIDATION_FAILURE'))
     }
   }
 
@@ -212,23 +159,19 @@ export class PartHandler {
    * due to some bad credentails.
    */
   public reportError (error: any) {
-    /**
-     * End the stream when an error has been encountered. We do not do it while emitting the
-     * validation errors, since we want the end user to decide, if they want to stop
-     * streaming or not, since many streaming API's doesn't offer abort feature.
-     */
-    this.part['readableFlowing'] === null ? this.part.resume() : this.part.emit('end')
+    this.skipEndStream()
+    this.finish()
 
-    /**
-     * Ignore self errors
-     */
-    if (error.code && error.code === 'E_STREAM_VALIDATION_FAILURE') {
+    if (error.code === 'E_STREAM_VALIDATION_FAILURE') {
       return
     }
 
-    this.errors.push({
-      fieldName: this.fieldName,
-      clientName: this.clientName,
+    /**
+     * Push to the array of file errors
+     */
+    this.file.errors.push({
+      fieldName: this.file.fieldName,
+      clientName: this.file.clientName,
       type: 'fatal',
       message: error.message,
     })
@@ -238,6 +181,27 @@ export class PartHandler {
    * Report success data about the file.
    */
   public reportSuccess (data?: { filePath?: string, tmpPath?: string } & { [key: string]: any }) {
-    this.postProcessFileData = data || {}
+    /**
+     * Re-attempt to detect the file extension after we are done
+     * consuming the stream
+     */
+    if (this.file.extname === undefined) {
+      this.detectFileTypeAndExtension(true)
+    }
+
+    if (data) {
+      const { filePath, tmpPath, ...meta } = data
+      if (filePath) {
+        this.file.filePath = filePath
+      }
+
+      if (tmpPath) {
+        this.file.tmpPath = tmpPath
+      }
+
+      this.file.meta = meta || {}
+    }
+
+    this.finish()
   }
 }

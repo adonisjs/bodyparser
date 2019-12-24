@@ -13,7 +13,6 @@ import test from 'japa'
 import { join } from 'path'
 import supertest from 'supertest'
 import { createServer } from 'http'
-import { Exception } from '@poppinss/utils'
 import { pathExists, remove, createWriteStream } from 'fs-extra'
 import { Encryption } from '@adonisjs/encryption/build/standalone'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
@@ -34,9 +33,13 @@ test.group('Multipart', () => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
-      multipart.onFile('package', {}, async (part, reporter) => {
-        part.on('data', (line) => {
-          reporter(line)
+      multipart.onFile('package', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', (line) => {
+            reporter(line)
+          })
+          part.on('error', reject)
+          part.on('end', resolve)
         })
       })
 
@@ -48,6 +51,7 @@ test.group('Multipart', () => {
     await supertest(server).post('/').attach('package', packageFilePath)
     assert.property(files, 'package')
     assert.isTrue(files!.package.isValid)
+    assert.equal(files!.package.state, 'consumed')
     assert.equal(files!.package.size, packageFileSize)
   })
 
@@ -58,11 +62,13 @@ test.group('Multipart', () => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
-      multipart.onFile('package', {}, async (part, reporter) => {
-        part.on('data', (line) => {
-          reporter(line)
+      multipart.onFile('package', {}, (part, reporter) => {
+        return new Promise((_resolve, reject) => {
+          part.on('data', (line) => {
+            reporter(line)
+          })
+          reject(Error('Cannot process'))
         })
-        throw new Error('Cannot process')
       })
 
       await multipart.process()
@@ -73,6 +79,7 @@ test.group('Multipart', () => {
     await supertest(server).post('/').attach('package', packageFilePath)
     assert.property(files, 'package')
     assert.isFalse(files!.package.isValid)
+    assert.equal(files!.package.state, 'consumed')
     assert.deepEqual(files!.package.errors, [{
       fieldName: 'package',
       clientName: 'package.json',
@@ -110,6 +117,7 @@ test.group('Multipart', () => {
     assert.deepEqual(stack, ['before', 'after', 'ended'])
     assert.property(files, 'package')
     assert.isTrue(files!.package.isValid)
+    assert.equal(files!.package.state, 'consumed')
     assert.equal(files!.package.size, packageFileSize)
   })
 
@@ -121,11 +129,16 @@ test.group('Multipart', () => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
-      multipart.onFile('package', {}, async (part, reporter) => {
-        part.on('data', (line) => {
-          reporter(line)
+      multipart.onFile('package', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', (line) => {
+            reporter(line)
+          })
+
+          part.on('error', reject)
+          part.on('end', resolve)
+          part.pipe(createWriteStream(SAMPLE_FILE_PATH))
         })
-        part.pipe(createWriteStream(SAMPLE_FILE_PATH))
       })
 
       await multipart.process()
@@ -140,6 +153,7 @@ test.group('Multipart', () => {
     assert.property(files, 'package')
     assert.isTrue(files!.package.isValid)
     assert.equal(files!.package.size, packageFileSize)
+    assert.equal(files!.package.state, 'consumed')
     assert.equal(text, 'true')
 
     await remove(SAMPLE_FILE_PATH)
@@ -173,6 +187,7 @@ test.group('Multipart', () => {
     assert.deepEqual(stack, ['before', 'after', 'ended'])
     assert.property(files, 'package')
     assert.isTrue(files!.package[0].isValid)
+    assert.equal(files!.package[0].state, 'consumed')
     assert.equal(files!.package[0].size, packageFileSize)
   })
 
@@ -203,6 +218,7 @@ test.group('Multipart', () => {
     assert.deepEqual(stack, ['before', 'after', 'ended'])
     assert.property(files, 'package')
     assert.isTrue(files!.package[0].isValid)
+    assert.equal(files!.package[0].state, 'consumed')
     assert.equal(files!.package[0].size, packageFileSize)
   })
 
@@ -233,6 +249,7 @@ test.group('Multipart', () => {
     assert.deepEqual(stack, ['before', 'after', 'ended'])
     assert.property(files, 'package')
     assert.isTrue(files!.package.isValid)
+    assert.equal(files!.package.state, 'consumed')
     assert.equal(files!.package.size, packageFileSize)
   })
 
@@ -245,10 +262,14 @@ test.group('Multipart', () => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
 
-      multipart.onFile('*', {}, async (part, reporter) => {
-        part.on('data', reporter)
-        stack.push('file')
-        part.resume()
+      multipart.onFile('*', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', reporter)
+          part.on('error', reject)
+          part.on('end', resolve)
+          stack.push('file')
+          part.resume()
+        })
       })
 
       await multipart.process()
@@ -267,10 +288,11 @@ test.group('Multipart', () => {
     assert.property(files, 'package')
     assert.isTrue(files!.package.isValid)
     assert.equal(files!.package.size, packageFileSize)
+    assert.equal(files!.package.state, 'consumed')
     assert.deepEqual(fields, { name: 'virk' })
   })
 
-  test('raise error when process is invoked multiple times', async (assert) => {
+  test('FIELDS: raise error when process is invoked multiple times', async (assert) => {
     const server = createServer(async (req, res) => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 4000 })
@@ -292,7 +314,7 @@ test.group('Multipart', () => {
     assert.equal(text, 'E_RUNTIME_EXCEPTION: multipart stream has already been consumed')
   })
 
-  test('raise error when maxFields are crossed', async (assert) => {
+  test('FIELDS: raise error when maxFields are crossed', async (assert) => {
     const server = createServer(async (req, res) => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1, limit: 4000 })
@@ -314,7 +336,7 @@ test.group('Multipart', () => {
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Max fields limit exceeded')
   })
 
-  test('raise error when bytes limit is crossed', async (assert) => {
+  test('FIELDS: raise error when bytes limit is crossed', async (assert) => {
     const server = createServer(async (req, res) => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 2 })
@@ -336,19 +358,23 @@ test.group('Multipart', () => {
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
   })
 
-  test('disrupt file uplods error when bytes limit is crossed', async (assert) => {
+  test('disrupt file uploads error when bytes limit is crossed', async (assert) => {
     assert.plan(2)
 
     const server = createServer(async (req, res) => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000, limit: 20 })
 
-      multipart.onFile('package', {}, async (part, report) => {
-        part.on('error', ({ message }) => {
-          assert.equal(message, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
-        })
+      multipart.onFile('package', {}, (part, report) => {
+        return new Promise((resolve, reject) => {
+          part.on('error', (error) => {
+            assert.equal(error.message, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+            reject(error)
+          })
 
-        part.on('data', report)
+          part.on('data', report)
+          part.on('end', resolve)
+        })
       })
 
       try {
@@ -369,9 +395,9 @@ test.group('Multipart', () => {
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
   })
 
-  test('report size validation errors', async (assert) => {
+  test('disrupt part streaming when validation fails', async (assert) => {
     let files: null | { [key: string]: File } = null
-    assert.plan(4)
+    assert.plan(5)
 
     const server = createServer(async (req, res) => {
       const request = new Request(req, res, encryption, requestConfig)
@@ -379,11 +405,15 @@ test.group('Multipart', () => {
 
       multipart.onFile('*', {
         size: 10,
-      }, async (part, reporter) => {
-        part.on('error', (error: Exception) => {
-          assert.equal(error.code, 'E_STREAM_VALIDATION_FAILURE')
+      }, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('error', (error: any) => {
+            assert.equal(error.code, 'E_STREAM_VALIDATION_FAILURE')
+            reject(error)
+          })
+          part.on('end', resolve)
+          part.on('data', reporter)
         })
-        part.on('data', reporter)
       })
 
       await multipart.process()
@@ -397,6 +427,7 @@ test.group('Multipart', () => {
 
     assert.property(files, 'package')
     assert.isFalse(files!.package.isValid)
+    assert.equal(files!.package.state, 'consumed')
     assert.deepEqual(files!.package.errors, [{
       type: 'size',
       clientName: 'package.json',
@@ -406,21 +437,23 @@ test.group('Multipart', () => {
   })
 
   test('validate stream only once', async (assert) => {
+    assert.plan(5)
     let files: null | { [key: string]: File } = null
-    assert.plan(4)
 
     const server = createServer(async (req, res) => {
       const request = new Request(req, res, encryption, requestConfig)
       const multipart = new Multipart(request, { maxFields: 1000 })
 
-      multipart.onFile('*', {
-        size: 10,
-      }, async (part, reporter) => {
-        part.on('error', (error: Exception) => {
-          assert.equal(error.code, 'E_STREAM_VALIDATION_FAILURE')
-          part.off('data', reporter)
+      multipart.onFile('*', { size: 10 }, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('error', (error: any) => {
+            assert.equal(error.code, 'E_STREAM_VALIDATION_FAILURE')
+            reject(error)
+          })
+
+          part.on('end', resolve)
+          part.on('data', reporter)
         })
-        part.on('data', reporter)
       })
 
       await multipart.process()
@@ -434,6 +467,7 @@ test.group('Multipart', () => {
 
     assert.property(files, 'profile')
     assert.isFalse(files!.profile.isValid)
+    assert.equal(files!.profile.state, 'consumed')
     assert.deepEqual(files!.profile.errors, [{
       type: 'size',
       clientName: 'unicorn.png',
@@ -443,6 +477,8 @@ test.group('Multipart', () => {
   })
 
   test('report extension validation errors', async (assert) => {
+    assert.plan(4)
+
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
@@ -451,9 +487,12 @@ test.group('Multipart', () => {
 
       multipart.onFile('*', {
         extnames: ['jpg'],
-      }, async (part, reporter) => {
-        part.on('error', () => {})
-        part.on('data', reporter)
+      }, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('error', reject)
+          part.on('end', resolve)
+          part.on('data', reporter)
+        })
       })
 
       await multipart.process()
@@ -467,6 +506,7 @@ test.group('Multipart', () => {
 
     assert.property(files, 'package')
     assert.isFalse(files!.package.isValid)
+    assert.equal(files!.package.state, 'consumed')
     assert.deepEqual(files!.package.errors, [{
       type: 'extname',
       clientName: 'package.json',
@@ -501,6 +541,7 @@ test.group('Multipart', () => {
     assert.property(files, 'package')
     assert.isTrue(files!.package.isValid)
     assert.isFalse(files!.package.validated)
+    assert.equal(files!.package.state, 'consumed')
     assert.equal(files!.package.extname, 'json')
     assert.deepEqual(files!.package.errors, [])
   })

@@ -745,7 +745,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
         try {
           await pkgFile.move(uploadsDir)
-          assert.equal(pkgFile.status, 'moved')
+          assert.equal(pkgFile.state, 'moved')
           res.writeHead(200, { 'content-type': 'application/json' })
           res.end()
         } catch (error) {
@@ -780,7 +780,7 @@ test.group('BodyParser Middleware | multipart', () => {
           await pkgFile.move(uploadsDir, {
             name: `myapp.${pkgFile.subtype}`,
           })
-          assert.equal(pkgFile.status, 'moved')
+          assert.equal(pkgFile.state, 'moved')
           res.writeHead(200, { 'content-type': 'application/json' })
           res.end()
         } catch (error) {

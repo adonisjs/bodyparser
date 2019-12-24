@@ -15,9 +15,9 @@ import { Exception } from '@poppinss/utils'
 import { RequestContract } from '@ioc:Adonis/Core/Request'
 
 import {
+  MultipartStream,
   MultipartContract,
   PartHandlerContract,
-  MultipartStream,
 } from '@ioc:Adonis/Addons/BodyParser'
 
 import { FormFields } from '../FormFields'
@@ -68,18 +68,19 @@ export class Multipart implements MultipartContract {
    */
   private upperLimit?: number
 
+  /**
+   * A track of total number of file bytes processed so far
+   */
   private processedBytes: number = 0
 
   /**
-   * Consumed is set to true when `process` is called. Calling
-   * process multiple times is not possible and hence this
-   * boolean must be checked first
+   * The current state of the multipart form handler
    */
-  public consumed = false
+  public state: 'idle' | 'processing' | 'error' | 'success' = 'idle'
 
   constructor (
     private request: RequestContract,
-    private config: Parameters<MultipartContract['process']>[0] = {},
+    private config: Partial<{ limit: string | number, maxFields: number }> = {},
   ) {}
 
   /**
@@ -141,14 +142,24 @@ export class Multipart implements MultipartContract {
 
     this.pendingHandlers++
 
+    /**
+     * Instantiate the part handler
+     */
     const partHandler = new PartHandler(part, handler.options)
+    partHandler.begin()
+
+    /**
+     * Track the file instance created by the part handler. The end user
+     * must be able to access these files.
+     */
+    this.files.add(partHandler.file.fieldName, partHandler.file)
 
     try {
       const response = await handler.handler(part, (line) => {
         const lineLength = line.length
 
         /**
-         * Keeping an eye on total bytes processed so far and shortcircuiting
+         * Keeping an eye on total bytes processed so far and shortcircuit
          * request when more than expected bytes have been received.
          */
         const error = this.validateProcessedBytes(lineLength)
@@ -162,29 +173,21 @@ export class Multipart implements MultipartContract {
            * Shortcircuit the entire stream
            */
           this.abort(error)
+          return
         }
 
         partHandler.reportProgress(line, lineLength)
       })
 
       /**
-       * Reporting success to the partHandler, which ends up on the
-       * file instance
+       * Stream consumed successfully
        */
-      if (response) {
-        partHandler.reportSuccess(response)
-      }
+      partHandler.reportSuccess(response || {})
     } catch (error) {
+      /**
+       * The stream handler reported an exception
+       */
       partHandler.reportError(error)
-    }
-
-    /**
-     * Pull the file from the `partHandler`. The file can also be `null` when
-     * the part consumer doesn't report progress
-     */
-    const file = partHandler.getFile()
-    if (file) {
-      this.files.add(file.fieldName, file)
     }
 
     this.pendingHandlers--
@@ -223,11 +226,14 @@ export class Multipart implements MultipartContract {
   }
 
   /**
-   * Set files and fields on the request class
+   * Mark the process as finished
    */
-  private cleanup () {
-    this.request['__raw_files'] = this.files.get()
-    this.request.setInitialBody(this.fields.get())
+  private finish (newState: 'error' | 'success') {
+    if (this.state === 'idle' || this.state === 'processing') {
+      this.state = newState
+      this.request['__raw_files'] = this.files.get()
+      this.request.setInitialBody(this.fields.get())
+    }
   }
 
   /**
@@ -265,7 +271,7 @@ export class Multipart implements MultipartContract {
    */
   public process (config?: Parameters<MultipartContract['process']>[0]): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.consumed) {
+      if (this.state !== 'idle') {
         reject(new Exception(
           'multipart stream has already been consumed',
           500,
@@ -274,11 +280,7 @@ export class Multipart implements MultipartContract {
         return
       }
 
-      /**
-       * Setting the flag to avoid multiple calls
-       * to the `process` method
-       */
-      this.consumed = true
+      this.state = 'processing'
       this.processConfig(config)
 
       this.form = new multiparty.Form({ maxFields: this.config!.maxFields })
@@ -293,6 +295,8 @@ export class Multipart implements MultipartContract {
         } else {
           reject(error)
         }
+
+        this.finish('error')
       })
 
       /**
@@ -309,7 +313,7 @@ export class Multipart implements MultipartContract {
          * check and resolve from here
          */
         if (this.isClosed()) {
-          this.cleanup()
+          this.finish('success')
           resolve()
         }
       })
@@ -331,7 +335,7 @@ export class Multipart implements MultipartContract {
        */
       this.form.on('close', () => {
         if (this.isClosed()) {
-          this.cleanup()
+          this.finish('success')
           resolve()
         }
       })

@@ -13,7 +13,7 @@ import bytes from 'bytes'
 import { extname } from 'path'
 import fileType from 'file-type'
 import mediaTyper from 'media-typer'
-import { FileUploadError } from '@ioc:Adonis/Addons/BodyParser'
+import { FileUploadError, DetectedFileType } from '@ioc:Adonis/Addons/BodyParser'
 
 /**
  * Attempts to parse the file mime type using the file magic number
@@ -97,7 +97,7 @@ export function getFileType (
   clientName: string,
   headers: { [key: string]: string },
   force: boolean = false,
-): null | { ext: string, subtype?: string, type?: string } {
+): null | DetectedFileType {
   /**
    * Attempt to detect file type from it's content
    */
@@ -110,7 +110,8 @@ export function getFileType (
    * If we are unable to pull the file magicType and the current
    * bytes of the content is under the minimumBytes required,
    * then we should return `null` and force the consumer
-   * to re-call this method after new content
+   * to re-call this method after receiving more content
+   * from the stream
    */
   if (fileContents.length < fileType.minimumBytes && !force) {
     return null
