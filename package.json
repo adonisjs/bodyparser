@@ -23,13 +23,13 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/dev-utils": "^1.4.0",
     "@adonisjs/encryption": "^1.0.3",
     "@adonisjs/fold": "^6.2.3",
     "@adonisjs/http-server": "^1.6.0",
     "@adonisjs/logger": "^1.1.7",
     "@adonisjs/mrm-preset": "^2.2.3",
     "@adonisjs/profiler": "^1.2.4",
+    "@poppinss/dev-utils": "^1.0.3",
     "@types/bytes": "^3.1.0",
     "@types/end-of-stream": "^1.4.0",
     "@types/fs-extra": "^8.0.1",

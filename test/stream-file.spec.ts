@@ -9,7 +9,7 @@
 
 import test from 'japa'
 import { join } from 'path'
-import { Filesystem } from '@adonisjs/dev-utils'
+import { Filesystem } from '@poppinss/dev-utils'
 import { createReadStream, pathExists } from 'fs-extra'
 
 import { streamFile } from '../src/Multipart/streamFile'
