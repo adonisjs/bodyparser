@@ -9,11 +9,9 @@
 
 /// <reference path="../adonis-typings/bodyparser.ts" />
 
-import bytes from 'bytes'
 import { extname } from 'path'
 import fileType from 'file-type'
 import mediaTyper from 'media-typer'
-import { FileUploadError, DetectedFileType } from '@ioc:Adonis/Core/BodyParser'
 
 /**
  * Attempts to parse the file mime type using the file magic number
@@ -28,68 +26,6 @@ function parseMimeType (mime: string): { type: string, subtype: string } | null 
 }
 
 /**
- * Returns an error when file size is over the expected
- * bytes.
- */
-export function validateSize (
-  fieldName: string,
-  clientName: string,
-  actualBytes: number,
-  expectedBytes?: string | number,
-): FileUploadError | null {
-  if (expectedBytes === undefined) {
-    return null
-  }
-
-  expectedBytes = typeof (expectedBytes) === 'string'
-    ? bytes(expectedBytes)
-    : expectedBytes
-
-  if (actualBytes > expectedBytes!) {
-    return {
-      fieldName,
-      clientName,
-      message: `File size should be less than ${bytes(expectedBytes)}`,
-      type: 'size',
-    }
-  }
-
-  return null
-}
-
-/**
- * Returns an error when file extension isn't one of the allowed file
- * extensions.
- */
-export function validateExtension (
-  fieldName: string,
-  clientName: string,
-  extension: string,
-  allowedExtensions?: string[],
-): FileUploadError | null {
-  if (!Array.isArray(allowedExtensions) || allowedExtensions.length === 0) {
-    return null
-  }
-
-  if (allowedExtensions.includes(extension)) {
-    return null
-  }
-
-  const suffix = allowedExtensions.length === 1 ? 'is' : 'are'
-  const message = [
-    `Invalid file extension ${extension}.`,
-    `Only ${allowedExtensions.join(', ')} ${suffix} allowed`,
-  ].join(' ')
-
-  return {
-    fieldName,
-    clientName,
-    message: message,
-    type: 'extname',
-  }
-}
-
-/**
  * Returns the file `type`, `subtype` and `extension`.
  */
 export function getFileType (
@@ -97,7 +33,7 @@ export function getFileType (
   clientName: string,
   headers: { [key: string]: string },
   force: boolean = false,
-): null | DetectedFileType {
+): null | { ext: string, type?: string, subtype?: string } {
   /**
    * Attempt to detect file type from it's content
    */

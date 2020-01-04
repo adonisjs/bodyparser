@@ -10,9 +10,30 @@
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import get from 'lodash.get'
-import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
 import { FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
+import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
 import { File } from '../Multipart/File'
+
+/**
+ * Updates the validation options on the file instance
+ */
+function setFileOptions (file: File, options?: Partial<FileValidationOptions>) {
+  if (file.sizeLimit === undefined && options && options.size) {
+    file.sizeLimit = options.size
+  }
+
+  if (file.allowedExtensions === undefined && options && options.extnames) {
+    file.allowedExtensions = options.extnames
+  }
+}
+
+/**
+ * A boolean to know if file is an instance of multipart
+ * file class
+ */
+function isInstanceOfFile (file: any): file is File {
+  return file && file instanceof File
+}
 
 /**
  * Extend the Request class by adding `file` and `files` macro to read processed
@@ -23,18 +44,15 @@ export default function extendRequest (Request: RequestConstructorContract) {
    * Fetch a single file
    */
   Request.macro('file', function getFile (key: string, options?: Partial<FileValidationOptions>) {
-    let file: File | File[] = get(this['__raw_files'], key)
+    let file: unknown = get(this['__raw_files'], key)
     file = Array.isArray(file) ? file[0] : file
 
-    if (!file || file instanceof File === false) {
+    if (!isInstanceOfFile(file)) {
       return null
     }
 
-    if (!file.validated) {
-      file.validationOptions = options || file.validationOptions
-      file.validate()
-    }
-
+    setFileOptions(file, options)
+    file.validate()
     return file
   })
 
@@ -42,14 +60,12 @@ export default function extendRequest (Request: RequestConstructorContract) {
    * Fetch an array of files
    */
   Request.macro('files', function getFiles (key: string, options?: Partial<FileValidationOptions>) {
-    let files: File | File[] = get(this['__raw_files'], key)
-    files = Array.isArray(files) ? files: files ? [files] : []
+    let files: unknown[] = get(this['__raw_files'], key)
+    files = Array.isArray(files) ? files : (files ? [files] : [])
 
-    return files.map((file) => {
-      if (!file.validated) {
-        file.validationOptions = options || file.validationOptions
-        file.validate()
-      }
+    return files.filter(isInstanceOfFile).map((file) => {
+      setFileOptions(file, options)
+      file.validate()
       return file
     })
   })

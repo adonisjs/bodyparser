@@ -14,26 +14,21 @@ import { outputFile } from 'fs-extra'
 import { Exception } from '@poppinss/utils'
 
 import {
-  FileInputNode,
   FileUploadError,
   FileValidationOptions,
   MultipartFileContract,
 } from '@ioc:Adonis/Core/BodyParser'
 
-import { validateExtension, validateSize } from '../utils'
+import { SizeValidator } from './Validators/Size'
+import { ExtensionValidator } from './Validators/Extensions'
 
 /**
  * The file holds the meta/data for an uploaded file, along with
  * an errors occurred during the upload process.
  */
 export class File implements MultipartFileContract {
-  /**
-   * In the streaming mode, the part handler will brute force the `validate` method
-   * as it attempts to re-run the validations after each chunk. So to avoid
-   * duplicate validation errors, we need to track their state
-   */
-  private didSizeValidationFailed = false
-  private didExtensionValidationFailed = false
+  private sizeValidator = new SizeValidator(this)
+  private extensionValidator = new ExtensionValidator(this)
 
   /**
    * Field name is the name of the field
@@ -96,7 +91,9 @@ export class File implements MultipartFileContract {
   /**
    * Whether or not the validations have been executed
    */
-  public validated = false
+  public get validated (): boolean {
+    return this.sizeValidator.validated && this.extensionValidator.validated
+  }
 
   /**
    * A boolean to know if file has one or more errors
@@ -105,66 +102,40 @@ export class File implements MultipartFileContract {
     return this.errors.length === 0
   }
 
-  constructor (private data: FileInputNode, public validationOptions: Partial<FileValidationOptions>) {
+  /**
+   * The maximum file size limit
+   */
+  public get sizeLimit () {
+    return this.sizeValidator.maxLimit
+  }
+  public set sizeLimit (limit: number | string | undefined) {
+    this.sizeValidator.maxLimit = limit
   }
 
   /**
-   * Validates the size. Calling this method multiple times may
-   * push the same error to the errors array
+   * Extensions allowed
    */
-  private validateSize () {
-    if (this.didSizeValidationFailed) {
-      return
-    }
+  public get allowedExtensions () {
+    return this.extensionValidator.extensions
+  }
+  public set allowedExtensions (extensions: string[] | undefined) {
+    this.extensionValidator.extensions = extensions
+  }
 
-    const error = validateSize(this.fieldName, this.clientName, this.size, this.validationOptions.size)
-    if (error) {
-      this.didSizeValidationFailed = true
-      this.errors.push(error)
-    }
+  constructor (
+    private data: { fieldName: string, clientName: string, headers: any },
+    validationOptions: Partial<FileValidationOptions>,
+  ) {
+    this.sizeLimit = validationOptions.size
+    this.allowedExtensions = validationOptions.extnames
   }
 
   /**
-   * Validates the file extension. Calling this method multiple times may
-   * push the same error to the errors array
+   * Validate the file
    */
-  private validateExtension () {
-    if (this.didExtensionValidationFailed) {
-      return
-    }
-
-    const error = validateExtension(this.fieldName, this.clientName, this.extname!, this.validationOptions.extnames)
-    if (error) {
-      this.didExtensionValidationFailed = true
-      this.errors.push(error)
-    }
-  }
-
   public validate () {
-    /**
-     * In stream mode, validate the extension only when we have been able
-     * to detect the extension and validate size everytime.
-     *
-     * It is responsiblity of the consumer to end the stream once one of the
-     * validations has failed and not re-call this method.
-     */
-    if (this.state === 'streaming') {
-      if (this.extname) {
-        this.validateExtension()
-      }
-      this.validateSize()
-      return
-    }
-
-    /**
-     * Do not validate file when it's validated or the state is not consumed
-     */
-    if (this.state === 'consumed' && !this.validated) {
-      this.validated = true
-      this.extname = this.extname || ''
-      this.validateExtension()
-      this.validateSize()
-    }
+    this.extensionValidator.validate()
+    this.sizeValidator.validate()
   }
 
   /**
@@ -177,9 +148,8 @@ export class File implements MultipartFileContract {
     }
 
     options = Object.assign({ name: this.clientName, overwrite: false }, options)
-
-    this.filePath = join(location, options!.name!)
+    this.filePath = join(location, options.name!)
     this.state = 'moved'
-    await outputFile(this.filePath, { overwrite: options!.overwrite! })
+    await outputFile(this.filePath, { overwrite: options.overwrite! })
   }
 }

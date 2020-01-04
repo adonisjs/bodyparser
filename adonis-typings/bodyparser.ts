@@ -101,15 +101,6 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   }
 
   /**
-   * The options that can be used to validate a given
-   * file
-   */
-  export type FileValidationOptions = {
-    size: string | number,
-    extnames: string[],
-  }
-
-  /**
    * The callback handler for a given file part
    */
   export type PartHandlerContract = (
@@ -134,6 +125,21 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   }
 
   /**
+   * ------------------------------------
+   * Multipart file related options
+   * ------------------------------------
+   */
+
+  /**
+   * The options that can be used to validate a given
+   * file
+   */
+  export type FileValidationOptions = {
+    size: string | number,
+    extnames: string[],
+  }
+
+  /**
    * Error shape for file upload errors
    */
   export type FileUploadError = {
@@ -144,35 +150,13 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   }
 
   /**
-   * New file constructor options shape
-   */
-  export type FileInputNode = {
-    fieldName: string,
-    clientName: string,
-    headers: {
-      [key: string]: string,
-    },
-  }
-
-  /**
-   * Shape of the detect file type
-   */
-  export type DetectedFileType = {
-    ext: string,
-    type?: string,
-    subtype?: string,
-  }
-
-  /**
    * Multipart file interface
    */
   export interface MultipartFileContract {
     fieldName: string,
     clientName: string,
     size: number,
-    headers: {
-      [key: string]: string,
-    }
+    headers: { [key: string]: string },
     tmpPath?: string,
     filePath?: string,
     type?: string,
@@ -182,7 +166,8 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     isValid: boolean,
     validated: boolean,
     errors: FileUploadError[],
-    validationOptions: Partial<FileValidationOptions>,
+    sizeLimit?: number | string
+    allowedExtensions?: string[]
 
     /**
      * Run validations on the file

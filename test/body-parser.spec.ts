@@ -800,4 +800,206 @@ test.group('BodyParser Middleware | multipart', () => {
 
     await remove(uploadsDir)
   })
+
+  test('validate file extension and file size seperately', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = getContext('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package')!
+        pkgFile.sizeLimit = 10
+        pkgFile.validate()
+
+        pkgFile.allowedExtensions = ['jpg']
+        pkgFile.validate()
+
+        res.end(JSON.stringify({
+          tmpPath: pkgFile.tmpPath!,
+          size: pkgFile.size,
+          validated: pkgFile.validated,
+          isValid: pkgFile.isValid,
+          errors: pkgFile.errors,
+        }))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+
+    assert.equal(body.size, packageFileSize)
+    assert.exists(body.tmpPath)
+    assert.isTrue(body.validated)
+    assert.isFalse(body.isValid)
+    assert.deepEqual(body.errors, [
+      {
+        fieldName: 'package',
+        clientName: 'package.json',
+        message: 'File size should be less than 10B',
+        type: 'size',
+      },
+      {
+        fieldName: 'package',
+        clientName: 'package.json',
+        message: 'Invalid file extension json. Only jpg is allowed',
+        type: 'extname',
+      },
+    ])
+  })
+
+  test('calling validate multiple times must be a noop', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = getContext('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package')!
+        pkgFile.sizeLimit = 10
+        pkgFile.validate()
+        pkgFile.validate()
+        pkgFile.validate()
+
+        pkgFile.allowedExtensions = ['jpg']
+        pkgFile.validate()
+        pkgFile.validate()
+        pkgFile.validate()
+
+        res.end(JSON.stringify({
+          tmpPath: pkgFile.tmpPath!,
+          size: pkgFile.size,
+          validated: pkgFile.validated,
+          isValid: pkgFile.isValid,
+          errors: pkgFile.errors,
+        }))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+
+    assert.equal(body.size, packageFileSize)
+    assert.exists(body.tmpPath)
+    assert.isTrue(body.validated)
+    assert.isFalse(body.isValid)
+    assert.deepEqual(body.errors, [
+      {
+        fieldName: 'package',
+        clientName: 'package.json',
+        message: 'File size should be less than 10B',
+        type: 'size',
+      },
+      {
+        fieldName: 'package',
+        clientName: 'package.json',
+        message: 'Invalid file extension json. Only jpg is allowed',
+        type: 'extname',
+      },
+    ])
+  })
+
+  test('validate file size using request.file method and extension manually', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = getContext('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package', { size: 10 })!
+
+        pkgFile.allowedExtensions = ['jpg']
+        pkgFile.validate()
+
+        res.end(JSON.stringify({
+          tmpPath: pkgFile.tmpPath!,
+          size: pkgFile.size,
+          validated: pkgFile.validated,
+          isValid: pkgFile.isValid,
+          errors: pkgFile.errors,
+        }))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+
+    assert.equal(body.size, packageFileSize)
+    assert.exists(body.tmpPath)
+    assert.isTrue(body.validated)
+    assert.isFalse(body.isValid)
+    assert.deepEqual(body.errors, [
+      {
+        fieldName: 'package',
+        clientName: 'package.json',
+        message: 'File size should be less than 10B',
+        type: 'size',
+      },
+      {
+        fieldName: 'package',
+        clientName: 'package.json',
+        message: 'Invalid file extension json. Only jpg is allowed',
+        type: 'extname',
+      },
+    ])
+  })
+
+  test('updating sizeLimit multiple times must not be allowed', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = getContext('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package', { size: 10 })!
+
+        try {
+          pkgFile.sizeLimit = 20
+          res.writeHead(200)
+          res.end()
+        } catch (error) {
+          res.writeHead(500)
+          res.end(error.message)
+        }
+      })
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .expect(500)
+
+    assert.equal(text, 'Cannot reset sizeLimit after file has been validated')
+  })
+
+  test('updating allowedExtensions multiple times must not be allowed', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = getContext('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('package', { extnames: ['json'] })!
+
+        try {
+          pkgFile.allowedExtensions = ['jpg']
+          res.writeHead(200)
+          res.end()
+        } catch (error) {
+          res.writeHead(500)
+          res.end(error.message)
+        }
+      })
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .expect(500)
+
+    assert.equal(text, 'Cannot update allowed extension names after file has been validated')
+  })
 })
