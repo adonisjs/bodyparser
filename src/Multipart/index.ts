@@ -12,6 +12,7 @@
 import bytes from 'bytes'
 import multiparty from 'multiparty'
 import { Exception } from '@poppinss/utils'
+import { LoggerContract } from '@ioc:Adonis/Core/Logger'
 import { RequestContract } from '@ioc:Adonis/Core/Request'
 
 import {
@@ -80,6 +81,7 @@ export class Multipart implements MultipartContract {
 
   constructor (
     private request: RequestContract,
+    private logger: LoggerContract,
     private config: Partial<{ limit: string | number, maxFields: number }> = {},
   ) {}
 
@@ -155,7 +157,7 @@ export class Multipart implements MultipartContract {
     this.files.add(partHandler.file.fieldName, partHandler.file)
 
     try {
-      const response = await handler.handler(part, (line) => {
+      const response = await handler.handler(part, async (line) => {
         if (this.state !== 'processing') {
           return
         }
@@ -173,18 +175,24 @@ export class Multipart implements MultipartContract {
           return
         }
 
-        partHandler.reportProgress(line, lineLength)
+        try {
+          await partHandler.reportProgress(line, lineLength)
+        } catch (err) {
+          this.logger.fatal(
+            'Unhandled multipart stream error. Make sure to handle "error" events for all manually processed streams',
+          )
+        }
       })
 
       /**
        * Stream consumed successfully
        */
-      partHandler.reportSuccess(response || {})
+      await partHandler.reportSuccess(response || {})
     } catch (error) {
       /**
        * The stream handler reported an exception
        */
-      partHandler.reportError(error)
+      await partHandler.reportError(error)
     }
 
     this.pendingHandlers--

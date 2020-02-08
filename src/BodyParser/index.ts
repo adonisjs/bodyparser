@@ -88,7 +88,7 @@ export class BodyParserMiddleware {
    * config
    */
   public async handle (
-    { request, route, profiler }: HttpContextContract,
+    { request, route, profiler, logger }: HttpContextContract,
     next: () => Promise<void>,
   ): Promise<void> {
     /**
@@ -120,7 +120,7 @@ export class BodyParserMiddleware {
     const multipartConfig = this.getConfigFor('multipart')
 
     if (this.isType(request, multipartConfig.types)) {
-      request.multipart = new Multipart(request, {
+      request.multipart = new Multipart(request, logger, {
         maxFields: multipartConfig.maxFields,
         limit: multipartConfig.limit,
       })

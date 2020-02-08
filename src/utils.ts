@@ -10,7 +10,7 @@
 /// <reference path="../adonis-typings/bodyparser.ts" />
 
 import { extname } from 'path'
-import fileType from 'file-type'
+import { fromBuffer } from 'file-type'
 import mediaTyper from 'media-typer'
 
 /**
@@ -28,16 +28,16 @@ function parseMimeType (mime: string): { type: string, subtype: string } | null 
 /**
  * Returns the file `type`, `subtype` and `extension`.
  */
-export function getFileType (
+export async function getFileType (
   fileContents: Buffer,
   clientName: string,
   headers: { [key: string]: string },
   force: boolean = false,
-): null | { ext: string, type?: string, subtype?: string } {
+): Promise<null | { ext: string, type?: string, subtype?: string }> {
   /**
    * Attempt to detect file type from it's content
    */
-  const magicType = fileType(fileContents)
+  const magicType = await fromBuffer(fileContents)
   if (magicType) {
     return Object.assign({ ext: magicType.ext }, parseMimeType(magicType.mime))
   }
@@ -49,7 +49,7 @@ export function getFileType (
    * to re-call this method after receiving more content
    * from the stream
    */
-  if (fileContents.length < fileType.minimumBytes && !force) {
+  if (!force) {
     return null
   }
 

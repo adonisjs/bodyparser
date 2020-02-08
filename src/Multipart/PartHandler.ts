@@ -63,12 +63,12 @@ export class PartHandler {
    * Detects the file type and extension and also validates it when validations
    * are not deferred.
    */
-  private detectFileTypeAndExtension (force: boolean) {
+  private async detectFileTypeAndExtension (force: boolean) {
     if (!this.buff) {
       return
     }
 
-    const fileType = getFileType(this.buff, this.file.clientName, this.file.headers, force)
+    const fileType = await getFileType(this.buff, this.file.clientName, this.file.headers, force)
     if (fileType) {
       this.file.extname = fileType.ext
       this.file.type = fileType.type
@@ -112,7 +112,7 @@ export class PartHandler {
    * Handles the file upload progress by validating the file size and
    * extension.
    */
-  public reportProgress (line: Buffer, bufferLength: number) {
+  public async reportProgress (line: Buffer, bufferLength: number) {
     /**
      * Do not consume stream data when file state is not `streaming`. Stream
      * events race conditions may emit the `data` event after the `error`
@@ -129,7 +129,7 @@ export class PartHandler {
      */
     if (this.file.extname === undefined) {
       this.buff = this.buff ? Buffer.concat([this.buff, line]) : line
-      this.detectFileTypeAndExtension(false)
+      await this.detectFileTypeAndExtension(false)
     } else {
       this.buff = undefined
     }
@@ -154,7 +154,10 @@ export class PartHandler {
     this.file.validate()
     if (!this.file.isValid && !this.emittedValidationError) {
       this.emittedValidationError = true
-      this.part.emit('error', new Exception('one or more validations failed', 400, 'E_STREAM_VALIDATION_FAILURE'))
+      this.part.emit(
+        'error',
+        new Exception('one or more validations failed', 400, 'E_STREAM_VALIDATION_FAILURE'),
+      )
     }
   }
 
@@ -163,7 +166,7 @@ export class PartHandler {
    * apart from the one reported by this class. For example: The `s3` failure
    * due to some bad credentails.
    */
-  public reportError (error: any) {
+  public async reportError (error: any) {
     if (this.file.state !== 'streaming') {
       return
     }
@@ -189,7 +192,7 @@ export class PartHandler {
   /**
    * Report success data about the file.
    */
-  public reportSuccess (data?: { filePath?: string, tmpPath?: string } & { [key: string]: any }) {
+  public async reportSuccess (data?: { filePath?: string, tmpPath?: string } & { [key: string]: any }) {
     if (this.file.state !== 'streaming') {
       return
     }
@@ -199,7 +202,7 @@ export class PartHandler {
      * consuming the stream
      */
     if (this.file.extname === undefined) {
-      this.detectFileTypeAndExtension(true)
+      await this.detectFileTypeAndExtension(true)
     }
 
     if (data) {

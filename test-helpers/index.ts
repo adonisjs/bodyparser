@@ -79,8 +79,12 @@ export function getContext (
   req?: IncomingMessage,
   res?: ServerResponse,
 ) {
-  const logger = new Logger({ enabled: true, level: 'trace', name: 'adonis' })
-  const profiler = new Profiler({}).create('')
+  const logger = getLogger()
+  const profiler = new Profiler(__dirname, logger, {}).create('')
   const encryption = new Encryption('verylongandrandom32charsecretkey')
   return HttpContext.create(url, params, logger, profiler, encryption, req, res)
+}
+
+export function getLogger () {
+  return new Logger({ enabled: true, level: 'trace', name: 'adonis' })
 }
