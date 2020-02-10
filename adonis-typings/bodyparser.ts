@@ -153,6 +153,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
    * Multipart file interface
    */
   export interface MultipartFileContract {
+    isMultipartFile: true,
     fieldName: string,
     clientName: string,
     size: number,

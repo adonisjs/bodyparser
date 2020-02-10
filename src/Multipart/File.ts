@@ -31,6 +31,12 @@ export class File implements MultipartFileContract {
   private extensionValidator = new ExtensionValidator(this)
 
   /**
+   * A boolean to know if file is an instance of this class
+   * or not
+   */
+  public isMultipartFile: true = true
+
+  /**
    * Field name is the name of the field
    */
   public fieldName = this.data.fieldName
