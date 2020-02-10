@@ -43,8 +43,10 @@ test.group('streamFile', (group) => {
     const file = createReadStream(MAIN_FILE)
     file.on('readable', () => {
       setTimeout(() => {
-        file.emit('error', 'blowup')
-      })
+        if (!file.destroyed) {
+          file.emit('error', 'blowup')
+        }
+      }, 0)
     })
 
     try {
@@ -52,5 +54,5 @@ test.group('streamFile', (group) => {
     } catch (error) {
       assert.equal(error, 'blowup')
     }
-  }).retry(2)
+  }).retry(3)
 })
