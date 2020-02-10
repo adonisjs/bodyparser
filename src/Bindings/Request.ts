@@ -69,4 +69,11 @@ export default function extendRequest (Request: RequestConstructorContract) {
       return file
     })
   })
+
+  /**
+   * Fetch all files
+   */
+  Request.macro('allFiles', function allFiles () {
+    return this['__raw_files'] || {}
+  })
 }
