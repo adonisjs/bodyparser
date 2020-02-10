@@ -44,7 +44,7 @@ export default function extendRequest (Request: RequestConstructorContract) {
    * Fetch a single file
    */
   Request.macro('file', function getFile (key: string, options?: Partial<FileValidationOptions>) {
-    let file: unknown = get(this['__raw_files'], key)
+    let file: unknown = get(this.allFiles(), key)
     file = Array.isArray(file) ? file[0] : file
 
     if (!isInstanceOfFile(file)) {
@@ -60,7 +60,7 @@ export default function extendRequest (Request: RequestConstructorContract) {
    * Fetch an array of files
    */
   Request.macro('files', function getFiles (key: string, options?: Partial<FileValidationOptions>) {
-    let files: unknown[] = get(this['__raw_files'], key)
+    let files: unknown[] = get(this.allFiles(), key)
     files = Array.isArray(files) ? files : (files ? [files] : [])
 
     return files.filter(isInstanceOfFile).map((file) => {

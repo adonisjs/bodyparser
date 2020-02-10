@@ -24,6 +24,7 @@ import { Multipart } from '../src/Multipart'
 import extendRequest from '../src/Bindings/Request'
 import { BodyParserMiddleware } from '../src/BodyParser'
 import { packageFilePath, packageFileSize, bodyParserConfig, getContext } from '../test-helpers'
+import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser'
 
 const Request = BaseRequest as unknown as RequestConstructorContract
 
@@ -1001,5 +1002,41 @@ test.group('BodyParser Middleware | multipart', () => {
       .expect(500)
 
     assert.equal(text, 'Cannot update allowed extension names after file has been validated')
+  })
+
+  test('get all files as an object', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = getContext('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const allFiles = ctx.request.allFiles()
+        const files = Object.keys(allFiles).map((field) => {
+          const file = allFiles[field] as MultipartFileContract
+          return {
+            field: field,
+            tmpPath: file.tmpPath!,
+            size: file.size,
+            validated: file.validated,
+            isValid: file.isValid,
+            errors: file.errors,
+          }
+        })
+
+        res.end(JSON.stringify(files))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+
+    assert.lengthOf(body, 1)
+    assert.equal(body[0].size, packageFileSize)
+    assert.exists(body[0].tmpPath)
+    assert.isFalse(body[0].validated)
+    assert.isTrue(body[0].isValid)
+    assert.lengthOf(body[0].errors, 0)
   })
 })
