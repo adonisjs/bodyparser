@@ -150,6 +150,22 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   }
 
   /**
+   * Shape of multipart.toJSON return value
+   */
+  export type MultipartFileJson = {
+    fieldName: string,
+    clientName: string,
+    size: number,
+    filePath?: string,
+    type?: string,
+    extname?: string,
+    subtype?: string,
+    state: 'idle' | 'streaming' | 'consumed' | 'moved',
+    isValid: boolean,
+    validated: boolean,
+  }
+
+  /**
    * Multipart file interface
    */
   export interface MultipartFileContract {
@@ -180,5 +196,10 @@ declare module '@ioc:Adonis/Core/BodyParser' {
      * streams cannot be moved unless `tmpPath` is defined explicitly.
      */
     move (location: string, options?: { name?: string, overwrite?: boolean }): Promise<void>
+
+    /**
+     * Get JSON representation of file
+     */
+    toJSON (): MultipartFileJson
   }
 }

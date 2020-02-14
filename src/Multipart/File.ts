@@ -158,4 +158,22 @@ export class File implements MultipartFileContract {
     this.state = 'moved'
     await outputFile(this.filePath, { overwrite: options.overwrite! })
   }
+
+  /**
+   * Returns file JSON representation
+   */
+  public toJSON () {
+    return {
+      fieldName: this.fieldName,
+      clientName: this.clientName,
+      size: this.size,
+      filePath: this.filePath,
+      type: this.type,
+      extname: this.extname,
+      subtype: this.subtype,
+      state: this.state,
+      isValid: this.isValid,
+      validated: this.validated,
+    }
+  }
 }
