@@ -16,7 +16,7 @@ import { tmpdir } from 'os'
 import { merge } from 'lodash'
 import supertest from 'supertest'
 import { createServer } from 'http'
-import { pathExists, remove } from 'fs-extra'
+import { pathExists, remove, readFile } from 'fs-extra'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
 import { Request as BaseRequest } from '@adonisjs/http-server/build/src/Request'
 
@@ -761,8 +761,9 @@ test.group('BodyParser Middleware | multipart', () => {
       .attach('package', packageFilePath)
       .expect(200)
 
-    const hasFile = await pathExists(join(uploadsDir, 'package.json'))
-    assert.isTrue(hasFile)
+    const uploadedFileContents = await readFile(join(uploadsDir, 'package.json'), 'utf-8')
+    const originalFileContents = await readFile(packageFilePath, 'utf-8')
+    assert.equal(uploadedFileContents, originalFileContents)
 
     await remove(uploadsDir)
   })
@@ -796,8 +797,9 @@ test.group('BodyParser Middleware | multipart', () => {
       .attach('package', packageFilePath)
       .expect(200)
 
-    const hasFile = await pathExists(join(uploadsDir, 'myapp.json'))
-    assert.isTrue(hasFile)
+    const uploadedFileContents = await readFile(join(uploadsDir, 'myapp.json'), 'utf-8')
+    const originalFileContents = await readFile(packageFilePath, 'utf-8')
+    assert.equal(uploadedFileContents, originalFileContents)
 
     await remove(uploadsDir)
   })

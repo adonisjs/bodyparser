@@ -10,7 +10,7 @@
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import { join } from 'path'
-import { outputFile } from 'fs-extra'
+import { move } from 'fs-extra'
 import { Exception } from '@poppinss/utils'
 
 import {
@@ -156,7 +156,7 @@ export class File implements MultipartFileContract {
     options = Object.assign({ name: this.clientName, overwrite: false }, options)
     this.filePath = join(location, options.name!)
     this.state = 'moved'
-    await outputFile(this.filePath, { overwrite: options.overwrite! })
+    await move(this.tmpPath, this.filePath, { overwrite: options.overwrite! })
   }
 
   /**
