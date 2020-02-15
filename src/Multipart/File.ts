@@ -79,6 +79,12 @@ export class File implements MultipartFileContract {
   public filePath?: string
 
   /**
+   * File name is only set after the move operation. It is the relative
+   * path of the moved file
+   */
+  public fileName?: string
+
+  /**
    * Tmp path, only exists when file is uploaded using the
    * classic mode.
    */
@@ -154,7 +160,8 @@ export class File implements MultipartFileContract {
     }
 
     options = Object.assign({ name: this.clientName, overwrite: false }, options)
-    this.filePath = join(location, options.name!)
+    this.fileName = options.name!
+    this.filePath = join(location, this.fileName)
     this.state = 'moved'
     await move(this.tmpPath, this.filePath, { overwrite: options.overwrite! })
   }
@@ -168,6 +175,7 @@ export class File implements MultipartFileContract {
       clientName: this.clientName,
       size: this.size,
       filePath: this.filePath,
+      fileName: this.fileName,
       type: this.type,
       extname: this.extname,
       subtype: this.subtype,

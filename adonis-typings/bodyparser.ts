@@ -176,6 +176,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     headers: { [key: string]: string },
     tmpPath?: string,
     filePath?: string,
+    fileName?: string,
     type?: string,
     extname?: string,
     subtype?: string,
