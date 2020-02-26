@@ -16,7 +16,7 @@ import { tmpdir } from 'os'
 import { merge } from 'lodash'
 import supertest from 'supertest'
 import { createServer } from 'http'
-import { pathExists, remove, readFile } from 'fs-extra'
+import { pathExists, remove, readFile, outputFile } from 'fs-extra'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
 import { Request as BaseRequest } from '@adonisjs/http-server/build/src/Request'
 
@@ -800,6 +800,37 @@ test.group('BodyParser Middleware | multipart', () => {
     const uploadedFileContents = await readFile(join(uploadsDir, 'myapp.json'), 'utf-8')
     const originalFileContents = await readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
+
+    await remove(uploadsDir)
+  })
+
+  test('raise error when destination file already exists', async (assert) => {
+    const uploadsDir = join(__dirname, 'uploads')
+
+    const server = createServer(async (req, res) => {
+      const ctx = getContext('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(bodyParserConfig)
+
+      await middleware.handle(ctx, async () => {
+        const pkgFile = ctx.request.file('package')!
+
+        try {
+          await pkgFile.move(uploadsDir, { overwrite: false })
+        } catch (error) {
+          assert.equal(error.message, `"package.json" already exists at "${uploadsDir}". Set "overwrite = true" to overwrite it`)
+          assert.equal(pkgFile.state, 'consumed')
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.end()
+        }
+      })
+    })
+
+    await outputFile(join(uploadsDir, 'package.json'), JSON.stringify({}))
+
+    await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .expect(200)
 
     await remove(uploadsDir)
   })

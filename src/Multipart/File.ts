@@ -166,11 +166,20 @@ export class File implements MultipartFileContract {
       throw new Exception('tmpPath must be set on the file before moving it', 500, 'E_MISSING_FILE_TMP_PATH')
     }
 
-    options = Object.assign({ name: this.clientName, overwrite: false }, options)
-    this.fileName = options.name!
-    this.filePath = join(location, this.fileName)
-    this.state = 'moved'
-    await move(this.tmpPath, this.filePath, { overwrite: options.overwrite! })
+    options = Object.assign({ name: this.clientName, overwrite: true }, options)
+    const filePath = join(location, options.name!)
+
+    try {
+      await move(this.tmpPath, filePath, { overwrite: options.overwrite! })
+      this.filePath = filePath
+      this.fileName = options.name!
+      this.state = 'moved'
+    } catch (error) {
+      if (error.message.includes('dest already exists')) {
+        throw new Error(`"${options.name!}" already exists at "${location}". Set "overwrite = true" to overwrite it`)
+      }
+      throw error
+    }
   }
 
   /**
