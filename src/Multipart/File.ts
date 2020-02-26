@@ -115,6 +115,13 @@ export class File implements MultipartFileContract {
   }
 
   /**
+   * Opposite of [[this.isValid]]
+   */
+  public get hasErrors () {
+    return !this.isValid
+  }
+
+  /**
    * The maximum file size limit
    */
   public get sizeLimit () {

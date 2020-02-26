@@ -182,6 +182,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     subtype?: string,
     state: 'idle' | 'streaming' | 'consumed' | 'moved',
     isValid: boolean,
+    hasErrors: boolean,
     validated: boolean,
     errors: FileUploadError[],
     sizeLimit?: number | string
