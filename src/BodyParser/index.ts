@@ -10,7 +10,7 @@
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import { tmpdir } from 'os'
-import uuid from 'uuid/v1'
+import { v1 as uuidV1 } from 'uuid'
 import coBody from 'co-body'
 import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
@@ -80,7 +80,7 @@ export class BodyParserMiddleware {
       return isAbsolute(tmpPath) ? tmpPath : join(tmpdir(), tmpPath)
     }
 
-    return join(tmpdir(), uuid())
+    return join(tmpdir(), uuidV1())
   }
 
   /**
