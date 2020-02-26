@@ -123,10 +123,11 @@ export class Multipart implements MultipartContract {
    */
   private async handlePart (part: MultipartStream) {
     /**
-     * Skip parts with empty names. This is a use case of bad client
-     * or intentional attempt to break the server
+     * Skip parts with empty name or empty filenames. The empty
+     * filenames takes place when user doesn't upload a file
+     * and empty name is more of a bad client scanerio.
      */
-    if (!part.name) {
+    if (!part.name || !part.filename) {
       part.resume()
       return
     }
