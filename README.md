@@ -1,42 +1,52 @@
-<div align="center"><img src="https://res.cloudinary.com/adonisjs/image/upload/q_100/v1564392111/adonis-banner_o9lunk.png" width="600px"></div>
+<div align="center">
+  <img src="https://res.cloudinary.com/adonisjs/image/upload/q_100/v1558612869/adonis-readme_zscycu.jpg" width="600px">
+</div>
 
-# AdonisJS BodyParser
-> Bodyparser middleware to AdonisJs
+<br />
 
-[![appveyor-image]][appveyor-url] [![circleci-image]][circleci-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url]
+<div align="center">
+  <h3>BodyParser</h3>
+  <p>
+    BodyParser Middleware For AdonisJS with first class support for <strong>file uploads</strong>, <strong>JSON payloads</strong>, <strong>raw body</strong> and standard <strong>form submissions</strong>
+  </p>
+</div>
 
-The BodyParser middleware parses the incoming HTTP requests body and files, so that you can access them using the `request` instance. The module is written specifically to work with AdonisJs only.
+<br />
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of contents
+<div align="center">
 
-- [Features](#features)
-- [Usage](#usage)
+[![circleci-image]][circleci-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url]
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+</div>
 
-## Features
+<div align="center">
+  <h3>
+    <a href="https://adonisjs.com">
+      Website
+    </a>
+    <span> | </span>
+    <a href="https://adonisjs.com/docs">
+      Guides
+    </a>
+    <span> | </span>
+    <a href="CONTRIBUTING.md">
+      Contributing
+    </a>
+  </h3>
+</div>
 
-1. Support for `multipart/form-data`, `application/x-www-form-urlencoded` as well raw HTTP requests.
-2. Extensive support for JSON request body including `application/vnd.api+json`, `application/json-patch+json`, `application/csp-report` and `application/json` content type.
-3. Exposes API to stream file uploads without writing to the `tmp` directory.
-4. Inbuilt protection from [JSON poisioning](https://medium.com/intrinsic/javascript-prototype-poisoning-vulnerabilities-in-the-wild-7bc15347c96)
+<div align="center">
+  <sub>Built with ❤︎ by <a href="https://github.com/thetutlage">Harminder Virk</a>
+</div>
 
-## Usage
-The bodyparser is part of `@adonisjs/core` package and hence no extra setup is required
-
-[appveyor-image]: https://img.shields.io/appveyor/ci/thetutlage/adonis-bodyparser/master.svg?style=for-the-badge&logo=appveyor
-[appveyor-url]: https://ci.appveyor.com/project/thetutlage/adonis-bodyparser "appveyor"
-
-[circleci-image]: https://img.shields.io/circleci/project/github/adonisjs/adonis-bodyparser/master.svg?style=for-the-badge&logo=circleci
-[circleci-url]: https://circleci.com/gh/adonisjs/adonis-bodyparser "circleci"
+[circleci-image]: https://img.shields.io/circleci/build/github/adonisjs/bodyparser/master.svg?style=for-the-badge&logo=circleci
+[circleci-url]: https://circleci.com/gh/adonisjs/bodyparser "circleci"
 
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]:  "typescript"
 
-[npm-image]: https://img.shields.io/npm/v/@adonisjs/bodyparser.svg?style=for-the-badge&logo=npm
-[npm-url]: https://npmjs.org/package/@adonisjs/bodyparser "npm"
+[npm-image]: https://img.shields.io/npm/v/@adonisjs/bodyparser/alpha.svg?style=for-the-badge&logo=npm
+[npm-url]: https://www.npmjs.com/package/@adonisjs/bodyparser/v/alpha "npm"
 
 [license-image]: https://img.shields.io/npm/l/@adonisjs/bodyparser?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md "license"
