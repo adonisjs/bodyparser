@@ -95,11 +95,13 @@ export class BodyParserMiddleware {
      * Initiating the `__raw_files` private property as an object
      */
     request['__raw_files'] = {}
+    const requestMethod = request.method()
 
     /**
      * Only process for whitelisted nodes
      */
-    if (!this.config.whitelistedMethods.includes(request.method())) {
+    if (!this.config.whitelistedMethods.includes(requestMethod)) {
+      logger.trace(`bodyparser skipping method ${requestMethod}`)
       return next()
     }
 
@@ -111,6 +113,7 @@ export class BodyParserMiddleware {
      * clients with missing headers.
      */
     if (!request.hasBody()) {
+      logger.trace('bodyparser skipping empty body')
       return next()
     }
 
@@ -120,6 +123,8 @@ export class BodyParserMiddleware {
     const multipartConfig = this.getConfigFor('multipart')
 
     if (this.isType(request, multipartConfig.types)) {
+      logger.trace('bodyparser parsing as multipart body')
+
       request.multipart = new Multipart(request, logger, {
         maxFields: multipartConfig.maxFields,
         limit: multipartConfig.limit,
@@ -170,6 +175,7 @@ export class BodyParserMiddleware {
      */
     const formConfig = this.getConfigFor('form')
     if (this.isType(request, formConfig.types)) {
+      logger.trace('bodyparser parsing as form request')
       const action = profiler.profile('bodyparser:urlencoded')
 
       try {
@@ -189,6 +195,7 @@ export class BodyParserMiddleware {
      */
     const jsonConfig = this.getConfigFor('json')
     if (this.isType(request, jsonConfig.types)) {
+      logger.trace('bodyparser parsing as json body')
       const action = profiler.profile('bodyparser:json')
 
       try {
@@ -208,6 +215,7 @@ export class BodyParserMiddleware {
      */
     const rawConfig = this.getConfigFor('raw')
     if (this.isType(request, rawConfig.types)) {
+      logger.trace('bodyparser parsing as raw body')
       const action = profiler.profile('bodyparser:raw')
 
       try {
