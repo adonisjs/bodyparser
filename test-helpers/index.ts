@@ -9,15 +9,15 @@
 
 /// <reference path="../adonis-typings/index.ts" />
 
-import { join } from 'path'
 import { EOL } from 'os'
+import { join } from 'path'
 import { IncomingMessage, ServerResponse } from 'http'
+import { RequestConfig } from '@ioc:Adonis/Core/Request'
 import { Logger } from '@adonisjs/logger/build/standalone'
 import { Profiler } from '@adonisjs/profiler/build/standalone'
-import { RequestConfigContract } from '@ioc:Adonis/Core/Request'
+import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
 import { Encryption } from '@adonisjs/encryption/build/standalone'
 import { HttpContext } from '@adonisjs/http-server/build/standalone'
-import { BodyParserConfigContract } from '@ioc:Adonis/Core/BodyParser'
 
 const contents = JSON.stringify(require('../package.json'), null, 2).split('\n').join(EOL)
 
@@ -25,14 +25,14 @@ export const packageFilePath = join(__dirname, '../package.json')
 export const packageFileSize = Buffer.from(contents, 'utf-8').length + EOL.length
 export const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
 
-export const requestConfig: RequestConfigContract = {
+export const requestConfig: RequestConfig = {
   allowMethodSpoofing: false,
   trustProxy: () => true,
   subdomainOffset: 2,
   generateRequestId: false,
 }
 
-export const bodyParserConfig: BodyParserConfigContract = {
+export const bodyParserConfig: BodyParserConfig = {
   whitelistedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
   json: {
     encoding: 'utf-8',
@@ -81,10 +81,10 @@ export function getContext (
 ) {
   const logger = getLogger()
   const profiler = new Profiler(__dirname, logger, {}).create('')
-  const encryption = new Encryption('verylongandrandom32charsecretkey')
+  const encryption = new Encryption({ secret: 'verylongandrandom32charsecretkey' })
   return HttpContext.create(url, params, logger, profiler, encryption, req, res)
 }
 
 export function getLogger () {
-  return new Logger({ enabled: true, level: 'trace', name: 'adonis' })
+  return new Logger({ enabled: false, level: 'trace', name: 'adonis' })
 }

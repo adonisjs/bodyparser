@@ -9,9 +9,9 @@
 
 /// <reference path="./bodyparser.ts" />
 import {
+  MultipartContract,
   FileValidationOptions,
   MultipartFileContract,
-  MultipartContract,
 } from '@ioc:Adonis/Core/BodyParser'
 
 /**

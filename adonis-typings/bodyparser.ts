@@ -9,7 +9,6 @@
 
 declare module '@ioc:Adonis/Core/BodyParser' {
   import { Readable } from 'stream'
-  import { FileTypeResult } from 'file-type'
 
   /**
    * Qs module config
@@ -42,28 +41,28 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   /**
    * Body parser config for parsing JSON requests
    */
-  export type BodyParserJSONConfigContract = BodyParserBaseConfig & {
+  export type BodyParserJSONConfig = BodyParserBaseConfig & {
     strict: boolean,
   }
 
   /**
    * Parser config for parsing form data
    */
-  export type BodyParserFormConfigContract = BodyParserBaseConfig & {
+  export type BodyParserFormConfig = BodyParserBaseConfig & {
     queryString: QueryStringConfig,
   }
 
   /**
    * Parser config for parsing raw body (untouched)
    */
-  export type BodyParserRawConfigContract = BodyParserBaseConfig & {
+  export type BodyParserRawConfig = BodyParserBaseConfig & {
     queryString: QueryStringConfig,
   }
 
   /**
    * Parser config for parsing multipart requests
    */
-  export type BodyParserMultipartConfigContract = BodyParserBaseConfig & {
+  export type BodyParserMultipartConfig = BodyParserBaseConfig & {
     autoProcess: boolean,
     maxFields: number,
     processManually: string[],
@@ -73,12 +72,12 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   /**
    * Body parser config for all different types
    */
-  export type BodyParserConfigContract = {
+  export type BodyParserConfig = {
     whitelistedMethods: string[],
-    json: BodyParserJSONConfigContract,
-    form: BodyParserFormConfigContract,
-    raw: BodyParserRawConfigContract,
-    multipart: BodyParserMultipartConfigContract,
+    json: BodyParserJSONConfig,
+    form: BodyParserFormConfig,
+    raw: BodyParserRawConfig,
+    multipart: BodyParserMultipartConfig,
   }
 
   /**
@@ -103,15 +102,14 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   /**
    * The callback handler for a given file part
    */
-  export type PartHandlerContract = (
+  export type PartHandler = (
     part: MultipartStream,
     reportChunk: (chunk: Buffer) => void,
   ) => Promise<({ filePath?: string, tmpPath?: string } & { [key: string]: any }) | void>
 
   /**
-   * Multipart class contract, since it is exposed on the
-   * request object, we need the interface to extend
-   * typings
+   * Multipart class contract, since it is exposed on the request object,
+   * we need the interface to extend typings.
    */
   export interface MultipartContract {
     state: 'idle' | 'processing' | 'error' | 'success',
@@ -119,7 +117,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     onFile (
       name: string,
       options: Partial<FileValidationOptions & { deferValidations: boolean }>,
-      callback: PartHandlerContract,
+      callback: PartHandler,
     ): this,
     process (config?: Partial<{ limit: string | number, maxFields: number }>): Promise<void>,
   }
@@ -150,9 +148,9 @@ declare module '@ioc:Adonis/Core/BodyParser' {
   }
 
   /**
-   * Shape of multipart.toJSON return value
+   * Shape of file.toJSON return value
    */
-  export type MultipartFileJson = {
+  export type FileJSON = {
     fieldName: string,
     clientName: string,
     size: number,
@@ -202,6 +200,6 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     /**
      * Get JSON representation of file
      */
-    toJSON (): MultipartFileJson
+    toJSON (): FileJSON
   }
 }

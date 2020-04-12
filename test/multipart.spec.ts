@@ -28,7 +28,9 @@ import {
   packageFileSize,
 } from '../test-helpers'
 
-const encryption = new Encryption('verylongandrandom32charsecretkey')
+const encryption = new Encryption({
+  secret: 'verylongandrandom32charsecretkey',
+})
 const Request = BaseRequest as unknown as RequestConstructorContract
 
 test.group('Multipart', () => {

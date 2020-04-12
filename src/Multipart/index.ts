@@ -18,7 +18,7 @@ import { RequestContract } from '@ioc:Adonis/Core/Request'
 import {
   MultipartStream,
   MultipartContract,
-  PartHandlerContract,
+  PartHandler as PartHandlerType,
 } from '@ioc:Adonis/Core/BodyParser'
 
 import { FormFields } from '../FormFields'
@@ -35,7 +35,7 @@ export class Multipart implements MultipartContract {
    */
   private handlers: {
     [key: string]: {
-      handler: PartHandlerContract,
+      handler: PartHandlerType,
       options: Parameters<MultipartContract['onFile']>[1],
     },
   } = {}
@@ -258,7 +258,7 @@ export class Multipart implements MultipartContract {
   public onFile (
     name: string,
     options: Parameters<MultipartContract['onFile']>[1],
-    handler: PartHandlerContract,
+    handler: PartHandlerType,
   ): this {
     this.handlers[name] = { handler, options }
     return this

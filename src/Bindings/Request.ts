@@ -9,9 +9,10 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
-import get from 'lodash.get'
+import { lodash } from '@poppinss/utils'
 import { FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
+
 import { File } from '../Multipart/File'
 
 /**
@@ -44,7 +45,7 @@ export default function extendRequest (Request: RequestConstructorContract) {
    * Fetch a single file
    */
   Request.macro('file', function getFile (key: string, options?: Partial<FileValidationOptions>) {
-    let file: unknown = get(this.allFiles(), key)
+    let file: unknown = lodash.get(this.allFiles(), key)
     file = Array.isArray(file) ? file[0] : file
 
     if (!isInstanceOfFile(file)) {
@@ -60,7 +61,7 @@ export default function extendRequest (Request: RequestConstructorContract) {
    * Fetch an array of files
    */
   Request.macro('files', function getFiles (key: string, options?: Partial<FileValidationOptions>) {
-    let files: unknown[] = get(this.allFiles(), key)
+    let files: unknown[] = lodash.get(this.allFiles(), key)
     files = Array.isArray(files) ? files : (files ? [files] : [])
 
     return files.filter(isInstanceOfFile).map((file) => {

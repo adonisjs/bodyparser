@@ -7,8 +7,7 @@
 * file that was distributed with this source code.
 */
 
-import get from 'lodash.get'
-import set from 'lodash.set'
+import { lodash } from '@poppinss/utils'
 
 /**
  * A jar of form fields to store form data by handling
@@ -49,10 +48,10 @@ export class FormFields {
     /**
      * Check to see if value exists or set it (if missing)
      */
-    const existingValue = get(this.fields, key)
+    const existingValue = lodash.get(this.fields, key)
 
     if (!existingValue) {
-      set(this.fields, key, isArray ? [value] : value)
+      lodash.set(this.fields, key, isArray ? [value] : value)
       return
     }
 
@@ -67,7 +66,7 @@ export class FormFields {
     /**
      * Set new value + existing value
      */
-    set(this.fields, key, [existingValue, value])
+    lodash.set(this.fields, key, [existingValue, value])
   }
 
   /**
