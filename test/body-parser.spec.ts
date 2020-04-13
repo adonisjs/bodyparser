@@ -13,9 +13,9 @@
 import test from 'japa'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import { merge } from 'lodash'
 import supertest from 'supertest'
 import { createServer } from 'http'
+import { lodash } from '@poppinss/utils'
 import { pathExists, remove, readFile, outputFile } from 'fs-extra'
 import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
 import { Request as BaseRequest } from '@adonisjs/http-server/build/src/Request'
@@ -113,7 +113,7 @@ test.group('BodyParser Middleware | form data', () => {
   test('abort if request size is over limit', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = getContext('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         form: {
           limit: 2,
         },
@@ -140,7 +140,7 @@ test.group('BodyParser Middleware | form data', () => {
   test('abort if specified encoding is not supported', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = getContext('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         form: {
           encoding: 'foo',
         },
@@ -207,7 +207,7 @@ test.group('BodyParser Middleware | json', () => {
   test('abort if request size is over limit', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = getContext('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         json: {
           limit: 2,
         },
@@ -274,7 +274,7 @@ test.group('BodyParser Middleware | raw body', () => {
   test('abort if request size is over limit', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = getContext('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         raw: {
           limit: 2,
         },
@@ -375,7 +375,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const server = createServer(async (req, res) => {
       const ctx = getContext('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         multipart: {
           autoProcess: true,
           tmpFileName () {
@@ -450,7 +450,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const server = createServer(async (req, res) => {
       const ctx = getContext('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         multipart: {
           autoProcess: false,
         },
@@ -474,7 +474,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const server = createServer(async (req, res) => {
       const ctx = getContext('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         multipart: {
           autoProcess: true,
           processManually: ['/'],
@@ -499,7 +499,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     const server = createServer(async (req, res) => {
       const ctx = getContext('/project/:id/file', { id: 1 }, req, res)
-      const middleware = new BodyParserMiddleware(merge({}, bodyParserConfig, {
+      const middleware = new BodyParserMiddleware(lodash.merge({}, bodyParserConfig, {
         multipart: {
           autoProcess: true,
           processManually: ['/project/:id/file'],
