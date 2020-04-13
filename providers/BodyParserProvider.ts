@@ -12,15 +12,15 @@ import extendRequest from '../src/Bindings/Request'
 import { BodyParserMiddleware } from '../src/BodyParser/index'
 
 export default class BodyParserProvider {
-  constructor (protected $container: IocContract) {
+  constructor (protected container: IocContract) {
   }
 
   /**
    * Registers the bodyparser middleware namespace to the container.
    */
   public register () {
-    this.$container.bind('Adonis/Core/BodyParserMiddleware', () => {
-      const Config = this.$container.use('Adonis/Core/Config')
+    this.container.bind('Adonis/Core/BodyParserMiddleware', () => {
+      const Config = this.container.use('Adonis/Core/Config')
       return new BodyParserMiddleware(Config.get('bodyparser', {}))
     })
   }
@@ -29,6 +29,6 @@ export default class BodyParserProvider {
    * Adding the `file` macro to add support for reading request files.
    */
   public boot () {
-    extendRequest(this.$container.use('Adonis/Core/Request'))
+    extendRequest(this.container.use('Adonis/Core/Request'))
   }
 }

@@ -15,7 +15,6 @@ import { v1 as uuidV1 } from 'uuid'
 import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
 
-import { RequestContract } from '@ioc:Adonis/Core/Request'
 import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
@@ -50,7 +49,7 @@ export class BodyParserMiddleware {
    * Returns a boolean telling if request `content-type` header
    * matches the expected types or not
    */
-  private isType (request: RequestContract, types: string[]): boolean {
+  private isType (request: HttpContextContract['request'], types: string[]): boolean {
     return !!(this.ensureTypes(types) && request.is(types))
   }
 
