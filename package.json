@@ -23,13 +23,13 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/encryption": "^2.0.1",
-    "@adonisjs/fold": "^6.3.3",
-    "@adonisjs/http-server": "^2.0.1",
-    "@adonisjs/logger": "^2.0.0",
+    "@adonisjs/encryption": "^2.0.2",
+    "@adonisjs/fold": "^6.3.5",
+    "@adonisjs/http-server": "^2.0.2",
+    "@adonisjs/logger": "^2.0.1",
     "@adonisjs/mrm-preset": "^2.3.0",
-    "@adonisjs/profiler": "^3.0.0",
-    "@poppinss/dev-utils": "^1.0.5",
+    "@adonisjs/profiler": "^3.0.1",
+    "@poppinss/dev-utils": "^1.0.6",
     "@types/bytes": "^3.1.0",
     "@types/end-of-stream": "^1.4.0",
     "@types/fs-extra": "^8.1.0",
@@ -80,7 +80,7 @@
     "anyBranch": false
   },
   "dependencies": {
-    "@poppinss/utils": "^2.2.3",
+    "@poppinss/utils": "^2.2.4",
     "bytes": "^3.1.0",
     "co-body": "git+https://github.com/thetutlage/co-body.git",
     "end-of-stream": "^1.4.4",
