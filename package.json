@@ -1,6 +1,6 @@
 {
   "name": "@adonisjs/bodyparser",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "AdonisJs body parser to read and parse HTTP request bodies",
   "main": "build/providers/BodyParserProvider.js",
   "files": [
