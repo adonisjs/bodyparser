@@ -6,8 +6,7 @@
   "files": [
     "build/src",
     "build/adonis-typings",
-    "build/providers",
-    "build/config"
+    "build/providers"
   ],
   "types": "./build/adonis-typings/index.d.ts",
   "scripts": {
@@ -16,7 +15,7 @@
     "test": "node japaFile.js",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
-    "build": "npm run compile && copyfiles \"config/**/*.txt\" build",
+    "build": "npm run compile",
     "lint": "eslint . --ext=.ts",
     "commit": "git-cz",
     "release": "np",
@@ -39,7 +38,6 @@
     "@types/supertest": "^2.0.8",
     "@types/uuid": "^7.0.2",
     "commitizen": "^4.0.4",
-    "copyfiles": "^2.2.0",
     "cz-conventional-changelog": "^3.1.0",
     "del-cli": "^3.0.0",
     "eslint": "^6.8.0",
@@ -92,14 +90,6 @@
   "publishConfig": {
     "access": "public",
     "tag": "alpha"
-  },
-  "adonisjs": {
-    "templates": {
-      "basePath": "./build/config",
-      "config": [
-        "bodyparser.txt"
-      ]
-    }
   },
   "directories": {
     "test": "test"
