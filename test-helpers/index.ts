@@ -17,7 +17,7 @@ import { Logger } from '@adonisjs/logger/build/standalone'
 import { Profiler } from '@adonisjs/profiler/build/standalone'
 import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
 import { Encryption } from '@adonisjs/encryption/build/standalone'
-import { HttpContext } from '@adonisjs/http-server/build/standalone'
+import { HttpContext, Router } from '@adonisjs/http-server/build/standalone'
 
 const contents = JSON.stringify(require('../package.json'), null, 2).split('\n').join(EOL)
 
@@ -82,7 +82,8 @@ export function getContext (
   const logger = getLogger()
   const profiler = new Profiler(__dirname, logger, {}).create('')
   const encryption = new Encryption({ secret: 'verylongandrandom32charsecretkey' })
-  return HttpContext.create(url, params, logger, profiler, encryption, req, res)
+  const router = new Router(encryption)
+  return HttpContext.create(url, params, logger, profiler, encryption, router, req, res)
 }
 
 export function getLogger () {

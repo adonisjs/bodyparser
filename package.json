@@ -22,33 +22,33 @@
     "version": "npm run build"
   },
   "devDependencies": {
-    "@adonisjs/encryption": "^2.0.2",
+    "@adonisjs/encryption": "^2.0.3",
     "@adonisjs/fold": "^6.3.5",
-    "@adonisjs/http-server": "^2.0.2",
-    "@adonisjs/logger": "^2.0.1",
+    "@adonisjs/http-server": "^2.1.1",
+    "@adonisjs/logger": "^2.0.5",
     "@adonisjs/mrm-preset": "^2.3.0",
-    "@adonisjs/profiler": "^3.0.1",
+    "@adonisjs/profiler": "^3.0.3",
     "@poppinss/dev-utils": "^1.0.6",
     "@types/bytes": "^3.1.0",
     "@types/end-of-stream": "^1.4.0",
     "@types/fs-extra": "^8.1.0",
-    "@types/media-typer": "^0.3.0",
+    "@types/media-typer": "^1.1.0",
     "@types/multiparty": "0.0.32",
-    "@types/node": "^13.11.1",
-    "@types/supertest": "^2.0.8",
-    "@types/uuid": "^7.0.2",
-    "commitizen": "^4.0.4",
-    "cz-conventional-changelog": "^3.1.0",
+    "@types/node": "^14.0.1",
+    "@types/supertest": "^2.0.9",
+    "@types/uuid": "^7.0.3",
+    "commitizen": "^4.1.2",
+    "cz-conventional-changelog": "^3.2.0",
     "del-cli": "^3.0.0",
-    "eslint": "^6.8.0",
-    "eslint-plugin-adonis": "^1.0.9",
+    "eslint": "^7.0.0",
+    "eslint-plugin-adonis": "^1.0.10",
     "husky": "^4.2.5",
     "japa": "^3.0.1",
-    "mrm": "^2.2.1",
+    "mrm": "^2.3.0",
     "np": "^5.2.1",
     "supertest": "^4.0.2",
-    "ts-node": "^8.8.2",
-    "typescript": "^3.8.3"
+    "ts-node": "^8.10.1",
+    "typescript": "^3.9.2"
   },
   "peerDependencies": {
     "@adonisjs/http-server": "^2.0.0"
@@ -77,15 +77,15 @@
     "anyBranch": false
   },
   "dependencies": {
-    "@poppinss/utils": "^2.2.4",
+    "@poppinss/utils": "^2.2.6",
     "bytes": "^3.1.0",
     "co-body": "git+https://github.com/thetutlage/co-body.git",
+    "cuid": "^2.1.8",
     "end-of-stream": "^1.4.4",
-    "file-type": "^14.1.4",
+    "file-type": "^14.3.0",
     "fs-extra": "^9.0.0",
     "media-typer": "^1.1.0",
-    "multiparty": "^4.2.1",
-    "uuid": "^7.0.3"
+    "multiparty": "^4.2.1"
   },
   "publishConfig": {
     "access": "public",
