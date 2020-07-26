@@ -8,8 +8,6 @@
  */
 
 import { IocContract } from '@adonisjs/fold'
-import extendRequest from '../src/Bindings/Request'
-import { BodyParserMiddleware } from '../src/BodyParser/index'
 
 export default class BodyParserProvider {
 	constructor(protected container: IocContract) {}
@@ -20,6 +18,7 @@ export default class BodyParserProvider {
 	public register() {
 		this.container.bind('Adonis/Core/BodyParserMiddleware', () => {
 			const Config = this.container.use('Adonis/Core/Config')
+			const { BodyParserMiddleware } = require('../src/BodyParser/index')
 			return new BodyParserMiddleware(Config.get('bodyparser', {}))
 		})
 	}
@@ -28,6 +27,7 @@ export default class BodyParserProvider {
 	 * Adding the `file` macro to add support for reading request files.
 	 */
 	public boot() {
+		const extendRequest = require('../src/Bindings/Request').default
 		extendRequest(this.container.use('Adonis/Core/Request'))
 	}
 }

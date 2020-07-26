@@ -25,6 +25,7 @@
     "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json adonisjs/bodyparser"
   },
   "devDependencies": {
+    "@adonisjs/config": "^1.1.0",
     "@adonisjs/encryption": "^2.0.6",
     "@adonisjs/fold": "^6.3.5",
     "@adonisjs/http-server": "^3.0.1",
@@ -59,7 +60,7 @@
     "typescript": "^3.9.7"
   },
   "peerDependencies": {
-    "@adonisjs/http-server": "^2.0.0"
+    "@adonisjs/http-server": "^3.0.0"
   },
   "nyc": {
     "exclude": [
