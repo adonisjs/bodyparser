@@ -183,8 +183,9 @@ export class File implements MultipartFileContract {
 			this.state = 'moved'
 		} catch (error) {
 			if (error.message.includes('dest already exists')) {
-				throw new Error(
-					`"${options.name!}" already exists at "${location}". Set "overwrite = true" to overwrite it`
+				throw new Exception(
+					`"${options.name!}" already exists at "${location}". Set "overwrite = true" to overwrite it`,
+					500
 				)
 			}
 			throw error
