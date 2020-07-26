@@ -11,7 +11,7 @@
 
 import cuid from 'cuid'
 import { tmpdir } from 'os'
-import coBody from 'co-body'
+import coBody from '@poppinss/co-body'
 import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
 
