@@ -27,7 +27,7 @@
   "devDependencies": {
     "@adonisjs/config": "^1.1.0",
     "@adonisjs/encryption": "^2.0.6",
-    "@adonisjs/fold": "^6.3.5",
+    "@adonisjs/fold": "^6.4.0",
     "@adonisjs/http-server": "^3.0.2",
     "@adonisjs/logger": "^2.1.0",
     "@adonisjs/mrm-preset": "^2.4.0",
