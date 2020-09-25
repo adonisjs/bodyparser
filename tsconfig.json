@@ -3,8 +3,5 @@
 	"compilerOptions": {
 		"skipLibCheck": true
 	},
-	"files": [
-		"./node_modules/@adonisjs/encryption/build/adonis-typings/encryption.d.ts",
-		"./node_modules/@adonisjs/profiler/build/adonis-typings/profiler.d.ts"
-	]
+	"files": ["./node_modules/@adonisjs/encryption/build/adonis-typings/encryption.d.ts"]
 }
