@@ -97,7 +97,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "alpha"
+    "tag": "next"
   },
   "directories": {
     "test": "test"
