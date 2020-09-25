@@ -8,41 +8,24 @@
  */
 
 import test from 'japa'
-import { join } from 'path'
-import { Registrar, Ioc } from '@adonisjs/fold'
-import { Config } from '@adonisjs/config/build/standalone'
-
 import { BodyParserMiddleware } from '../src/BodyParser'
+import { setupApp, fs } from '../test-helpers'
 
-test.group('BodyParser Provider', () => {
+test.group('BodyParser Provider', (group) => {
+	group.afterEach(async () => {
+		await fs.cleanup()
+	})
+
 	test('register encryption provider', async (assert) => {
-		const ioc = new Ioc()
-		ioc.bind('Adonis/Core/Config', () => {
-			return new Config()
-		})
-
-		const registrar = new Registrar(ioc, join(__dirname, '..'))
-		await registrar
-			.useProviders(['@adonisjs/http-server', './providers/BodyParserProvider'])
-			.registerAndBoot()
-
-		assert.instanceOf(ioc.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
+		const app = await setupApp(['../../providers/BodyParserProvider'])
+		assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
 	})
 
 	test('extend request class by adding the file methods', async (assert) => {
-		const ioc = new Ioc()
-		ioc.bind('Adonis/Core/Config', () => {
-			return new Config()
-		})
-
-		const registrar = new Registrar(ioc, join(__dirname, '..'))
-		await registrar
-			.useProviders(['@adonisjs/http-server', './providers/BodyParserProvider'])
-			.registerAndBoot()
-
-		assert.instanceOf(ioc.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
-		assert.property(ioc.use('Adonis/Core/Request').prototype, 'file')
-		assert.property(ioc.use('Adonis/Core/Request').prototype, 'files')
-		assert.property(ioc.use('Adonis/Core/Request').prototype, 'allFiles')
+		const app = await setupApp(['../../providers/BodyParserProvider'])
+		assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
+		assert.property(app.container.use('Adonis/Core/Request').prototype, 'file')
+		assert.property(app.container.use('Adonis/Core/Request').prototype, 'files')
+		assert.property(app.container.use('Adonis/Core/Request').prototype, 'allFiles')
 	})
 })

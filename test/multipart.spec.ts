@@ -14,26 +14,29 @@ import { join } from 'path'
 import supertest from 'supertest'
 import { createServer } from 'http'
 import { pathExists, remove, createWriteStream } from 'fs-extra'
-import { Encryption } from '@adonisjs/encryption/build/standalone'
-import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
-import { Request as BaseRequest } from '@adonisjs/http-server/build/src/Request'
+import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
 import { Multipart } from '../src/Multipart'
 import { File } from '../src/Multipart/File'
-import { sleep, getLogger, requestConfig, packageFilePath, packageFileSize } from '../test-helpers'
+import { sleep, packageFilePath, packageFileSize, setupApp, fs } from '../test-helpers'
 
-const encryption = new Encryption({
-	secret: 'verylongandrandom32charsecretkey',
-})
-const Request = (BaseRequest as unknown) as RequestConstructorContract
+let app: ApplicationContract
 
-test.group('Multipart', () => {
+test.group('Multipart', (group) => {
+	group.before(async () => {
+		app = await setupApp()
+	})
+
+	group.after(async () => {
+		await fs.cleanup()
+	})
+
 	test('process file by attaching handler on field name', async (assert) => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('package', {}, (part, reporter) => {
 				return new Promise((resolve, reject) => {
@@ -46,7 +49,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files']
+			files = ctx.request['__raw_files']
 			res.end()
 		})
 
@@ -61,8 +64,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('package', {}, (part, reporter) => {
 				return new Promise((_resolve, reject) => {
@@ -75,7 +78,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files'] || null
+			files = ctx.request['__raw_files'] || null
 			res.end()
 		})
 
@@ -98,8 +101,8 @@ test.group('Multipart', () => {
 		const stack: string[] = []
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('package', {}, async (part, reporter) => {
 				part.on('data', (line) => {
@@ -113,7 +116,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files']
+			files = ctx.request['__raw_files']
 			stack.push('ended')
 			res.end()
 		})
@@ -131,8 +134,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('package', {}, (part, reporter) => {
 				return new Promise((resolve, reject) => {
@@ -147,7 +150,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files']
+			files = ctx.request['__raw_files']
 
 			const hasFile = await pathExists(SAMPLE_FILE_PATH)
 			res.end(String(hasFile))
@@ -169,8 +172,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('package', {}, async (part, reporter) => {
 				part.on('data', reporter)
@@ -182,7 +185,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files']
+			files = ctx.request['__raw_files']
 			stack.push('ended')
 			res.end()
 		})
@@ -201,8 +204,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('package', {}, async (part, reporter) => {
 				part.on('data', reporter)
@@ -214,7 +217,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files']
+			files = ctx.request['__raw_files']
 			stack.push('ended')
 			res.end()
 		})
@@ -232,8 +235,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('*', {}, async (part, reporter) => {
 				part.on('data', reporter)
@@ -245,7 +248,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files']
+			files = ctx.request['__raw_files']
 			stack.push('ended')
 			res.end()
 		})
@@ -264,8 +267,8 @@ test.group('Multipart', () => {
 		let fields: null | { [key: string]: any } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile('*', {}, (part, reporter) => {
 				return new Promise((resolve, reject) => {
@@ -278,8 +281,8 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files']
-			fields = request.all()
+			files = ctx.request['__raw_files']
+			fields = ctx.request.all()
 			stack.push('ended')
 			res.end()
 		})
@@ -296,8 +299,8 @@ test.group('Multipart', () => {
 
 	test('FIELDS: raise error when process is invoked multiple times', async (assert) => {
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			try {
 				await multipart.process()
@@ -316,8 +319,8 @@ test.group('Multipart', () => {
 
 	test('FIELDS: raise error when maxFields are crossed', async (assert) => {
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1, limit: 4000 })
 
 			try {
 				await multipart.process()
@@ -335,8 +338,8 @@ test.group('Multipart', () => {
 
 	test('FIELDS: raise error when bytes limit is crossed', async (assert) => {
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 2 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 2 })
 
 			try {
 				await multipart.process()
@@ -356,8 +359,8 @@ test.group('Multipart', () => {
 		assert.plan(2)
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 20 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 20 })
 
 			multipart.onFile('package', {}, (part, report) => {
 				return new Promise((resolve, reject) => {
@@ -399,8 +402,8 @@ test.group('Multipart', () => {
 		assert.plan(5)
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile(
 				'*',
@@ -420,7 +423,7 @@ test.group('Multipart', () => {
 			)
 
 			await multipart.process()
-			files = request['__raw_files'] || null
+			files = ctx.request['__raw_files'] || null
 			res.end()
 		})
 
@@ -444,8 +447,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000 })
 
 			multipart.onFile('*', { size: 10 }, (part, reporter) => {
 				return new Promise((resolve, reject) => {
@@ -460,7 +463,7 @@ test.group('Multipart', () => {
 			})
 
 			await multipart.process()
-			files = request['__raw_files'] || null
+			files = ctx.request['__raw_files'] || null
 			res.end()
 		})
 
@@ -485,8 +488,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile(
 				'*',
@@ -503,7 +506,7 @@ test.group('Multipart', () => {
 			)
 
 			await multipart.process()
-			files = request['__raw_files'] || null
+			files = ctx.request['__raw_files'] || null
 			res.end()
 		})
 
@@ -526,8 +529,8 @@ test.group('Multipart', () => {
 		let files: null | { [key: string]: File } = null
 
 		const server = createServer(async (req, res) => {
-			const request = new Request(req, res, encryption, requestConfig)
-			const multipart = new Multipart(request, getLogger(), { maxFields: 1000, limit: 4000 })
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
 
 			multipart.onFile(
 				'*',
@@ -545,7 +548,7 @@ test.group('Multipart', () => {
 			)
 
 			await multipart.process()
-			files = request['__raw_files'] || null
+			files = ctx.request['__raw_files'] || null
 			res.end()
 		})
 

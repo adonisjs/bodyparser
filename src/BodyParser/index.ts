@@ -120,7 +120,7 @@ export class BodyParserMiddleware {
 		if (this.isType(ctx.request, multipartConfig.types)) {
 			ctx.logger.trace('bodyparser parsing as multipart body')
 
-			ctx.request.multipart = new Multipart(ctx.request, ctx.logger, {
+			ctx.request.multipart = new Multipart(ctx, {
 				maxFields: multipartConfig.maxFields,
 				limit: multipartConfig.limit,
 			})

@@ -11,26 +11,16 @@
 
 import { EOL } from 'os'
 import { join } from 'path'
-import { IncomingMessage, ServerResponse } from 'http'
-import { RequestConfig } from '@ioc:Adonis/Core/Request'
-import { Logger } from '@adonisjs/logger/build/standalone'
-import { Profiler } from '@adonisjs/profiler/build/standalone'
+import { Filesystem } from '@poppinss/dev-utils'
+import { Application } from '@adonisjs/application'
 import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
-import { Encryption } from '@adonisjs/encryption/build/standalone'
-import { HttpContext, Router } from '@adonisjs/http-server/build/standalone'
 
 const contents = JSON.stringify(require('../package.json'), null, 2).split('\n').join(EOL)
 
 export const packageFilePath = join(__dirname, '../package.json')
 export const packageFileSize = Buffer.from(contents, 'utf-8').length + EOL.length
 export const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
-
-export const requestConfig: RequestConfig = {
-	allowMethodSpoofing: false,
-	trustProxy: () => true,
-	subdomainOffset: 2,
-	generateRequestId: false,
-}
+export const fs = new Filesystem(join(__dirname, 'app'))
 
 export const bodyParserConfig: BodyParserConfig = {
 	whitelistedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
@@ -67,14 +57,27 @@ export const bodyParserConfig: BodyParserConfig = {
 	},
 }
 
-export function getContext(url: string, params: any, req?: IncomingMessage, res?: ServerResponse) {
-	const logger = getLogger()
-	const profiler = new Profiler(__dirname, logger, {}).create('')
-	const encryption = new Encryption({ secret: 'verylongandrandom32charsecretkey' })
-	const router = new Router(encryption)
-	return HttpContext.create(url, params, logger, profiler, encryption, router, req, res)
-}
+/**
+ * Setup application
+ */
+export async function setupApp(providers?: string[]) {
+	const app = new Application(fs.basePath, 'web', {
+		providers: ['@adonisjs/encryption', '@adonisjs/http-server'].concat(providers || []),
+	})
+	await fs.add('.env', '')
+	await fs.add(
+		'config/app.ts',
+		`
+		export const appKey = 'verylongandrandom32charsecretkey'
+		export const http = {
+			cookie: {},
+		}
+	`
+	)
 
-export function getLogger() {
-	return new Logger({ enabled: false, level: 'trace', name: 'adonis' })
+	app.setup()
+	app.registerProviders()
+	await app.bootProviders()
+
+	return app
 }

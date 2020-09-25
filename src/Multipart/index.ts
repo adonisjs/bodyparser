@@ -12,8 +12,7 @@
 import bytes from 'bytes'
 import multiparty from 'multiparty'
 import { Exception } from '@poppinss/utils'
-import { LoggerContract } from '@ioc:Adonis/Core/Logger'
-import { RequestContract } from '@ioc:Adonis/Core/Request'
+import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import {
 	MultipartStream,
@@ -80,8 +79,7 @@ export class Multipart implements MultipartContract {
 	public state: 'idle' | 'processing' | 'error' | 'success' = 'idle'
 
 	constructor(
-		private request: RequestContract,
-		private logger: LoggerContract,
+		private ctx: HttpContextContract,
 		private config: Partial<{ limit: string | number; maxFields: number }> = {}
 	) {}
 
@@ -179,7 +177,7 @@ export class Multipart implements MultipartContract {
 				try {
 					await partHandler.reportProgress(line, lineLength)
 				} catch (err) {
-					this.logger.fatal(
+					this.ctx.logger.fatal(
 						'Unhandled multipart stream error. Make sure to handle "error" events for all manually processed streams'
 					)
 				}
@@ -236,8 +234,8 @@ export class Multipart implements MultipartContract {
 	private finish(newState: 'error' | 'success') {
 		if (this.state === 'idle' || this.state === 'processing') {
 			this.state = newState
-			this.request['__raw_files'] = this.files.get()
-			this.request.setInitialBody(this.fields.get())
+			this.ctx.request['__raw_files'] = this.files.get()
+			this.ctx.request.setInitialBody(this.fields.get())
 		}
 	}
 
@@ -343,7 +341,7 @@ export class Multipart implements MultipartContract {
 				}
 			})
 
-			this.form.parse(this.request.request)
+			this.form.parse(this.ctx.request.request)
 		})
 	}
 }
