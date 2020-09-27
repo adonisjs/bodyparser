@@ -8,7 +8,6 @@
     "build/adonis-typings",
     "build/providers"
   ],
-  "types": "./build/adonis-typings/index.d.ts",
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
@@ -25,10 +24,9 @@
     "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json adonisjs/bodyparser"
   },
   "devDependencies": {
-    "@adonisjs/application": "^3.0.0",
-    "@adonisjs/encryption": "^2.0.6",
-    "@adonisjs/fold": "^6.4.0",
-    "@adonisjs/http-server": "^4.0.0",
+    "@adonisjs/application": "^3.0.5",
+    "@adonisjs/encryption": "^3.0.1",
+    "@adonisjs/http-server": "^4.0.1",
     "@adonisjs/mrm-preset": "^2.4.0",
     "@adonisjs/require-ts": "^1.0.0",
     "@poppinss/dev-utils": "^1.0.10",
@@ -43,8 +41,8 @@
     "commitizen": "^4.2.1",
     "cz-conventional-changelog": "^3.3.0",
     "del-cli": "^3.0.1",
-    "eslint": "^7.9.0",
-    "eslint-config-prettier": "^6.11.0",
+    "eslint": "^7.10.0",
+    "eslint-config-prettier": "^6.12.0",
     "eslint-plugin-adonis": "^1.0.15",
     "eslint-plugin-prettier": "^3.1.4",
     "github-label-sync": "^2.0.0",
@@ -54,10 +52,12 @@
     "np": "^6.5.0",
     "npm-audit-html": "^1.4.3",
     "prettier": "^2.1.2",
-    "supertest": "^4.0.2",
+    "supertest": "^5.0.0",
     "typescript": "^4.0.3"
   },
   "peerDependencies": {
+    "@adonisjs/application": "^3.0.0",
+    "@adonisjs/encryption": "^3.0.0",
     "@adonisjs/http-server": "^4.0.0"
   },
   "nyc": {
