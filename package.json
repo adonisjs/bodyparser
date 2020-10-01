@@ -24,9 +24,9 @@
     "sync-labels": "github-label-sync --labels ./node_modules/@adonisjs/mrm-preset/gh-labels.json adonisjs/bodyparser"
   },
   "devDependencies": {
-    "@adonisjs/application": "^3.0.5",
+    "@adonisjs/application": "^3.0.10",
     "@adonisjs/encryption": "^3.0.1",
-    "@adonisjs/http-server": "^4.0.1",
+    "@adonisjs/http-server": "^4.0.3",
     "@adonisjs/mrm-preset": "^2.4.0",
     "@adonisjs/require-ts": "^1.0.0",
     "@poppinss/dev-utils": "^1.0.10",
