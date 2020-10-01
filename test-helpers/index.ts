@@ -70,6 +70,7 @@ export async function setupApp(providers?: string[]) {
 		`
 		export const appKey = 'verylongandrandom32charsecretkey'
 		export const http = {
+			trustProxy: () => true,
 			cookie: {},
 		}
 	`
