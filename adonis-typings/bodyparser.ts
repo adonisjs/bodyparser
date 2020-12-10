@@ -97,6 +97,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
 		name: string
 		filename: string
 		bytes: number
+		file: MultipartFileContract
 	}
 
 	/**
@@ -135,6 +136,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
 	export type FileValidationOptions = {
 		size: string | number
 		extnames: string[]
+		strict: boolean
 	}
 
 	/**

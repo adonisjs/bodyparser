@@ -154,6 +154,7 @@ export class Multipart implements MultipartContract {
 		 * must be able to access these files.
 		 */
 		this.files.add(partHandler.file.fieldName, partHandler.file)
+		part.file = partHandler.file
 
 		try {
 			const response = await handler.handler(part, async (line) => {
@@ -291,13 +292,19 @@ export class Multipart implements MultipartContract {
 			 * error
 			 */
 			this.form.on('error', (error: Error) => {
-				if (error.message === 'maxFields 1 exceeded.') {
-					reject(new Exception('Max fields limit exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE'))
-				} else {
-					reject(error)
-				}
-
 				this.finish('error')
+
+				process.nextTick(() => {
+					if (this.ctx.request.request.readable) {
+						this.ctx.request.request.resume()
+					}
+
+					if (error.message === 'maxFields 1 exceeded.') {
+						reject(new Exception('Max fields limit exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE'))
+					} else {
+						reject(error)
+					}
+				})
 			})
 
 			/**

@@ -58,6 +58,7 @@ export function streamFile(
 				})
 
 				if (typeof dataListener === 'function') {
+					readStream.pause()
 					readStream.on('data', dataListener)
 				}
 

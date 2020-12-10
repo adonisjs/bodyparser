@@ -46,6 +46,7 @@ export class PartHandler {
 		{
 			size: this.options.size,
 			extnames: this.options.extnames,
+			strict: this.options.strict,
 		}
 	)
 
@@ -89,7 +90,11 @@ export class PartHandler {
 		 * validation errors, since we want the end user to decide, if they want to stop
 		 * streaming or not, since many streaming API's doesn't offer abort feature.
 		 */
-		this.part['readableFlowing'] === null ? this.part.resume() : this.part.emit('end')
+		if (this.part['readableFlowing'] === null) {
+			this.part.resume()
+		} else {
+			this.part.emit('end')
+		}
 	}
 
 	/**
@@ -126,7 +131,7 @@ export class PartHandler {
 		}
 
 		/**
-		 * Detect the file type and extension when it's null, otherwise
+		 * Detect the file type and extension when extname is null, otherwise
 		 * empty out the buffer. We only need the buffer to find the
 		 * file extension from it's content.
 		 */
@@ -207,7 +212,7 @@ export class PartHandler {
 		 * consuming the stream
 		 */
 		if (this.file.extname === undefined) {
-			await this.detectFileTypeAndExtension(true)
+			await this.detectFileTypeAndExtension(this.options.strict ? false : true)
 		}
 
 		if (data) {

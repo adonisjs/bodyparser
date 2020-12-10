@@ -139,6 +139,7 @@ test.group('Multipart', (group) => {
 
 			multipart.onFile('package', {}, (part, reporter) => {
 				return new Promise((resolve, reject) => {
+					part.pause()
 					part.on('data', (line) => {
 						reporter(line)
 					})
@@ -365,7 +366,6 @@ test.group('Multipart', (group) => {
 			multipart.onFile('package', {}, (part, report) => {
 				return new Promise((resolve, reject) => {
 					part.on('error', (error) => {
-						part.removeAllListeners()
 						assert.equal(error.message, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
 						reject(error)
 					})
@@ -560,5 +560,90 @@ test.group('Multipart', (group) => {
 		assert.equal(files!.package.state, 'consumed')
 		assert.equal(files!.package.extname, 'json')
 		assert.deepEqual(files!.package.errors, [])
+	})
+
+	test('work fine when stream is errored without reading', async (assert) => {
+		let files: null | { [key: string]: File } = null
+
+		const server = createServer(async (req, res) => {
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+
+			multipart.onFile('package', {}, (part) => {
+				return new Promise((resolve) => {
+					part.on('error', () => {
+						/**
+						 * Node.js doesn't emit the "end" event after the "error". However,
+						 * multiparty needs it
+						 */
+						part.emit('end')
+
+						/**
+						 * We resolve, to reproduce the above defined behavior. If we reject
+						 * the promise, then the part handler will emit "end" instead
+						 */
+						resolve()
+					})
+
+					part.on('end', () => {
+						resolve()
+					})
+
+					part.emit('error', new Error('abort'))
+				})
+			})
+
+			await multipart.process()
+			files = ctx.request['__raw_files']
+			res.end()
+		})
+
+		await supertest(server).post('/').attach('package', packageFilePath)
+		assert.property(files, 'package')
+		assert.isTrue(files!.package.isValid)
+		assert.equal(files!.package.size, 0)
+		assert.equal(files!.package.state, 'consumed')
+	})
+
+	test('end request when abort is called without end the part', async (assert) => {
+		let files: null | { [key: string]: File } = null
+
+		const server = createServer(async (req, res) => {
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+
+			multipart.onFile('package', {}, (part) => {
+				return new Promise((resolve) => {
+					part.on('error', (error) => {
+						multipart.abort(error)
+
+						/**
+						 * We resolve, to reproduce the above defined behavior. If we reject
+						 * the promise, then the part handler will emit "end" instead
+						 */
+						resolve()
+					})
+
+					part.on('end', () => {
+						resolve()
+					})
+
+					part.emit('error', new Error('abort'))
+				})
+			})
+
+			try {
+				await multipart.process()
+			} catch {}
+
+			files = ctx.request['__raw_files']
+			res.end()
+		})
+
+		await supertest(server).post('/').attach('package', packageFilePath)
+		assert.property(files, 'package')
+		assert.isTrue(files!.package.isValid)
+		assert.equal(files!.package.size, 0)
+		assert.equal(files!.package.state, 'consumed')
 	})
 })
