@@ -646,4 +646,47 @@ test.group('Multipart', (group) => {
 		assert.equal(files!.package.size, 0)
 		assert.equal(files!.package.state, 'consumed')
 	})
+
+	test('report extension validation errors when unable to detect extension till completion', async (assert) => {
+		assert.plan(4)
+
+		let files: null | { [key: string]: File } = null
+
+		const server = createServer(async (req, res) => {
+			const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+			const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+
+			multipart.onFile(
+				'*',
+				{
+					extnames: ['jpg'],
+				},
+				(part, reporter) => {
+					return new Promise((resolve, reject) => {
+						part.on('error', reject)
+						part.on('end', resolve)
+						part.on('data', reporter)
+					})
+				}
+			)
+
+			await multipart.process()
+			files = ctx.request['__raw_files'] || null
+			res.end()
+		})
+
+		await supertest(server).post('/').attach('package', packageFilePath)
+
+		assert.property(files, 'package')
+		assert.isFalse(files!.package.isValid)
+		assert.equal(files!.package.state, 'consumed')
+		assert.deepEqual(files!.package.errors, [
+			{
+				type: 'extname',
+				clientName: 'package.json',
+				fieldName: 'package',
+				message: 'Invalid file extension json. Only jpg is allowed',
+			},
+		])
+	})
 })

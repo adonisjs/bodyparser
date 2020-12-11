@@ -136,7 +136,6 @@ declare module '@ioc:Adonis/Core/BodyParser' {
 	export type FileValidationOptions = {
 		size: string | number
 		extnames: string[]
-		strict: boolean
 	}
 
 	/**

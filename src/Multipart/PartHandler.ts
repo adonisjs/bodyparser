@@ -9,11 +9,12 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
+import { extname } from 'path'
 import { Exception } from '@poppinss/utils'
 import { MultipartStream, FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
 
 import { File } from './File'
-import { getFileType } from '../utils'
+import { getFileType, supportMagicFileTypes } from '../utils'
 
 /**
  * Part handler handles the progress of a stream and also internally validates
@@ -34,6 +35,21 @@ export class PartHandler {
 	private buff?: Buffer
 
 	/**
+	 * A boolean to know if we can use the magic number to detect the file type. This is how it
+	 * works.
+	 *
+	 * - We begin by extracting the file extension from the file name
+	 * - If the extension is something we support via magic numbers, then we ignore the extension
+	 * 	 and inspect the buffer
+	 * - Otherwise, we have no other option than to trust the extension
+	 *
+	 * Think of this as using the optimal way for validating the file type
+	 */
+	private canFileTypeBeDetected = supportMagicFileTypes.includes(
+		extname(this.part.filename).replace(/^\./, '')
+	)
+
+	/**
 	 * Creating a new file object for each part inside the multipart
 	 * form data
 	 */
@@ -46,7 +62,6 @@ export class PartHandler {
 		{
 			size: this.options.size,
 			extnames: this.options.extnames,
-			strict: this.options.strict,
 		}
 	)
 
@@ -212,7 +227,7 @@ export class PartHandler {
 		 * consuming the stream
 		 */
 		if (this.file.extname === undefined) {
-			await this.detectFileTypeAndExtension(this.options.strict ? false : true)
+			await this.detectFileTypeAndExtension(this.canFileTypeBeDetected ? false : true)
 		}
 
 		if (data) {
