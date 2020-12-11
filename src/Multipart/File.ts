@@ -208,6 +208,8 @@ export class File implements MultipartFileContract {
 			state: this.state,
 			isValid: this.isValid,
 			validated: this.validated,
+			errors: this.errors,
+			meta: this.meta,
 		}
 	}
 }

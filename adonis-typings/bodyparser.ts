@@ -162,6 +162,8 @@ declare module '@ioc:Adonis/Core/BodyParser' {
 		state: 'idle' | 'streaming' | 'consumed' | 'moved'
 		isValid: boolean
 		validated: boolean
+		errors: FileUploadError[]
+		meta: any
 	}
 
 	/**
@@ -186,6 +188,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
 		errors: FileUploadError[]
 		sizeLimit?: number | string
 		allowedExtensions?: string[]
+		meta: any
 
 		/**
 		 * Run validations on the file
