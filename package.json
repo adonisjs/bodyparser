@@ -89,7 +89,7 @@
     "bytes": "^3.1.0",
     "cuid": "^2.1.8",
     "end-of-stream": "^1.4.4",
-    "file-type": "^16.0.1",
+    "file-type": "^16.1.0",
     "fs-extra": "^9.0.1",
     "media-typer": "^1.1.0",
     "multiparty": "^4.2.2"
