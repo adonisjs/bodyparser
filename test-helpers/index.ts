@@ -76,8 +76,8 @@ export async function setupApp(providers?: string[]) {
 	`
 	)
 
-	app.setup()
-	app.registerProviders()
+	await app.setup()
+	await app.registerProviders()
 	await app.bootProviders()
 
 	return app

@@ -19,7 +19,7 @@ export default class BodyParserProvider {
 	 */
 	public register() {
 		this.app.container.bind('Adonis/Core/BodyParserMiddleware', () => {
-			const Config = this.app.container.use('Adonis/Core/Config')
+			const Config = this.app.container.resolveBinding('Adonis/Core/Config')
 			const { BodyParserMiddleware } = require('../src/BodyParser/index')
 			return new BodyParserMiddleware(Config.get('bodyparser', {}))
 		})
@@ -30,6 +30,6 @@ export default class BodyParserProvider {
 	 */
 	public boot() {
 		const extendRequest = require('../src/Bindings/Request').default
-		extendRequest(this.app.container.use('Adonis/Core/Request'))
+		extendRequest(this.app.container.resolveBinding('Adonis/Core/Request'))
 	}
 }
