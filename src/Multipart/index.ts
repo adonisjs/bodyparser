@@ -10,8 +10,8 @@
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
 import bytes from 'bytes'
-import multiparty from 'multiparty'
 import { Exception } from '@poppinss/utils'
+import multiparty from '@poppinss/multiparty'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import {

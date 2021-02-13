@@ -573,10 +573,9 @@ test.group('Multipart', (group) => {
         return new Promise((resolve) => {
           part.on('error', () => {
             /**
-             * Node.js doesn't emit the "end" event after the "error". However,
-             * multiparty needs it
+             * Node.js doesn't emit the "close" event when stream is not flowing
              */
-            part.emit('end')
+            part.emit('close')
 
             /**
              * We resolve, to reproduce the above defined behavior. If we reject

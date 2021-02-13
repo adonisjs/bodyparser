@@ -34,7 +34,6 @@
     "@types/end-of-stream": "^1.4.0",
     "@types/fs-extra": "^9.0.7",
     "@types/media-typer": "^1.1.0",
-    "@types/multiparty": "0.0.32",
     "@types/node": "^14.14.27",
     "@types/supertest": "^2.0.10",
     "@types/uuid": "^8.3.0",
@@ -83,14 +82,14 @@
   },
   "dependencies": {
     "@poppinss/co-body": "^1.0.0",
+    "@poppinss/multiparty": "^1.0.0",
     "@poppinss/utils": "^3.0.3",
     "bytes": "^3.1.0",
     "cuid": "^2.1.8",
     "end-of-stream": "^1.4.4",
     "file-type": "^16.2.0",
     "fs-extra": "^9.1.0",
-    "media-typer": "^1.1.0",
-    "multiparty": "^4.2.2"
+    "media-typer": "^1.1.0"
   },
   "publishConfig": {
     "access": "public",

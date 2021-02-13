@@ -100,16 +100,7 @@ export class PartHandler {
    * streaming consumer reports an error
    */
   private skipEndStream() {
-    /**
-     * End the stream when an error has been encountered. We do not do it while emitting the
-     * validation errors, since we want the end user to decide, if they want to stop
-     * streaming or not, since many streaming API's doesn't offer abort feature.
-     */
-    if (this.part['readableFlowing'] === null) {
-      this.part.resume()
-    } else {
-      this.part.emit('end')
-    }
+    this.part.emit('close')
   }
 
   /**
