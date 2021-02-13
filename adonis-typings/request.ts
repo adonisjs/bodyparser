@@ -8,19 +8,19 @@
  */
 
 import {
-	MultipartContract,
-	FileValidationOptions,
-	MultipartFileContract,
+  MultipartContract,
+  FileValidationOptions,
+  MultipartFileContract,
 } from '@ioc:Adonis/Core/BodyParser'
 
 /**
  * Extending the `request` interface on the core module
  */
 declare module '@ioc:Adonis/Core/Request' {
-	interface RequestContract {
-		file(key: string, options?: Partial<FileValidationOptions>): MultipartFileContract | null
-		files(key: string, options?: Partial<FileValidationOptions>): MultipartFileContract[]
-		allFiles(): { [field: string]: MultipartFileContract | MultipartFileContract[] }
-		multipart: MultipartContract
-	}
+  interface RequestContract {
+    file(key: string, options?: Partial<FileValidationOptions>): MultipartFileContract | null
+    files(key: string, options?: Partial<FileValidationOptions>): MultipartFileContract[]
+    allFiles(): { [field: string]: MultipartFileContract | MultipartFileContract[] }
+    multipart: MultipartContract
+  }
 }

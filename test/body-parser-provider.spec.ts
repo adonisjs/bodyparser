@@ -12,20 +12,20 @@ import { BodyParserMiddleware } from '../src/BodyParser'
 import { setupApp, fs } from '../test-helpers'
 
 test.group('BodyParser Provider', (group) => {
-	group.afterEach(async () => {
-		await fs.cleanup()
-	})
+  group.afterEach(async () => {
+    await fs.cleanup()
+  })
 
-	test('register encryption provider', async (assert) => {
-		const app = await setupApp(['../../providers/BodyParserProvider'])
-		assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
-	})
+  test('register encryption provider', async (assert) => {
+    const app = await setupApp(['../../providers/BodyParserProvider'])
+    assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
+  })
 
-	test('extend request class by adding the file methods', async (assert) => {
-		const app = await setupApp(['../../providers/BodyParserProvider'])
-		assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
-		assert.property(app.container.use('Adonis/Core/Request').prototype, 'file')
-		assert.property(app.container.use('Adonis/Core/Request').prototype, 'files')
-		assert.property(app.container.use('Adonis/Core/Request').prototype, 'allFiles')
-	})
+  test('extend request class by adding the file methods', async (assert) => {
+    const app = await setupApp(['../../providers/BodyParserProvider'])
+    assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
+    assert.property(app.container.use('Adonis/Core/Request').prototype, 'file')
+    assert.property(app.container.use('Adonis/Core/Request').prototype, 'files')
+    assert.property(app.container.use('Adonis/Core/Request').prototype, 'allFiles')
+  })
 })

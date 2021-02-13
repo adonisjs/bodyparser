@@ -19,40 +19,40 @@ const SAMPLE_FILE = join(fs.basePath, 'hello-out.txt')
 const MAIN_FILE = join(fs.basePath, 'hello-in.txt')
 
 test.group('streamFile', (group) => {
-	group.afterEach(async () => {
-		try {
-			await fs.cleanup()
-		} catch (error) {}
-	})
+  group.afterEach(async () => {
+    try {
+      await fs.cleanup()
+    } catch (error) {}
+  })
 
-	test('write readable stream to the destination', async (assert) => {
-		await fs.add(MAIN_FILE, 'hello')
+  test('write readable stream to the destination', async (assert) => {
+    await fs.add(MAIN_FILE, 'hello')
 
-		const file = createReadStream(MAIN_FILE)
-		await streamFile(file, SAMPLE_FILE)
+    const file = createReadStream(MAIN_FILE)
+    await streamFile(file, SAMPLE_FILE)
 
-		const hasFile = await pathExists(SAMPLE_FILE)
-		assert.isTrue(hasFile)
-	})
+    const hasFile = await pathExists(SAMPLE_FILE)
+    assert.isTrue(hasFile)
+  })
 
-	test('raise error when stream gets interuppted', async (assert) => {
-		assert.plan(1)
+  test('raise error when stream gets interuppted', async (assert) => {
+    assert.plan(1)
 
-		await fs.add(MAIN_FILE, 'hello\nhi\nhow are you')
+    await fs.add(MAIN_FILE, 'hello\nhi\nhow are you')
 
-		const file = createReadStream(MAIN_FILE)
-		file.on('readable', () => {
-			setTimeout(() => {
-				if (!file.destroyed) {
-					file.emit('error', 'blowup')
-				}
-			}, 0)
-		})
+    const file = createReadStream(MAIN_FILE)
+    file.on('readable', () => {
+      setTimeout(() => {
+        if (!file.destroyed) {
+          file.emit('error', 'blowup')
+        }
+      }, 0)
+    })
 
-		try {
-			await streamFile(file, SAMPLE_FILE)
-		} catch (error) {
-			assert.equal(error, 'blowup')
-		}
-	}).retry(3)
+    try {
+      await streamFile(file, SAMPLE_FILE)
+    } catch (error) {
+      assert.equal(error, 'blowup')
+    }
+  }).retry(3)
 })

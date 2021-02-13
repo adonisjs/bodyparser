@@ -23,62 +23,62 @@ export const sleep = (time: number) => new Promise((resolve) => setTimeout(resol
 export const fs = new Filesystem(join(__dirname, 'app'))
 
 export const bodyParserConfig: BodyParserConfig = {
-	whitelistedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
-	json: {
-		encoding: 'utf-8',
-		limit: '1mb',
-		strict: true,
-		types: [
-			'application/json',
-			'application/json-patch+json',
-			'application/vnd.api+json',
-			'application/csp-report',
-		],
-	},
-	form: {
-		encoding: 'utf-8',
-		limit: '1mb',
-		queryString: {},
-		types: ['application/x-www-form-urlencoded'],
-	},
-	raw: {
-		encoding: 'utf-8',
-		limit: '1mb',
-		queryString: {},
-		types: ['text/*'],
-	},
-	multipart: {
-		autoProcess: true,
-		processManually: [],
-		encoding: 'utf-8',
-		maxFields: 1000,
-		limit: '20mb',
-		types: ['multipart/form-data'],
-	},
+  whitelistedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'],
+  json: {
+    encoding: 'utf-8',
+    limit: '1mb',
+    strict: true,
+    types: [
+      'application/json',
+      'application/json-patch+json',
+      'application/vnd.api+json',
+      'application/csp-report',
+    ],
+  },
+  form: {
+    encoding: 'utf-8',
+    limit: '1mb',
+    queryString: {},
+    types: ['application/x-www-form-urlencoded'],
+  },
+  raw: {
+    encoding: 'utf-8',
+    limit: '1mb',
+    queryString: {},
+    types: ['text/*'],
+  },
+  multipart: {
+    autoProcess: true,
+    processManually: [],
+    encoding: 'utf-8',
+    maxFields: 1000,
+    limit: '20mb',
+    types: ['multipart/form-data'],
+  },
 }
 
 /**
  * Setup application
  */
 export async function setupApp(providers?: string[]) {
-	const app = new Application(fs.basePath, 'web', {
-		providers: ['@adonisjs/encryption', '@adonisjs/http-server'].concat(providers || []),
-	})
-	await fs.add('.env', '')
-	await fs.add(
-		'config/app.ts',
-		`
+  const app = new Application(fs.basePath, 'web', {
+    providers: ['@adonisjs/encryption', '@adonisjs/http-server'].concat(providers || []),
+  })
+  await fs.add('.env', '')
+  await fs.add(
+    'config/app.ts',
+    `
 		export const appKey = 'verylongandrandom32charsecretkey'
 		export const http = {
 			trustProxy: () => true,
 			cookie: {},
 		}
 	`
-	)
+  )
 
-	await app.setup()
-	await app.registerProviders()
-	await app.bootProviders()
+  await app.setup()
+  await app.registerProviders()
+  await app.bootProviders()
 
-	return app
+  return app
 }

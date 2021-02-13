@@ -19,13 +19,13 @@ import { File } from '../Multipart/File'
  * Updates the validation options on the file instance
  */
 function setFileOptions(file: File, options?: Partial<FileValidationOptions>) {
-	if (file.sizeLimit === undefined && options && options.size) {
-		file.sizeLimit = options.size
-	}
+  if (file.sizeLimit === undefined && options && options.size) {
+    file.sizeLimit = options.size
+  }
 
-	if (file.allowedExtensions === undefined && options && options.extnames) {
-		file.allowedExtensions = options.extnames
-	}
+  if (file.allowedExtensions === undefined && options && options.extnames) {
+    file.allowedExtensions = options.extnames
+  }
 }
 
 /**
@@ -33,7 +33,7 @@ function setFileOptions(file: File, options?: Partial<FileValidationOptions>) {
  * file class
  */
 function isInstanceOfFile(file: any): file is File {
-	return file && file instanceof File
+  return file && file instanceof File
 }
 
 /**
@@ -41,40 +41,40 @@ function isInstanceOfFile(file: any): file is File {
  * files
  */
 export default function extendRequest(Request: RequestConstructorContract) {
-	/**
-	 * Fetch a single file
-	 */
-	Request.macro('file', function getFile(key: string, options?: Partial<FileValidationOptions>) {
-		let file: unknown = lodash.get(this.allFiles(), key)
-		file = Array.isArray(file) ? file[0] : file
+  /**
+   * Fetch a single file
+   */
+  Request.macro('file', function getFile(key: string, options?: Partial<FileValidationOptions>) {
+    let file: unknown = lodash.get(this.allFiles(), key)
+    file = Array.isArray(file) ? file[0] : file
 
-		if (!isInstanceOfFile(file)) {
-			return null
-		}
+    if (!isInstanceOfFile(file)) {
+      return null
+    }
 
-		setFileOptions(file, options)
-		file.validate()
-		return file
-	})
+    setFileOptions(file, options)
+    file.validate()
+    return file
+  })
 
-	/**
-	 * Fetch an array of files
-	 */
-	Request.macro('files', function getFiles(key: string, options?: Partial<FileValidationOptions>) {
-		let files: unknown[] = lodash.get(this.allFiles(), key)
-		files = Array.isArray(files) ? files : files ? [files] : []
+  /**
+   * Fetch an array of files
+   */
+  Request.macro('files', function getFiles(key: string, options?: Partial<FileValidationOptions>) {
+    let files: unknown[] = lodash.get(this.allFiles(), key)
+    files = Array.isArray(files) ? files : files ? [files] : []
 
-		return files.filter(isInstanceOfFile).map((file) => {
-			setFileOptions(file, options)
-			file.validate()
-			return file
-		})
-	})
+    return files.filter(isInstanceOfFile).map((file) => {
+      setFileOptions(file, options)
+      file.validate()
+      return file
+    })
+  })
 
-	/**
-	 * Fetch all files
-	 */
-	Request.macro('allFiles', function allFiles() {
-		return this['__raw_files'] || {}
-	})
+  /**
+   * Fetch all files
+   */
+  Request.macro('allFiles', function allFiles() {
+    return this['__raw_files'] || {}
+  })
 }

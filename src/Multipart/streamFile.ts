@@ -17,53 +17,53 @@ import { open, close, createWriteStream, unlink } from 'fs-extra'
  * can listen for the `data` event.
  */
 export function streamFile(
-	readStream: Readable,
-	location: string,
-	dataListener?: (line: Buffer) => void
+  readStream: Readable,
+  location: string,
+  dataListener?: (line: Buffer) => void
 ): Promise<void> {
-	return new Promise((resolve, reject) => {
-		open(location, 'w')
-			.then((fd) => {
-				/**
-				 * Create write stream and reject promise on error
-				 * event
-				 */
-				const writeStream = createWriteStream(location)
-				writeStream.on('error', reject)
+  return new Promise((resolve, reject) => {
+    open(location, 'w')
+      .then((fd) => {
+        /**
+         * Create write stream and reject promise on error
+         * event
+         */
+        const writeStream = createWriteStream(location)
+        writeStream.on('error', reject)
 
-				/**
-				 * Handle closing of read stream from multiple sources
-				 */
-				eos(readStream, (error: Error) => {
-					close(fd)
+        /**
+         * Handle closing of read stream from multiple sources
+         */
+        eos(readStream, (error: Error) => {
+          close(fd)
 
-					/**
-					 * Resolve when their are no errors in
-					 * streaming
-					 */
-					if (!error) {
-						resolve()
-						return
-					}
+          /**
+           * Resolve when their are no errors in
+           * streaming
+           */
+          if (!error) {
+            resolve()
+            return
+          }
 
-					/**
-					 * Otherwise cleanup write stream
-					 */
-					reject(error)
+          /**
+           * Otherwise cleanup write stream
+           */
+          reject(error)
 
-					process.nextTick(() => {
-						writeStream.end()
-						unlink(writeStream.path).catch(() => {})
-					})
-				})
+          process.nextTick(() => {
+            writeStream.end()
+            unlink(writeStream.path).catch(() => {})
+          })
+        })
 
-				if (typeof dataListener === 'function') {
-					readStream.pause()
-					readStream.on('data', dataListener)
-				}
+        if (typeof dataListener === 'function') {
+          readStream.pause()
+          readStream.on('data', dataListener)
+        }
 
-				readStream.pipe(writeStream)
-			})
-			.catch(reject)
-	})
+        readStream.pipe(writeStream)
+      })
+      .catch(reject)
+  })
 }

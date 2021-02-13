@@ -10,26 +10,26 @@
 import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
 export default class BodyParserProvider {
-	constructor(protected app: ApplicationContract) {}
+  constructor(protected app: ApplicationContract) {}
 
-	public static needsApplication = true
+  public static needsApplication = true
 
-	/**
-	 * Registers the bodyparser middleware namespace to the container.
-	 */
-	public register() {
-		this.app.container.bind('Adonis/Core/BodyParserMiddleware', () => {
-			const Config = this.app.container.resolveBinding('Adonis/Core/Config')
-			const { BodyParserMiddleware } = require('../src/BodyParser/index')
-			return new BodyParserMiddleware(Config.get('bodyparser', {}))
-		})
-	}
+  /**
+   * Registers the bodyparser middleware namespace to the container.
+   */
+  public register() {
+    this.app.container.bind('Adonis/Core/BodyParserMiddleware', () => {
+      const Config = this.app.container.resolveBinding('Adonis/Core/Config')
+      const { BodyParserMiddleware } = require('../src/BodyParser/index')
+      return new BodyParserMiddleware(Config.get('bodyparser', {}))
+    })
+  }
 
-	/**
-	 * Adding the `file` macro to add support for reading request files.
-	 */
-	public boot() {
-		const extendRequest = require('../src/Bindings/Request').default
-		extendRequest(this.app.container.resolveBinding('Adonis/Core/Request'))
-	}
+  /**
+   * Adding the `file` macro to add support for reading request files.
+   */
+  public boot() {
+    const extendRequest = require('../src/Bindings/Request').default
+    extendRequest(this.app.container.resolveBinding('Adonis/Core/Request'))
+  }
 }
