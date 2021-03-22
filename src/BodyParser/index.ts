@@ -9,11 +9,11 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
-import cuid from 'cuid'
 import { tmpdir } from 'os'
 import coBody from '@poppinss/co-body'
 import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
+import { cuid } from '@poppinss/utils/build/helpers'
 
 import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
