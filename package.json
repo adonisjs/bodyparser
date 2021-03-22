@@ -92,7 +92,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "tag": "alpha"
+    "tag": "latest"
   },
   "directories": {
     "test": "test"
