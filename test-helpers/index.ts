@@ -76,6 +76,14 @@ export async function setupApp(providers?: string[]) {
 	`
   )
 
+  await fs.add(
+    'config/bodyparser.ts',
+    `
+    const bodyParserConfig = ${JSON.stringify(bodyParserConfig)}
+    export default bodyParserConfig
+  `
+  )
+
   await app.setup()
   await app.registerProviders()
   await app.bootProviders()

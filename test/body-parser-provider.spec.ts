@@ -18,12 +18,16 @@ test.group('BodyParser Provider', (group) => {
 
   test('register encryption provider', async (assert) => {
     const app = await setupApp(['../../providers/BodyParserProvider'])
-    assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
+    assert.deepEqual(app.container.use('Adonis/Core/BodyParser'), BodyParserMiddleware)
+    assert.instanceOf(
+      app.container.make(app.container.use('Adonis/Core/BodyParser')),
+      BodyParserMiddleware
+    )
   })
 
   test('extend request class by adding the file methods', async (assert) => {
     const app = await setupApp(['../../providers/BodyParserProvider'])
-    assert.instanceOf(app.container.use('Adonis/Core/BodyParserMiddleware'), BodyParserMiddleware)
+    assert.deepEqual(app.container.use('Adonis/Core/BodyParser'), BodyParserMiddleware)
     assert.property(app.container.use('Adonis/Core/Request').prototype, 'file')
     assert.property(app.container.use('Adonis/Core/Request').prototype, 'files')
     assert.property(app.container.use('Adonis/Core/Request').prototype, 'allFiles')

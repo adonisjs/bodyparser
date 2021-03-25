@@ -9,6 +9,7 @@
 
 declare module '@ioc:Adonis/Core/BodyParser' {
   import { Readable } from 'stream'
+  import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
   /**
    * Qs module config
@@ -206,4 +207,16 @@ declare module '@ioc:Adonis/Core/BodyParser' {
      */
     toJSON(): FileJSON
   }
+
+  /**
+   * Shape of the bodyparser middleware class constructor
+   */
+  export interface BodyParserMiddlewareContract {
+    new (config: BodyParserConfig): {
+      handle(ctx: HttpContextContract, next: () => void): any
+    }
+  }
+
+  const BodyParserMiddleware: BodyParserMiddlewareContract
+  export default BodyParserMiddleware
 }

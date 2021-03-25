@@ -1,7 +1,9 @@
 {
   "extends": "./node_modules/@adonisjs/mrm-preset/_tsconfig",
   "compilerOptions": {
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "files": ["./node_modules/@adonisjs/encryption/build/adonis-typings/encryption.d.ts"]
 }

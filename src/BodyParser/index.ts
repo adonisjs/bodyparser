@@ -13,7 +13,9 @@ import { tmpdir } from 'os'
 import coBody from '@poppinss/co-body'
 import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
+import { inject } from '@adonisjs/application'
 import { cuid } from '@poppinss/utils/build/helpers'
+import type { ConfigContract } from '@ioc:Adonis/Core/Config'
 
 import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
 import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
@@ -25,8 +27,16 @@ import { streamFile } from '../Multipart/streamFile'
  * BodyParser middleware parses the incoming request body and set it as
  * request body to be read later in the request lifecycle.
  */
+@inject(['Adonis/Core/Config'])
 export class BodyParserMiddleware {
-  constructor(private config: BodyParserConfig) {}
+  /**
+   * Bodyparser config
+   */
+  private config: BodyParserConfig
+
+  constructor(Config: ConfigContract) {
+    this.config = Config.get('bodyparser', {})
+  }
 
   /**
    * Returns config for a given type
