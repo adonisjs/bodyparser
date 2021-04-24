@@ -51,6 +51,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
    */
   export type BodyParserFormConfig = BodyParserBaseConfig & {
     queryString: QueryStringConfig
+    convertEmptyStringsToNull: boolean
   }
 
   /**
@@ -67,6 +68,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     autoProcess: boolean
     maxFields: number
     processManually: string[]
+    convertEmptyStringsToNull: boolean
     tmpFileName?(): string
   }
 

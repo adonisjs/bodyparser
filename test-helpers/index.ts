@@ -39,6 +39,7 @@ export const bodyParserConfig: BodyParserConfig = {
     encoding: 'utf-8',
     limit: '1mb',
     queryString: {},
+    convertEmptyStringsToNull: true,
     types: ['application/x-www-form-urlencoded'],
   },
   raw: {
@@ -49,6 +50,7 @@ export const bodyParserConfig: BodyParserConfig = {
   },
   multipart: {
     autoProcess: true,
+    convertEmptyStringsToNull: true,
     processManually: [],
     encoding: 'utf-8',
     maxFields: 1000,

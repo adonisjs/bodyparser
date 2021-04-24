@@ -16,6 +16,8 @@ import { lodash } from '@poppinss/utils'
 export class FormFields {
   private fields: any = {}
 
+  constructor(private config: { convertEmptyStringsToNull: boolean }) {}
+
   /**
    * Add a new key/value pair. The keys with array like
    * expressions are handled properly.
@@ -35,6 +37,13 @@ export class FormFields {
    */
   public add(key: string, value: any): void {
     let isArray = false
+
+    /**
+     * Convert empty strings to null
+     */
+    if (this.config.convertEmptyStringsToNull && value === '') {
+      value = null
+    }
 
     /**
      * Drop `[]` without indexes, since lodash `_.set` and

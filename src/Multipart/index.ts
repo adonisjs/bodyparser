@@ -42,13 +42,17 @@ export class Multipart implements MultipartContract {
   /**
    * Collected fields from the multipart stream
    */
-  private fields = new FormFields()
+  private fields = new FormFields({
+    convertEmptyStringsToNull: this.config.convertEmptyStringsToNull === true,
+  })
 
   /**
    * Collected files from the multipart stream. Files are only collected
    * when there is an attached listener for a given file.
    */
-  private files = new FormFields()
+  private files = new FormFields({
+    convertEmptyStringsToNull: this.config.convertEmptyStringsToNull === true,
+  })
 
   /**
    * We track the finishing of `this.onFile` async handlers
@@ -80,7 +84,11 @@ export class Multipart implements MultipartContract {
 
   constructor(
     private ctx: HttpContextContract,
-    private config: Partial<{ limit: string | number; maxFields: number }> = {}
+    private config: Partial<{
+      limit: string | number
+      maxFields: number
+      convertEmptyStringsToNull: boolean
+    }> = {}
   ) {}
 
   /**

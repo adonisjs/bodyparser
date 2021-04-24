@@ -194,8 +194,25 @@ test.group('BodyParser Middleware | form data', (group) => {
     })
 
     const { body } = await supertest(server).post('/').type('form').send({ '': 'virk' })
-
     assert.deepEqual(body, {})
+  })
+
+  test('convert empty strings to null', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify(ctx.request.all()))
+      })
+    })
+
+    const { body } = await supertest(server).post('/').type('form').send({ name: '' })
+
+    assert.deepEqual(body, {
+      name: null,
+    })
   })
 })
 
@@ -1125,5 +1142,25 @@ test.group('BodyParser Middleware | multipart', (group) => {
     assert.isFalse(body[0].validated)
     assert.isTrue(body[0].isValid)
     assert.lengthOf(body[0].errors, 0)
+  })
+
+  test('convert empty strings to null', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const body = ctx.request.all()
+        res.end(JSON.stringify(body))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .field('username', '')
+
+    assert.deepEqual(body, { username: null })
   })
 })

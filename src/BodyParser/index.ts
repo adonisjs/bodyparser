@@ -133,6 +133,7 @@ export class BodyParserMiddleware {
       ctx.request.multipart = new Multipart(ctx, {
         maxFields: multipartConfig.maxFields,
         limit: multipartConfig.limit,
+        convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
       })
 
       /**
