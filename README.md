@@ -25,7 +25,7 @@
       Website
     </a>
     <span> | </span>
-    <a href="https://adonisjs.com/docs">
+    <a href="https://docs.adonisjs.com/guides/request#request-body">
       Guides
     </a>
     <span> | </span>
