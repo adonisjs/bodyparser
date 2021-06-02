@@ -29,7 +29,7 @@ import extendRequest from '../src/Bindings/Request'
 import { BodyParserMiddleware } from '../src/BodyParser'
 import { packageFilePath, packageFileSize, setupApp, fs } from '../test-helpers'
 
-const Request = (BaseRequest as unknown) as RequestConstructorContract
+const Request = BaseRequest as unknown as RequestConstructorContract
 let app: ApplicationContract
 
 test.group('BodyParser Middleware | generic', (group) => {
