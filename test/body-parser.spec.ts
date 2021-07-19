@@ -533,7 +533,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
     })
 
     await supertest(server).post('/').attach('package', packageFilePath).field('username', 'virk')
-  })
+  }).retry(3)
 
   test('do not process request when processManually static route matches', async (assert) => {
     assert.plan(2)
@@ -557,7 +557,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
     })
 
     await supertest(server).post('/').attach('package', packageFilePath).field('username', 'virk')
-  })
+  }).retry(3)
 
   test('do not process request when processManually has dynamic route', async (assert) => {
     assert.plan(2)

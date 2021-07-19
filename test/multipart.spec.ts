@@ -644,7 +644,7 @@ test.group('Multipart', (group) => {
     assert.isTrue(files!.package.isValid)
     assert.equal(files!.package.size, 0)
     assert.equal(files!.package.state, 'consumed')
-  })
+  }).retry(3)
 
   test('report extension validation errors when unable to detect extension till completion', async (assert) => {
     assert.plan(4)
