@@ -579,6 +579,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
+        await ctx.request['multipart'].process()
         res.end()
       })
     })

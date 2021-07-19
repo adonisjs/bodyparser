@@ -604,7 +604,7 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package.state, 'consumed')
   })
 
-  test('end request when abort is called without end the part', async (assert) => {
+  test('end request when abort is called without ending the part', async (assert) => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
@@ -614,7 +614,7 @@ test.group('Multipart', (group) => {
       multipart.onFile('package', {}, (part) => {
         return new Promise((resolve) => {
           part.on('error', (error) => {
-            multipart.abort(error)
+            setTimeout(() => multipart.abort(error))
 
             /**
              * We resolve, to reproduce the above defined behavior. If we reject
