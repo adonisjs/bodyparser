@@ -158,6 +158,15 @@ export class File implements MultipartFileContract {
   }
 
   /**
+   * Mark file as moved
+   */
+  public markAsMoved(fileName: string, filePath: string) {
+    this.filePath = filePath
+    this.fileName = fileName
+    this.state = 'moved'
+  }
+
+  /**
    * Moves the file to a given location. Multiple calls to the `move` method are allowed,
    * incase you want to move a file to multiple locations.
    */
@@ -178,9 +187,7 @@ export class File implements MultipartFileContract {
 
     try {
       await move(this.tmpPath, filePath, { overwrite: options.overwrite! })
-      this.filePath = filePath
-      this.fileName = options.name!
-      this.state = 'moved'
+      this.markAsMoved(options.name!, filePath)
     } catch (error) {
       if (error.message.includes('dest already exists')) {
         throw new Exception(

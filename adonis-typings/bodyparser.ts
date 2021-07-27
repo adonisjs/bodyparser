@@ -199,6 +199,11 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     validate(): void
 
     /**
+     * Mark file as moved
+     */
+    markAsMoved(fileName: string, filePath: string): void
+
+    /**
      * Move file from temporary path to a different location. Self consumed
      * streams cannot be moved unless `tmpPath` is defined explicitly.
      */
