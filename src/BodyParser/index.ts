@@ -15,10 +15,11 @@ import { join, isAbsolute } from 'path'
 import { Exception } from '@poppinss/utils'
 import { inject } from '@adonisjs/application'
 import { cuid } from '@poppinss/utils/build/helpers'
-import type { ConfigContract } from '@ioc:Adonis/Core/Config'
 
-import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
-import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import type { ConfigContract } from '@ioc:Adonis/Core/Config'
+import type { DriveManagerContract } from '@ioc:Adonis/Core/Drive'
+import type { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
+import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
 import { Multipart } from '../Multipart'
 import { streamFile } from '../Multipart/streamFile'
@@ -27,14 +28,14 @@ import { streamFile } from '../Multipart/streamFile'
  * BodyParser middleware parses the incoming request body and set it as
  * request body to be read later in the request lifecycle.
  */
-@inject(['Adonis/Core/Config'])
+@inject(['Adonis/Core/Config', 'Adonis/Core/Drive'])
 export class BodyParserMiddleware {
   /**
    * Bodyparser config
    */
   private config: BodyParserConfig
 
-  constructor(Config: ConfigContract) {
+  constructor(Config: ConfigContract, private drive: DriveManagerContract) {
     this.config = Config.get('bodyparser', {})
   }
 
@@ -130,11 +131,15 @@ export class BodyParserMiddleware {
     if (this.isType(ctx.request, multipartConfig.types)) {
       ctx.logger.trace('bodyparser parsing as multipart body')
 
-      ctx.request.multipart = new Multipart(ctx, {
-        maxFields: multipartConfig.maxFields,
-        limit: multipartConfig.limit,
-        convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
-      })
+      ctx.request.multipart = new Multipart(
+        ctx,
+        {
+          maxFields: multipartConfig.maxFields,
+          limit: multipartConfig.limit,
+          convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
+        },
+        this.drive
+      )
 
       /**
        * Skip parsing when `autoProcess` is disabled or route matches one

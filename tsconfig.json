@@ -5,5 +5,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
   },
-  "files": ["./node_modules/@adonisjs/encryption/build/adonis-typings/encryption.d.ts"]
+  "files": [
+    "./node_modules/@adonisjs/encryption/build/adonis-typings/encryption.d.ts",
+    "./node_modules/@adonisjs/drive/build/adonis-typings/index.d.ts"
+  ]
 }

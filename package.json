@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "@adonisjs/application": "^5.1.6",
+    "@adonisjs/drive": "^2.0.1",
     "@adonisjs/encryption": "^4.0.5",
     "@adonisjs/http-server": "^5.5.5",
     "@adonisjs/mrm-preset": "^4.1.2",
@@ -54,6 +55,7 @@
   },
   "peerDependencies": {
     "@adonisjs/application": "^5.0.0",
+    "@adonisjs/drive": "^2.0.0",
     "@adonisjs/http-server": "^5.0.0"
   },
   "nyc": {

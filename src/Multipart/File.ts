@@ -9,9 +9,12 @@
 
 /// <reference path="../../adonis-typings/bodyparser.ts" />
 
+import slash from 'slash'
 import { join } from 'path'
-import { move } from 'fs-extra'
 import { Exception } from '@poppinss/utils'
+import { move, createReadStream } from 'fs-extra'
+import { cuid } from '@poppinss/utils/build/helpers'
+import { DisksList, WriteOptions, DriveManagerContract } from '@ioc:Adonis/Core/Drive'
 
 import {
   FileUploadError,
@@ -143,7 +146,8 @@ export class File implements MultipartFileContract {
 
   constructor(
     private data: { fieldName: string; clientName: string; headers: any },
-    validationOptions: Partial<FileValidationOptions>
+    validationOptions: Partial<FileValidationOptions>,
+    private drive: DriveManagerContract
   ) {
     this.sizeLimit = validationOptions.size
     this.allowedExtensions = validationOptions.extnames
@@ -197,6 +201,46 @@ export class File implements MultipartFileContract {
       }
       throw error
     }
+  }
+
+  /**
+   * Move file to a drive disk
+   */
+  public async moveToDisk(
+    location: string,
+    options?: WriteOptions & { name?: string },
+    diskName?: keyof DisksList
+  ): Promise<void> {
+    const driver = diskName ? this.drive.use(diskName) : this.drive.use()
+    const fileName = options?.name || `${cuid()}.${this.extname}`
+
+    /**
+     * Move file as normal when using the local driver
+     */
+    if (driver.name === 'local') {
+      await this.move(driver.makePath(location), {
+        name: fileName,
+        overwrite: true,
+      })
+      return
+    }
+
+    /**
+     * Make a unix style key for cloud drivers, since the cloud
+     * key is not a filesystem path
+     */
+    const key = slash(join(location || './', fileName))
+
+    /**
+     * Set the content type for cloud drivers
+     */
+    options = options || {}
+    if (this.type && this.subtype && !options.contentType) {
+      options.contentType = `${this.type}/${this.subtype}`
+    }
+
+    await driver.putStream(key, createReadStream(this.tmpPath!), options)
+    this.markAsMoved(key, await driver.getUrl(key))
   }
 
   /**

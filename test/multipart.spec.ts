@@ -36,7 +36,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, (part, reporter) => {
         return new Promise((resolve, reject) => {
@@ -65,7 +69,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, (part, reporter) => {
         return new Promise((_resolve, reject) => {
@@ -102,7 +110,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, async (part, reporter) => {
         part.on('data', (line) => {
@@ -135,7 +147,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, (part, reporter) => {
         return new Promise((resolve, reject) => {
@@ -174,7 +190,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, async (part, reporter) => {
         part.on('data', reporter)
@@ -206,7 +226,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, async (part, reporter) => {
         part.on('data', reporter)
@@ -237,7 +261,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('*', {}, async (part, reporter) => {
         part.on('data', reporter)
@@ -269,7 +297,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('*', {}, (part, reporter) => {
         return new Promise((resolve, reject) => {
@@ -301,7 +333,11 @@ test.group('Multipart', (group) => {
   test('FIELDS: raise error when process is invoked multiple times', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       try {
         await multipart.process()
@@ -321,7 +357,11 @@ test.group('Multipart', (group) => {
   test('FIELDS: raise error when maxFields are crossed', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       try {
         await multipart.process()
@@ -340,7 +380,11 @@ test.group('Multipart', (group) => {
   test('FIELDS: raise error when bytes limit is crossed', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 2 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 2 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       try {
         await multipart.process()
@@ -361,7 +405,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 20 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 20 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, (part, report) => {
         return new Promise((resolve, reject) => {
@@ -403,7 +451,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile(
         '*',
@@ -448,7 +500,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('*', { size: 10 }, (part, reporter) => {
         return new Promise((resolve, reject) => {
@@ -489,7 +545,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile(
         '*',
@@ -530,7 +590,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile(
         '*',
@@ -567,7 +631,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, (part) => {
         return new Promise((resolve) => {
@@ -609,7 +677,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile('package', {}, (part) => {
         return new Promise((resolve) => {
@@ -653,7 +725,11 @@ test.group('Multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 4000 })
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 4000 },
+        app.container.use('Adonis/Core/Drive')
+      )
 
       multipart.onFile(
         '*',

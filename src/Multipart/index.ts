@@ -22,6 +22,7 @@ import {
 
 import { FormFields } from '../FormFields'
 import { PartHandler } from './PartHandler'
+import { DriveManagerContract } from '@ioc:Adonis/Core/Drive'
 
 /**
  * Multipart class offers a low level API to interact the incoming
@@ -88,7 +89,8 @@ export class Multipart implements MultipartContract {
       limit: string | number
       maxFields: number
       convertEmptyStringsToNull: boolean
-    }> = {}
+    }> = {},
+    private drive: DriveManagerContract
   ) {}
 
   /**
@@ -154,7 +156,7 @@ export class Multipart implements MultipartContract {
     /**
      * Instantiate the part handler
      */
-    const partHandler = new PartHandler(part, handler.options)
+    const partHandler = new PartHandler(part, handler.options, this.drive)
     partHandler.begin()
 
     /**

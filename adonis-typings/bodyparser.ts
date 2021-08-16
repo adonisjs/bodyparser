@@ -9,6 +9,7 @@
 
 declare module '@ioc:Adonis/Core/BodyParser' {
   import { Readable } from 'stream'
+  import { DisksList, WriteOptions } from '@ioc:Adonis/Core/Drive'
   import { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
   /**
@@ -208,6 +209,15 @@ declare module '@ioc:Adonis/Core/BodyParser' {
      * streams cannot be moved unless `tmpPath` is defined explicitly.
      */
     move(location: string, options?: { name?: string; overwrite?: boolean }): Promise<void>
+
+    /**
+     * Move file to a pre-registered drive disk
+     */
+    moveToDisk(
+      location: string,
+      options?: WriteOptions & { name?: string },
+      diskName?: keyof DisksList
+    ): Promise<void>
 
     /**
      * Get JSON representation of file

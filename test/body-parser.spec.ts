@@ -48,7 +48,10 @@ test.group('BodyParser Middleware | generic', (group) => {
   test('do not parse get requests', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -64,7 +67,10 @@ test.group('BodyParser Middleware | generic', (group) => {
   test('by pass when body is empty', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -80,7 +86,10 @@ test.group('BodyParser Middleware | generic', (group) => {
   test('by pass when content type is not supported', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -113,7 +122,10 @@ test.group('BodyParser Middleware | form data', (group) => {
   test('handle request with form data', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -135,7 +147,10 @@ test.group('BodyParser Middleware | form data', (group) => {
           limit: 2,
         },
       })
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -163,7 +178,10 @@ test.group('BodyParser Middleware | form data', (group) => {
           encoding: 'foo',
         },
       })
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -185,7 +203,10 @@ test.group('BodyParser Middleware | form data', (group) => {
   test('ignore fields with empty name', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -200,7 +221,10 @@ test.group('BodyParser Middleware | form data', (group) => {
   test('convert empty strings to null', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -232,7 +256,10 @@ test.group('BodyParser Middleware | json', (group) => {
   test('handle request with json body', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -254,7 +281,10 @@ test.group('BodyParser Middleware | json', (group) => {
         },
       })
 
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -276,7 +306,10 @@ test.group('BodyParser Middleware | json', (group) => {
   test('ignore fields with empty name', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -306,7 +339,10 @@ test.group('BodyParser Middleware | raw body', (group) => {
   test('handle request with raw body', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -331,7 +367,10 @@ test.group('BodyParser Middleware | raw body', (group) => {
         },
       })
 
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
       try {
         await middleware.handle(ctx, async () => {})
       } catch (error) {
@@ -366,7 +405,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('handle request with just files', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -390,7 +432,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('handle request with files and fields', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -417,7 +462,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('handle request array of files', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -453,7 +501,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
           limit: packageFileSize * 2 - 10,
         },
       })
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -480,7 +531,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('handle request with empty field name', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -499,7 +553,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('handle request with empty file name', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200)
@@ -523,7 +580,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
         },
       })
 
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
@@ -547,7 +607,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
         },
       })
 
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
@@ -574,7 +637,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
         },
       })
 
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
@@ -590,7 +656,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('detect file ext and mime type using magic number', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -620,7 +689,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('validate file when access via request.file method', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -657,7 +729,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('validate array of files when access via request.file method', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -715,7 +790,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('pull first file even when source is an array', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -755,7 +833,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test("return null when file doesn't exists", async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -771,7 +852,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test("return empty array file doesn't exists", async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -787,7 +871,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('get file from nested object', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -819,7 +906,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         const pkgFile = ctx.request.file('package')!
@@ -850,7 +940,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         const pkgFile = ctx.request.file('package')!
@@ -883,7 +976,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         const pkgFile = ctx.request.file('package')!
@@ -912,7 +1008,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('validate file extension and file size seperately', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -960,7 +1059,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('calling validate multiple times must be a noop', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1012,7 +1114,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('validate file size using request.file method and extension manually', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1058,7 +1163,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('updating sizeLimit multiple times must not be allowed', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1086,7 +1194,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('updating allowedExtensions multiple times must not be allowed', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1114,7 +1225,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('get all files as an object', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1148,7 +1262,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
   test('convert empty strings to null', async (assert) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(app.container.use('Adonis/Core/Config'))
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1163,5 +1280,39 @@ test.group('BodyParser Middleware | multipart', (group) => {
       .field('username', '')
 
     assert.deepEqual(body, { username: null })
+  })
+
+  test('move file using drive', async (assert) => {
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
+
+      await middleware.handle(ctx, async () => {
+        const pkgFile = ctx.request.file('package')!
+
+        try {
+          await pkgFile.moveToDisk('./')
+          assert.equal(pkgFile.state, 'moved')
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.write(JSON.stringify({ filePath: pkgFile.filePath }))
+          res.end()
+        } catch (error) {
+          res.writeHead(500, { 'content-type': 'application/json' })
+          res.end(error.message)
+        }
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .expect(200)
+
+    const uploadedFileContents = await readFile(body.filePath, 'utf-8')
+    const originalFileContents = await readFile(packageFilePath, 'utf-8')
+    assert.equal(uploadedFileContents, originalFileContents)
   })
 })

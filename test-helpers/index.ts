@@ -64,18 +64,20 @@ export const bodyParserConfig: BodyParserConfig = {
  */
 export async function setupApp(providers?: string[]) {
   const app = new Application(fs.basePath, 'web', {
-    providers: ['@adonisjs/encryption', '@adonisjs/http-server'].concat(providers || []),
+    providers: ['@adonisjs/encryption', '@adonisjs/http-server', '@adonisjs/drive'].concat(
+      providers || []
+    ),
   })
   await fs.add('.env', '')
   await fs.add(
     'config/app.ts',
     `
-		export const appKey = 'verylongandrandom32charsecretkey'
-		export const http = {
-			trustProxy: () => true,
-			cookie: {},
-		}
-	`
+    export const appKey = 'verylongandrandom32charsecretkey'
+    export const http = {
+      trustProxy: () => true,
+      cookie: {},
+    }
+  `
   )
 
   await fs.add(
@@ -83,6 +85,26 @@ export async function setupApp(providers?: string[]) {
     `
     const bodyParserConfig = ${JSON.stringify(bodyParserConfig)}
     export default bodyParserConfig
+  `
+  )
+
+  await fs.add(
+    'config/drive.ts',
+    `
+    const driveConfig = {
+      disk: 'local',
+      disks: {
+        local: {
+          driver: 'local',
+          root: '${join(fs.basePath, 'uploads')}',
+          basePath: '/',
+          serveAssets: true,
+          visibility: 'public'
+        }
+      }
+    }
+
+    export default driveConfig
   `
   )
 

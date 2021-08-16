@@ -7,10 +7,11 @@
  * file that was distributed with this source code.
  */
 
-/// <reference path="../../adonis-typings/bodyparser.ts" />
+/// <reference path="../../adonis-typings/index.ts" />
 
 import { extname } from 'path'
 import { Exception } from '@poppinss/utils'
+import { DriveManagerContract } from '@ioc:Adonis/Core/Drive'
 import { MultipartStream, FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
 
 import { File } from './File'
@@ -62,7 +63,8 @@ export class PartHandler {
     {
       size: this.options.size,
       extnames: this.options.extnames,
-    }
+    },
+    this.drive
   )
 
   /**
@@ -75,7 +77,8 @@ export class PartHandler {
 
   constructor(
     private part: MultipartStream,
-    private options: Partial<FileValidationOptions & { deferValidations: boolean }>
+    private options: Partial<FileValidationOptions & { deferValidations: boolean }>,
+    private drive: DriveManagerContract
   ) {}
 
   /**
