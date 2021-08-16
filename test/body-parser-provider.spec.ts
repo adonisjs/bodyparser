@@ -1,5 +1,5 @@
 /*
- * @adonisjs/events
+ * @adonisjs/bodyparser
  *
  * (c) Harminder Virk <virk@adonisjs.com>
  *
@@ -16,7 +16,7 @@ test.group('BodyParser Provider', (group) => {
     await fs.cleanup()
   })
 
-  test('register encryption provider', async (assert) => {
+  test('register bodyparser provider', async (assert) => {
     const app = await setupApp(['../../providers/BodyParserProvider'])
     assert.deepEqual(app.container.use('Adonis/Core/BodyParser'), BodyParserMiddleware)
     assert.instanceOf(

@@ -9,6 +9,7 @@
 
 /// <reference path="../adonis-typings/index.ts" />
 
+import slash from 'slash'
 import { EOL } from 'os'
 import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
@@ -96,7 +97,7 @@ export async function setupApp(providers?: string[]) {
       disks: {
         local: {
           driver: 'local',
-          root: '${join(fs.basePath, 'uploads')}',
+          root: '${slash(join(fs.basePath, 'uploads'))}',
           basePath: '/',
           serveAssets: true,
           visibility: 'public'
