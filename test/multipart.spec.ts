@@ -71,7 +71,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -112,7 +112,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -149,7 +149,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -192,7 +192,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -228,7 +228,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -263,7 +263,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -299,7 +299,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -335,7 +335,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -359,7 +359,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1, limit: 4000 },
+        { maxFields: 1, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -453,7 +453,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -547,7 +547,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -592,7 +592,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -633,7 +633,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -679,7 +679,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -727,7 +727,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 4000 },
+        { maxFields: 1000, limit: 8000 },
         app.container.use('Adonis/Core/Drive')
       )
 
