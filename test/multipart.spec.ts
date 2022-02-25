@@ -374,7 +374,7 @@ test.group('Multipart', (group) => {
 
     const { text } = await supertest(server).post('/').field('name', 'virk').field('age', '22')
 
-    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Max fields limit exceeded')
+    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Fields length limit exceeded')
   })
 
   test('FIELDS: raise error when bytes limit is crossed', async (assert) => {
@@ -382,7 +382,7 @@ test.group('Multipart', (group) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
         ctx,
-        { maxFields: 1000, limit: 2 },
+        { maxFields: 1000, fieldsLimit: 2 },
         app.container.use('Adonis/Core/Drive')
       )
 
@@ -396,8 +396,7 @@ test.group('Multipart', (group) => {
     })
 
     const { text } = await supertest(server).post('/').field('name', 'virk').field('age', '22')
-
-    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Fields size in bytes exceeded')
   })
 
   test('disrupt file uploads error when total bytes limit is crossed', async (assert) => {

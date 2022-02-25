@@ -136,6 +136,7 @@ export class BodyParserMiddleware {
         {
           maxFields: multipartConfig.maxFields,
           limit: multipartConfig.limit,
+          fieldsLimit: multipartConfig.fieldsLimit,
           convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
         },
         this.drive

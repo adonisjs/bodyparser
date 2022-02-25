@@ -70,6 +70,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     maxFields: number
     processManually: string[]
     convertEmptyStringsToNull: boolean
+    fieldsLimit?: number | string
     tmpFileName?(): string
   }
 

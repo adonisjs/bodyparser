@@ -69,9 +69,14 @@ export class Multipart implements MultipartContract {
 
   /**
    * Total size limit of the multipart stream. If it goes beyond
-   * this limit, then an exception will be raised.
+   * the limit, then an exception will be raised.
    */
   private upperLimit?: number
+
+  /**
+   * Total size in bytes for all the fields (not the files)
+   */
+  private maxFieldsSize?: number
 
   /**
    * A track of total number of file bytes processed so far
@@ -87,6 +92,7 @@ export class Multipart implements MultipartContract {
     private ctx: HttpContextContract,
     private config: Partial<{
       limit: string | number
+      fieldsLimit: string | number
       maxFields: number
       convertEmptyStringsToNull: boolean
     }> = {},
@@ -216,12 +222,7 @@ export class Multipart implements MultipartContract {
       return
     }
 
-    const error = this.validateProcessedBytes(value.length)
-    if (error) {
-      this.abort(error)
-    } else {
-      this.fields.add(key, value)
-    }
+    this.fields.add(key, value)
   }
 
   /**
@@ -230,6 +231,15 @@ export class Multipart implements MultipartContract {
    */
   private processConfig(config?: Parameters<MultipartContract['process']>[0]) {
     this.config = Object.assign(this.config, config)
+
+    /**
+     * Getting bytes from the `config.fieldsLimit` option, which can
+     * also be a string.
+     */
+    this.maxFieldsSize =
+      typeof this.config!.fieldsLimit === 'string'
+        ? bytes(this.config.fieldsLimit)
+        : this.config!.fieldsLimit
 
     /**
      * Getting bytes from the `config.limit` option, which can
@@ -295,7 +305,10 @@ export class Multipart implements MultipartContract {
       this.state = 'processing'
       this.processConfig(config)
 
-      this.form = new multiparty.Form({ maxFields: this.config!.maxFields })
+      this.form = new multiparty.Form({
+        maxFields: this.config!.maxFields,
+        maxFieldsSize: this.maxFieldsSize,
+      })
 
       /**
        * Raise error when form encounters an
@@ -309,8 +322,12 @@ export class Multipart implements MultipartContract {
             this.ctx.request.request.resume()
           }
 
-          if (error.message === 'maxFields 1 exceeded.') {
-            reject(new Exception('Max fields limit exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE'))
+          if (error.message.match(/maxFields [0-9]+ exceeded/)) {
+            reject(new Exception('Fields length limit exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE'))
+          } else if (error.message.match(/maxFieldsSize [0-9]+ exceeded/)) {
+            reject(
+              new Exception('Fields size in bytes exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE')
+            )
           } else {
             reject(error)
           }
