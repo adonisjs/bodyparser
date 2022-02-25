@@ -9,7 +9,7 @@
 
 /// <reference path="../adonis-typings/bodyparser.ts" />
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import supertest from 'supertest'
 import { createServer } from 'http'
@@ -23,15 +23,12 @@ import { sleep, packageFilePath, packageFileSize, setupApp, fs } from '../test-h
 let app: ApplicationContract
 
 test.group('Multipart', (group) => {
-  group.before(async () => {
+  group.setup(async () => {
     app = await setupApp()
+    return () => fs.cleanup()
   })
 
-  group.after(async () => {
-    await fs.cleanup()
-  })
-
-  test('process file by attaching handler on field name', async (assert) => {
+  test('process file by attaching handler on field name', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
@@ -64,7 +61,7 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package.size, packageFileSize)
   })
 
-  test('error inside onFile handler should propogate to file errors', async (assert) => {
+  test('error inside onFile handler should propogate to file errors', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
@@ -104,7 +101,7 @@ test.group('Multipart', (group) => {
     ])
   })
 
-  test('wait for promise to return even when part has been streamed', async (assert) => {
+  test('wait for promise to return even when part has been streamed', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
     const stack: string[] = []
 
@@ -141,7 +138,7 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package.size, packageFileSize)
   })
 
-  test('work fine when stream is piped to a destination', async (assert) => {
+  test('work fine when stream is piped to a destination', async ({ assert }) => {
     const SAMPLE_FILE_PATH = join(__dirname, './sample.json')
     let files: null | { [key: string]: File } = null
 
@@ -184,7 +181,7 @@ test.group('Multipart', (group) => {
     await remove(SAMPLE_FILE_PATH)
   })
 
-  test('work fine with array of files', async (assert) => {
+  test('work fine with array of files', async ({ assert }) => {
     const stack: string[] = []
     let files: null | { [key: string]: File } = null
 
@@ -220,7 +217,7 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package[0].size, packageFileSize)
   })
 
-  test('work fine with indexed array of files', async (assert) => {
+  test('work fine with indexed array of files', async ({ assert }) => {
     const stack: string[] = []
     let files: null | { [key: string]: File } = null
 
@@ -255,7 +252,7 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package[0].size, packageFileSize)
   })
 
-  test('pass file to wildcard handler when defined', async (assert) => {
+  test('pass file to wildcard handler when defined', async ({ assert }) => {
     const stack: string[] = []
     let files: null | { [key: string]: File } = null
 
@@ -290,7 +287,7 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package.size, packageFileSize)
   })
 
-  test('collect fields automatically', async (assert) => {
+  test('collect fields automatically', async ({ assert }) => {
     const stack: string[] = []
     let files: null | { [key: string]: File } = null
     let fields: null | { [key: string]: any } = null
@@ -330,7 +327,7 @@ test.group('Multipart', (group) => {
     assert.deepEqual(fields, { name: 'virk' })
   })
 
-  test('FIELDS: raise error when process is invoked multiple times', async (assert) => {
+  test('FIELDS: raise error when process is invoked multiple times', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
@@ -354,7 +351,7 @@ test.group('Multipart', (group) => {
     assert.equal(text, 'E_RUNTIME_EXCEPTION: multipart stream has already been consumed')
   })
 
-  test('FIELDS: raise error when maxFields are crossed', async (assert) => {
+  test('FIELDS: raise error when maxFields are crossed', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
@@ -377,7 +374,7 @@ test.group('Multipart', (group) => {
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Fields length limit exceeded')
   })
 
-  test('FIELDS: raise error when bytes limit is crossed', async (assert) => {
+  test('FIELDS: raise error when bytes limit is crossed', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
       const multipart = new Multipart(
@@ -399,7 +396,7 @@ test.group('Multipart', (group) => {
     assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Fields size in bytes exceeded')
   })
 
-  test('disrupt file uploads error when total bytes limit is crossed', async (assert) => {
+  test('disrupt file uploads error when total bytes limit is crossed', async ({ assert }) => {
     assert.plan(2)
 
     const server = createServer(async (req, res) => {
@@ -444,7 +441,7 @@ test.group('Multipart', (group) => {
     }
   })
 
-  test('disrupt part streaming when validation fails', async (assert) => {
+  test('disrupt part streaming when validation fails', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
     assert.plan(5)
 
@@ -493,7 +490,7 @@ test.group('Multipart', (group) => {
     ])
   })
 
-  test('validate stream only once', async (assert) => {
+  test('validate stream only once', async ({ assert }) => {
     assert.plan(5)
     let files: null | { [key: string]: File } = null
 
@@ -537,7 +534,7 @@ test.group('Multipart', (group) => {
     ])
   })
 
-  test('report extension validation errors', async (assert) => {
+  test('report extension validation errors', async ({ assert }) => {
     assert.plan(4)
 
     let files: null | { [key: string]: File } = null
@@ -584,7 +581,7 @@ test.group('Multipart', (group) => {
     ])
   })
 
-  test('do not run validations when deferValidations is set to true', async (assert) => {
+  test('do not run validations when deferValidations is set to true', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
@@ -625,7 +622,7 @@ test.group('Multipart', (group) => {
     assert.deepEqual(files!.package.errors, [])
   })
 
-  test('work fine when stream is errored without reading', async (assert) => {
+  test('work fine when stream is errored without reading', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
@@ -671,7 +668,7 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package.state, 'consumed')
   })
 
-  test('end request when abort is called without ending the part', async (assert) => {
+  test('end request when abort is called without ending the part', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
 
     const server = createServer(async (req, res) => {
@@ -717,7 +714,9 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package.state, 'consumed')
   }).retry(3)
 
-  test('report extension validation errors when unable to detect extension till completion', async (assert) => {
+  test('report extension validation errors when unable to detect extension till completion', async ({
+    assert,
+  }) => {
     assert.plan(4)
 
     let files: null | { [key: string]: File } = null

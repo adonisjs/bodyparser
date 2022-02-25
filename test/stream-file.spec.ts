@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import { Filesystem } from '@poppinss/dev-utils'
 import { createReadStream, pathExists } from 'fs-extra'
@@ -19,13 +19,11 @@ const SAMPLE_FILE = join(fs.basePath, 'hello-out.txt')
 const MAIN_FILE = join(fs.basePath, 'hello-in.txt')
 
 test.group('streamFile', (group) => {
-  group.afterEach(async () => {
-    try {
-      await fs.cleanup()
-    } catch (error) {}
+  group.each.teardown(async () => {
+    await fs.cleanup()
   })
 
-  test('write readable stream to the destination', async (assert) => {
+  test('write readable stream to the destination', async ({ assert }) => {
     await fs.add(MAIN_FILE, 'hello')
 
     const file = createReadStream(MAIN_FILE)
@@ -35,7 +33,7 @@ test.group('streamFile', (group) => {
     assert.isTrue(hasFile)
   })
 
-  test('raise error when stream gets interuppted', async (assert) => {
+  test('raise error when stream gets interuppted', async ({ assert }) => {
     assert.plan(1)
 
     await fs.add(MAIN_FILE, 'hello\nhi\nhow are you')

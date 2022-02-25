@@ -7,16 +7,16 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { BodyParserMiddleware } from '../src/BodyParser'
 import { setupApp, fs } from '../test-helpers'
 
 test.group('BodyParser Provider', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('register bodyparser provider', async (assert) => {
+  test('register bodyparser provider', async ({ assert }) => {
     const app = await setupApp(['../../providers/BodyParserProvider'])
     assert.deepEqual(app.container.use('Adonis/Core/BodyParser'), BodyParserMiddleware)
     assert.instanceOf(
@@ -25,7 +25,7 @@ test.group('BodyParser Provider', (group) => {
     )
   })
 
-  test('extend request class by adding the file methods', async (assert) => {
+  test('extend request class by adding the file methods', async ({ assert }) => {
     const app = await setupApp(['../../providers/BodyParserProvider'])
     assert.deepEqual(app.container.use('Adonis/Core/BodyParser'), BodyParserMiddleware)
     assert.property(app.container.use('Adonis/Core/Request').prototype, 'file')
