@@ -20,7 +20,7 @@ const MAIN_FILE = join(fs.basePath, 'hello-in.txt')
 
 test.group('streamFile', (group) => {
   group.each.teardown(async () => {
-    await fs.cleanup()
+    await fs.cleanup().catch(() => {})
   })
 
   test('write readable stream to the destination', async ({ assert }) => {

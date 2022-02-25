@@ -13,9 +13,7 @@ import { setupApp, fs } from '../test-helpers'
 
 test.group('BodyParser Provider', (group) => {
   group.each.teardown(async () => {
-    try {
-      await fs.cleanup()
-    } catch {}
+    await fs.cleanup().catch(() => {})
   })
 
   test('register bodyparser provider', async ({ assert }) => {
