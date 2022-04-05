@@ -212,7 +212,10 @@ export class File implements MultipartFileContract {
     diskName?: keyof DisksList
   ): Promise<void> {
     const driver = diskName ? this.drive.use(diskName) : this.drive.use()
-    const fileName = options?.name || `${cuid()}.${this.extname}`
+    const fileName =
+      options?.name || (driver.name as any) === 'fake'
+        ? this.clientName
+        : `${cuid()}.${this.extname}`
 
     /**
      * Move file as normal when using the local driver
