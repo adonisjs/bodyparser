@@ -212,9 +212,12 @@ export class File implements MultipartFileContract {
     diskName?: keyof DisksList
   ): Promise<void> {
     const driver = diskName ? this.drive.use(diskName) : this.drive.use()
+
     const fileName =
-      options?.name || (driver.name as any) === 'fake'
+      (driver.name as any) === 'fake'
         ? this.clientName
+        : options?.name
+        ? options.name
         : `${cuid()}.${this.extname}`
 
     /**
