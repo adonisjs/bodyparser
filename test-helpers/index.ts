@@ -18,6 +18,8 @@ import { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
 
 const contents = JSON.stringify(require('../package.json'), null, 2).split('\n').join(EOL)
 
+export const xlsFilePath = join(__dirname, '../sample.xls')
+export const xlsxFilePath = join(__dirname, '../sample.xlsx')
 export const packageFilePath = join(__dirname, '../package.json')
 export const packageFileSize = Buffer.from(contents, 'utf-8').length + EOL.length
 export const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))

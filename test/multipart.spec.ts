@@ -18,7 +18,15 @@ import { ApplicationContract } from '@ioc:Adonis/Core/Application'
 
 import { Multipart } from '../src/Multipart'
 import { File } from '../src/Multipart/File'
-import { sleep, packageFilePath, packageFileSize, setupApp, fs } from '../test-helpers'
+import {
+  fs,
+  sleep,
+  setupApp,
+  xlsFilePath,
+  xlsxFilePath,
+  packageFilePath,
+  packageFileSize,
+} from '../test-helpers'
 
 let app: ApplicationContract
 
@@ -761,5 +769,87 @@ test.group('Multipart', (group) => {
         message: 'Invalid file extension json. Only jpg is allowed',
       },
     ])
+  })
+
+  test('validate xlsx extension', async ({ assert }) => {
+    let files: null | { [key: string]: File } = null
+
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 8000 },
+        app.container.use('Adonis/Core/Drive')
+      )
+
+      multipart.onFile(
+        '*',
+        {
+          extnames: ['xlsx'],
+        },
+        (part, reporter) => {
+          return new Promise((resolve, reject) => {
+            part.on('error', reject)
+            part.on('end', resolve)
+            part.on('data', reporter)
+          })
+        }
+      )
+
+      await multipart.process()
+      files = ctx.request['__raw_files'] || null
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('report', xlsxFilePath)
+
+    assert.property(files, 'report')
+    assert.isTrue(files!.report.isValid)
+    assert.equal(files!.report.state, 'consumed')
+    assert.equal(files!.report.extname, 'xlsx')
+    assert.lengthOf(files!.report.errors, 0)
+  })
+
+  test('validate xls extension', async ({ assert }) => {
+    let files: null | { [key: string]: File } = null
+
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000, limit: 10000 },
+        app.container.use('Adonis/Core/Drive')
+      )
+
+      multipart.onFile(
+        '*',
+        {
+          extnames: ['xls'],
+        },
+        (part, reporter) => {
+          return new Promise((resolve, reject) => {
+            part.on('error', reject)
+            part.on('end', resolve)
+            part.on('data', reporter)
+          })
+        }
+      )
+
+      try {
+        await multipart.process()
+      } catch (error) {
+        console.log(error)
+      }
+      files = ctx.request['__raw_files'] || null
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('report', xlsFilePath)
+
+    assert.property(files, 'report')
+    assert.isTrue(files!.report.isValid)
+    assert.equal(files!.report.state, 'consumed')
+    assert.equal(files!.report.extname, 'xls')
+    assert.lengthOf(files!.report.errors, 0)
   })
 })

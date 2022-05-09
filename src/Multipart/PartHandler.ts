@@ -15,7 +15,7 @@ import { DriveManagerContract } from '@ioc:Adonis/Core/Drive'
 import { MultipartStream, FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
 
 import { File } from './File'
-import { getFileType, supportMagicFileTypes } from '../utils'
+import { computeFileTypeFromName, getFileType, supportMagicFileTypes } from '../utils'
 
 /**
  * Part handler handles the progress of a stream and also internally validates
@@ -46,8 +46,8 @@ export class PartHandler {
    *
    * Think of this as using the optimal way for validating the file type
    */
-  private canFileTypeBeDetected = supportMagicFileTypes.includes(
-    extname(this.part.filename).replace(/^\./, '')
+  private canFileTypeBeDetected = supportMagicFileTypes.has(
+    extname(this.part.filename).replace(/^\./, '') as any
   )
 
   /**
@@ -85,12 +85,15 @@ export class PartHandler {
    * Detects the file type and extension and also validates it when validations
    * are not deferred.
    */
-  private async detectFileTypeAndExtension(force: boolean) {
+  private async detectFileTypeAndExtension() {
     if (!this.buff) {
       return
     }
 
-    const fileType = await getFileType(this.buff, this.file.clientName, this.file.headers, force)
+    const fileType = this.canFileTypeBeDetected
+      ? await getFileType(this.buff)
+      : computeFileTypeFromName(this.file.clientName, this.file.headers)
+
     if (fileType) {
       this.file.extname = fileType.ext
       this.file.type = fileType.type
@@ -146,7 +149,7 @@ export class PartHandler {
      */
     if (this.file.extname === undefined) {
       this.buff = this.buff ? Buffer.concat([this.buff, line]) : line
-      await this.detectFileTypeAndExtension(false)
+      await this.detectFileTypeAndExtension()
     } else {
       this.buff = undefined
     }
@@ -221,7 +224,7 @@ export class PartHandler {
      * consuming the stream
      */
     if (this.file.extname === undefined) {
-      await this.detectFileTypeAndExtension(this.canFileTypeBeDetected ? false : true)
+      await this.detectFileTypeAndExtension()
     }
 
     if (data) {
