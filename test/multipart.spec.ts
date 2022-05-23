@@ -771,6 +771,41 @@ test.group('Multipart', (group) => {
     ])
   })
 
+  test('correctly retrieve file extension from magic number', async ({ assert }) => {
+    let files: null | { [key: string]: File } = null
+
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+      const multipart = new Multipart(
+        ctx,
+        { maxFields: 1000 },
+        app.container.use('Adonis/Core/Drive')
+      )
+
+      multipart.onFile('*', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('error', reject)
+          part.on('end', resolve)
+          part.on('data', reporter)
+        })
+      })
+
+      await multipart.process()
+      files = ctx.request['__raw_files'] || null
+      res.end()
+    })
+
+    await supertest(server)
+      .post('/')
+      .attach('picture', join(__dirname, '..', 'unicorn-wo-ext'), { contentType: 'image/png' })
+
+    assert.property(files, 'picture')
+    assert.isTrue(files!.picture.isValid)
+    assert.equal(files!.picture.state, 'consumed')
+    assert.equal(files!.picture.extname, 'png')
+    assert.lengthOf(files!.picture.errors, 0)
+  })
+
   test('validate xlsx extension', async ({ assert }) => {
     let files: null | { [key: string]: File } = null
 
