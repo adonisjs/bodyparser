@@ -40,15 +40,18 @@ export class PartHandler {
    * works.
    *
    * - We begin by extracting the file extension from the file name
+   * - If the file has no extension, we try to inspect the buffer
    * - If the extension is something we support via magic numbers, then we ignore the extension
    * 	 and inspect the buffer
    * - Otherwise, we have no other option than to trust the extension
    *
    * Think of this as using the optimal way for validating the file type
    */
-  private canFileTypeBeDetected = supportMagicFileTypes.has(
-    extname(this.part.filename).replace(/^\./, '') as any
-  )
+  private get canFileTypeBeDetected() {
+    const fileExtension = extname(this.part.filename).replace(/^\./, '') as any
+
+    return fileExtension ? supportMagicFileTypes.has(fileExtension) : true
+  }
 
   /**
    * Creating a new file object for each part inside the multipart
