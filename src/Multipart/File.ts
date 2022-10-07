@@ -245,6 +245,10 @@ export class File implements MultipartFileContract {
       options.contentType = `${this.type}/${this.subtype}`
     }
 
+    if (options.contentLength === undefined) {
+      options.contentLength = this.size
+    }
+
     await driver.putStream(key, createReadStream(this.tmpPath!), options)
     this.markAsMoved(key, await driver.getUrl(key))
   }
