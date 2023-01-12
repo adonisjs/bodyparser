@@ -14,6 +14,7 @@ import bytes from 'bytes'
 import { Exception } from '@poppinss/utils'
 import type { HttpContext } from '@adonisjs/http-server'
 
+import debug from '../debug.js'
 import { FormFields } from '../form_fields.js'
 import { PartHandler } from './part_handler.js'
 import type {
@@ -166,10 +167,12 @@ export class Multipart {
      */
     const handler = this.#handlers[name] || this.#handlers['*']
     if (!handler) {
+      debug('skipping multipart part as there are no handlers "%s"', name)
       part.resume()
       return
     }
 
+    debug('processing multipart part "%s"', name)
     this.#pendingHandlers++
 
     /**
@@ -324,6 +327,8 @@ export class Multipart {
         maxFields: this.#config!.maxFields,
         maxFieldsSize: this.#maxFieldsSize,
       })
+
+      debug('processing multipart body')
 
       /**
        * Raise error when form encounters an

@@ -13,6 +13,7 @@ import { Request } from '@adonisjs/http-server'
 import { MultipartFile } from '../multipart/file.js'
 import type { Multipart } from '../multipart/main.js'
 import type { FileValidationOptions } from '../types.js'
+import debug from '../debug.js'
 
 /**
  * Extending request class with custom properties.
@@ -47,6 +48,8 @@ function setFileOptions(file: MultipartFile, options?: Partial<FileValidationOpt
 function isInstanceOfFile(file: any): file is MultipartFile {
   return file && file instanceof MultipartFile
 }
+
+debug('extending request class with "file", "files" and "allFiles" macros')
 
 /**
  * Fetch a single file

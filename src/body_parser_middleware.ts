@@ -17,6 +17,7 @@ import { join, isAbsolute } from 'node:path'
 import type { NextFn } from '@poppinss/middleware/types'
 import type { HttpContext } from '@adonisjs/http-server'
 
+import debug from './debug.js'
 import { Multipart } from './multipart/main.js'
 import type { BodyParserConfig } from './types.js'
 import { streamFile } from './multipart/stream_file.js'
@@ -38,6 +39,7 @@ export class BodyParserMiddleware {
 
   constructor(config: BodyParserConfig) {
     this.#config = config
+    debug('using config %O', this.#config)
   }
 
   /**
@@ -107,13 +109,14 @@ export class BodyParserMiddleware {
      * Initiating the `__raw_files` #property as an object
      */
     ctx.request['__raw_files'] = {}
+    const requestUrl = ctx.request.url()
     const requestMethod = ctx.request.method()
 
     /**
      * Only process for whitelisted nodes
      */
     if (!this.#config.whitelistedMethods.includes(requestMethod)) {
-      ctx.logger.trace(`bodyparser skipping method ${requestMethod}`)
+      debug('skipping HTTP request method "%s", URI: "%s"', requestMethod, requestUrl)
       return next()
     }
 
@@ -125,7 +128,7 @@ export class BodyParserMiddleware {
      * clients with missing headers.
      */
     if (!ctx.request.hasBody()) {
-      ctx.logger.trace('bodyparser skipping empty body')
+      debug('skipping as request has no body, URI: "%s"', requestUrl)
       return next()
     }
 
@@ -135,7 +138,7 @@ export class BodyParserMiddleware {
     const multipartConfig = this.#getConfigFor('multipart')
 
     if (this.#isType(ctx.request, multipartConfig.types)) {
-      ctx.logger.trace('bodyparser parsing as multipart body')
+      debug('parsing multipart body, URI: "%s"', requestUrl)
 
       ctx.request.multipart = new Multipart(ctx, {
         maxFields: multipartConfig.maxFields,
@@ -188,7 +191,7 @@ export class BodyParserMiddleware {
      */
     const formConfig = this.#getConfigFor('form')
     if (this.#isType(ctx.request, formConfig.types)) {
-      ctx.logger.trace('bodyparser parsing as form request')
+      debug('parsing urlencoded form, URI: "%s"', requestUrl)
 
       try {
         const { parsed, raw } = await coBody.form(ctx.request.request, {
@@ -208,7 +211,7 @@ export class BodyParserMiddleware {
      */
     const jsonConfig = this.#getConfigFor('json')
     if (this.#isType(ctx.request, jsonConfig.types)) {
-      ctx.logger.trace('bodyparser parsing as json body')
+      debug('parsing JSON body, URI: "%s"', requestUrl)
 
       try {
         const { parsed, raw } = await coBody.json(ctx.request.request, {
@@ -228,7 +231,7 @@ export class BodyParserMiddleware {
      */
     const rawConfig = this.#getConfigFor('raw')
     if (this.#isType(ctx.request, rawConfig.types)) {
-      ctx.logger.trace('bodyparser parsing as raw body')
+      debug('parsing raw body, URI: "%s"', requestUrl)
 
       try {
         const { raw } = await coBody.text(ctx.request.request, {
