@@ -173,7 +173,7 @@ export class MultipartFile extends Macroable {
    */
   async move(location: string, options?: { name?: string; overwrite?: boolean }): Promise<void> {
     if (!this.tmpPath) {
-      throw new Exception('tmpPath must be set on the file before moving it', {
+      throw new Exception('property "tmpPath" must be set on the file before moving it', {
         status: 500,
         code: 'E_MISSING_FILE_TMP_PATH',
       })

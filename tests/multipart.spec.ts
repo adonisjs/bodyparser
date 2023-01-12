@@ -66,6 +66,84 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package instanceof MultipartFile && files!.package.size, packageFileSize)
   })
 
+  test('get file JSON representation', async ({ assert }) => {
+    let files: null | Record<string, MultipartFile | MultipartFile[]> = null
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 })
+
+      multipart.onFile('package', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', (line) => {
+            reporter(line)
+          })
+          part.on('error', reject)
+          part.on('end', resolve)
+        })
+      })
+
+      await multipart.process()
+      files = ctx.request['__raw_files']
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('package', packageFilePath)
+    assert.property(files, 'package')
+
+    const pkgFile = files!.package as MultipartFile
+    assert.deepEqual(pkgFile.toJSON(), {
+      clientName: 'package.json',
+      errors: [],
+      extname: 'json',
+      fieldName: 'package',
+      fileName: undefined,
+      filePath: undefined,
+      isValid: true,
+      meta: {},
+      size: packageFileSize,
+      state: 'consumed',
+      subtype: 'json',
+      type: 'application',
+      validated: true,
+    })
+  })
+
+  test('raise error when file.move method is called without a tmp path', async ({ assert }) => {
+    let files: null | Record<string, MultipartFile | MultipartFile[]> = null
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 })
+
+      multipart.onFile('package', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', (line) => {
+            reporter(line)
+          })
+          part.on('error', reject)
+          part.on('end', resolve)
+        })
+      })
+
+      await multipart.process()
+      files = ctx.request['__raw_files']
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('package', packageFilePath)
+    const pkgFile = files!.package as MultipartFile
+
+    await assert.rejects(
+      () => pkgFile.move(join(BASE_PATH, './')),
+      'property "tmpPath" must be set on the file before moving it'
+    )
+  })
+
   test('error inside onFile handler should propogate to file errors', async ({ assert }) => {
     let files: null | Record<string, MultipartFile | MultipartFile[]> = null
 
