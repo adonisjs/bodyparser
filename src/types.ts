@@ -56,9 +56,7 @@ export type BodyParserFormConfig = BodyParserBaseConfig & {
 /**
  * Parser config for parsing raw body (untouched)
  */
-export type BodyParserRawConfig = BodyParserBaseConfig & {
-  queryString: QueryStringConfig
-}
+export type BodyParserRawConfig = BodyParserBaseConfig
 
 /**
  * Parser config for parsing multipart requests

@@ -42,7 +42,6 @@ export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig
     raw: {
       encoding: 'utf-8',
       limit: '1mb',
-      queryString: {},
       types: ['text/*'],
       ...config.raw,
     },
