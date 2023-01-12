@@ -10,7 +10,7 @@
 import lodash from '@poppinss/utils/lodash'
 
 import { defineConfig } from '../src/define_config.js'
-import { BodyParserMiddleware } from '../src/body_parser.js'
+import { BodyParserMiddleware } from '../src/body_parser_middleware.js'
 import type { BodyParserConfig, BodyParserOptionalConfig } from '../src/types.js'
 
 /**

@@ -14,14 +14,17 @@ import cuid from 'cuid'
 import { tmpdir } from 'node:os'
 import { Exception } from '@poppinss/utils'
 import { join, isAbsolute } from 'node:path'
-import { HttpContext } from '@adonisjs/http-server'
+import type { NextFn } from '@poppinss/middleware/types'
+import type { HttpContext } from '@adonisjs/http-server'
 
 import { Multipart } from './multipart/main.js'
 import type { BodyParserConfig } from './types.js'
 import { streamFile } from './multipart/stream_file.js'
 
+/**
+ * Bindings to extend request
+ */
 import './bindings/request.js'
-import { NextFn } from '@poppinss/middleware/types'
 
 /**
  * BodyParser middleware parses the incoming request body and set it as

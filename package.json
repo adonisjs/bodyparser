@@ -1,17 +1,19 @@
 {
   "name": "@adonisjs/bodyparser",
   "version": "8.1.7",
-  "description": "AdonisJS body-parser to read and parse HTTP request body",
+  "description": "BodyParser middleware for AdonisJS http server to read and parse request body",
   "main": "build/index.js",
   "type": "module",
   "files": [
     "build/src",
+    "build/test_factories",
     "build/index.d.ts",
     "build/index.js"
   ],
   "exports": {
     ".": "./build/index.js",
-    "./types": "./build/src/types/main.js"
+    "./test_factories/*": "./build/test_factories/*.js",
+    "./types": "./build/src/types.js"
   },
   "scripts": {
     "pretest": "npm run lint",
@@ -30,6 +32,8 @@
   "devDependencies": {
     "@adonisjs/application": "^6.6.0-0",
     "@adonisjs/encryption": "^5.1.0-0",
+    "@adonisjs/events": "^8.4.0-0",
+    "@adonisjs/fold": "^9.9.0-0",
     "@adonisjs/http-server": "^6.4.0-0",
     "@commitlint/cli": "^17.4.1",
     "@commitlint/config-conventional": "^17.4.0",
@@ -63,6 +67,7 @@
   },
   "dependencies": {
     "@poppinss/co-body": "^1.1.3",
+    "@poppinss/macroable": "^1.0.0-0",
     "@poppinss/multiparty": "^2.0.1",
     "@poppinss/utils": "^6.3.1-0",
     "bytes": "^3.1.2",
@@ -71,6 +76,9 @@
     "file-type": "^18.1.0",
     "fs-extra": "^11.1.0",
     "media-typer": "^1.1.0"
+  },
+  "peerDependencies": {
+    "@adonisjs/http-server": "^6.4.0-0"
   },
   "keywords": [
     "adonisjs",

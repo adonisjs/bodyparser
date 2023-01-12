@@ -10,6 +10,7 @@
 import { move } from 'fs-extra'
 import { join } from 'node:path'
 import { Exception } from '@poppinss/utils'
+import { Macroable } from '@poppinss/macroable'
 
 import { SizeValidator } from './validators/size.js'
 import { ExtensionValidator } from './validators/extensions.js'
@@ -19,7 +20,7 @@ import type { FileUploadError, FileValidationOptions } from '../types.js'
  * The file holds the meta/data for an uploaded file, along with
  * an errors occurred during the upload process.
  */
-export class MultipartFile {
+export class MultipartFile extends Macroable {
   #sizeValidator = new SizeValidator(this)
 
   #extensionValidator = new ExtensionValidator(this)
@@ -141,6 +142,7 @@ export class MultipartFile {
     data: { fieldName: string; clientName: string; headers: any },
     validationOptions: Partial<FileValidationOptions>
   ) {
+    super()
     this.sizeLimit = validationOptions.size
     this.allowedExtensions = validationOptions.extnames
     this.fieldName = data.fieldName

@@ -123,21 +123,6 @@ export type PartHandler = (
 ) => Promise<({ filePath?: string; tmpPath?: string } & { [key: string]: any }) | void>
 
 /**
- * Multipart class contract, since it is exposed on the request object,
- * we need the interface to extend typings.
- */
-export interface MultipartContract {
-  state: 'idle' | 'processing' | 'error' | 'success'
-  abort(error: any): void
-  onFile(
-    name: string,
-    options: Partial<FileValidationOptions & { deferValidations: boolean }>,
-    callback: PartHandler
-  ): this
-  process(config?: Partial<{ limit: string | number; maxFields: number }>): Promise<void>
-}
-
-/**
  * ------------------------------------
  * Multipart file related options
  * ------------------------------------

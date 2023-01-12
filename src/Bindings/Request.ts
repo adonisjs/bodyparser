@@ -14,6 +14,9 @@ import { MultipartFile } from '../multipart/file.js'
 import type { Multipart } from '../multipart/main.js'
 import type { FileValidationOptions } from '../types.js'
 
+/**
+ * Extending request class with custom properties.
+ */
 declare module '@adonisjs/http-server' {
   export interface Request {
     multipart: Multipart

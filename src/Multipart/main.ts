@@ -18,7 +18,7 @@ import { FormFields } from '../form_fields.js'
 import { PartHandler } from './part_handler.js'
 import type {
   MultipartStream,
-  MultipartContract,
+  FileValidationOptions,
   PartHandler as PartHandlerType,
 } from '../types.js'
 
@@ -27,7 +27,7 @@ import type {
  * HTTP request data as a stream. This makes it super easy to
  * write files to s3 without saving them to the disk first.
  */
-export class Multipart implements MultipartContract {
+export class Multipart {
   #ctx: HttpContext
   #config: Partial<{
     limit: string | number
@@ -42,7 +42,7 @@ export class Multipart implements MultipartContract {
   #handlers: {
     [key: string]: {
       handler: PartHandlerType
-      options: Parameters<MultipartContract['onFile']>[1]
+      options: Partial<FileValidationOptions & { deferValidations: boolean }>
     }
   } = {}
 
@@ -242,7 +242,7 @@ export class Multipart implements MultipartContract {
    * Processes the user config and computes the `upperLimit` value from
    * it.
    */
-  #processConfig(config?: Parameters<MultipartContract['process']>[0]) {
+  #processConfig(config?: Partial<{ limit: string | number; maxFields: number }>) {
     this.#config = Object.assign(this.#config, config)
 
     /**
@@ -288,7 +288,7 @@ export class Multipart implements MultipartContract {
    */
   onFile(
     name: string,
-    options: Parameters<MultipartContract['onFile']>[1],
+    options: Partial<FileValidationOptions & { deferValidations: boolean }>,
     handler: PartHandlerType
   ): this {
     this.#handlers[name] = { handler, options }
@@ -306,7 +306,7 @@ export class Multipart implements MultipartContract {
    * Process the request by going all the file and field
    * streams.
    */
-  process(config?: Parameters<MultipartContract['process']>[0]): Promise<void> {
+  process(config?: Partial<{ limit: string | number; maxFields: number }>): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.state !== 'idle') {
         reject(
