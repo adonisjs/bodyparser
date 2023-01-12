@@ -1,45 +1,27 @@
-<div align="center">
-  <img src="https://res.cloudinary.com/adonisjs/image/upload/q_100/v1558612869/adonis-readme_zscycu.jpg" width="600px">
-</div>
+# @adonisjs/bodyparser
 
 <br />
 
-<div align="center">
-  <h3>BodyParser</h3>
-  <p>
-    BodyParser Middleware For AdonisJS with first class support for <strong>file uploads</strong>, <strong>JSON payloads</strong>, <strong>raw body</strong> and standard <strong>form submissions</strong>
-  </p>
-</div>
+[![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url] [![synk-image]][synk-url]
 
-<br />
+## Introduction
+This repo provides the BodyParser middleware to process AdonisJS HTTP request body. The middleware has parsers for **JSON**, **URLencoded form**, and **Multipart** content types.
 
-<div align="center">
+## Official Documentation
+The documentation is available on the [AdonisJS website](https://docs.adonisjs.com/guides/request)
 
-[![gh-workflow-image]][gh-workflow-url] [![typescript-image]][typescript-url] [![npm-image]][npm-url] [![license-image]][license-url]  [![synk-image]][synk-url]
+## Contributing
+One of the primary goals of AdonisJS is to have a vibrant community of users and contributors who believes in the principles of the framework.
 
-</div>
+We encourage you to read the [contribution guide](https://github.com/adonisjs/.github/blob/main/docs/CONTRIBUTING.md) before contributing to the framework.
 
-<div align="center">
-  <h3>
-    <a href="https://adonisjs.com">
-      Website
-    </a>
-    <span> | </span>
-    <a href="https://docs.adonisjs.com/guides/request#request-body">
-      Guides
-    </a>
-    <span> | </span>
-    <a href="CONTRIBUTING.md">
-      Contributing
-    </a>
-  </h3>
-</div>
+## Code of Conduct
+In order to ensure that the AdonisJS community is welcoming to all, please review and abide by the [Code of Conduct](https://github.com/adonisjs/.github/blob/main/docs/CODE_OF_CONDUCT.md).
 
-<div align="center">
-  <sub>Built with ❤︎ by <a href="https://twitter.com/AmanVirk1">Harminder Virk</a>
-</div>
+## License
+AdonisJS Bodyparser is open-sourced software licensed under the [MIT license](LICENSE.md).
 
-[gh-workflow-image]: https://img.shields.io/github/workflow/status/adonisjs/bodyparser/test?style=for-the-badge
+[gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/adonisjs/bodyparser/test.yml?style=for-the-badge
 [gh-workflow-url]: https://github.com/adonisjs/bodyparser/actions/workflows/test.yml "Github action"
 
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
