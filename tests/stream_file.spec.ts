@@ -7,38 +7,40 @@
  * file that was distributed with this source code.
  */
 
+import fs from 'fs-extra'
+import { join } from 'node:path'
 import { test } from '@japa/runner'
-import { join } from 'path'
-import { Filesystem } from '@poppinss/dev-utils'
-import { createReadStream, pathExists } from 'fs-extra'
+import { fileURLToPath } from 'node:url'
 
-import { streamFile } from '../src/Multipart/streamFile'
+import { streamFile } from '../src/multipart/stream_file.js'
 
-const fs = new Filesystem(join(__dirname, 'app'))
-const SAMPLE_FILE = join(fs.basePath, 'hello-out.txt')
-const MAIN_FILE = join(fs.basePath, 'hello-in.txt')
+const BASE_URL = new URL('./tmp/', import.meta.url)
+const BASE_PATH = fileURLToPath(BASE_URL)
+
+const SAMPLE_FILE = join(BASE_PATH, 'hello-out.txt')
+const MAIN_FILE = join(BASE_PATH, 'hello-in.txt')
 
 test.group('streamFile', (group) => {
   group.each.teardown(async () => {
-    await fs.cleanup().catch(() => {})
+    await fs.remove(BASE_PATH)
   })
 
   test('write readable stream to the destination', async ({ assert }) => {
-    await fs.add(MAIN_FILE, 'hello')
+    await fs.outputFile(MAIN_FILE, 'hello')
 
-    const file = createReadStream(MAIN_FILE)
+    const file = fs.createReadStream(MAIN_FILE)
     await streamFile(file, SAMPLE_FILE)
 
-    const hasFile = await pathExists(SAMPLE_FILE)
+    const hasFile = await fs.pathExists(SAMPLE_FILE)
     assert.isTrue(hasFile)
   })
 
   test('raise error when stream gets interuppted', async ({ assert }) => {
     assert.plan(1)
 
-    await fs.add(MAIN_FILE, 'hello\nhi\nhow are you')
+    await fs.outputFile(MAIN_FILE, 'hello\nhi\nhow are you')
 
-    const file = createReadStream(MAIN_FILE)
+    const file = fs.createReadStream(MAIN_FILE)
     file.on('readable', () => {
       setTimeout(() => {
         if (!file.destroyed) {

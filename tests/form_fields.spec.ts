@@ -8,7 +8,7 @@
  */
 
 import { test } from '@japa/runner'
-import { FormFields } from '../src/FormFields'
+import { FormFields } from '../src/form_fields.js'
 
 test.group('Form Fields Parser', () => {
   test('add a plain key value pair to form fields', ({ assert }) => {

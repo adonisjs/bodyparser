@@ -7,18 +7,27 @@
  * file that was distributed with this source code.
  */
 
-/// <reference path="../../adonis-typings/bodyparser.ts" />
+import lodash from '@poppinss/utils/lodash'
+import { Request } from '@adonisjs/http-server'
 
-import { lodash } from '@poppinss/utils'
-import { FileValidationOptions } from '@ioc:Adonis/Core/BodyParser'
-import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
+import { MultipartFile } from '../multipart/file.js'
+import type { Multipart } from '../multipart/main.js'
+import type { FileValidationOptions } from '../types.js'
 
-import { File } from '../Multipart/File'
+declare module '@adonisjs/http-server' {
+  export interface Request {
+    multipart: Multipart
+    __raw_files: Record<string, MultipartFile | MultipartFile[]>
+    allFiles(): Record<string, MultipartFile | MultipartFile[]>
+    file(key: string, options?: Partial<FileValidationOptions>): MultipartFile | null
+    files(key: string, options?: Partial<FileValidationOptions>): MultipartFile[]
+  }
+}
 
 /**
  * Updates the validation options on the file instance
  */
-function setFileOptions(file: File, options?: Partial<FileValidationOptions>) {
+function setFileOptions(file: MultipartFile, options?: Partial<FileValidationOptions>) {
   if (file.sizeLimit === undefined && options && options.size) {
     file.sizeLimit = options.size
   }
@@ -32,19 +41,16 @@ function setFileOptions(file: File, options?: Partial<FileValidationOptions>) {
  * A boolean to know if file is an instance of multipart
  * file class
  */
-function isInstanceOfFile(file: any): file is File {
-  return file && file instanceof File
+function isInstanceOfFile(file: any): file is MultipartFile {
+  return file && file instanceof MultipartFile
 }
 
 /**
- * Extend the Request class by adding `file` and `files` macro to read processed
- * files
+ * Fetch a single file
  */
-export default function extendRequest(Request: RequestConstructorContract) {
-  /**
-   * Fetch a single file
-   */
-  Request.macro('file', function getFile(key: string, options?: Partial<FileValidationOptions>) {
+Request.macro(
+  'file',
+  function getFile(this: Request, key: string, options?: Partial<FileValidationOptions>) {
     let file: unknown = lodash.get(this.allFiles(), key)
     file = Array.isArray(file) ? file[0] : file
 
@@ -55,12 +61,15 @@ export default function extendRequest(Request: RequestConstructorContract) {
     setFileOptions(file, options)
     file.validate()
     return file
-  })
+  }
+)
 
-  /**
-   * Fetch an array of files
-   */
-  Request.macro('files', function getFiles(key: string, options?: Partial<FileValidationOptions>) {
+/**
+ * Fetch an array of files
+ */
+Request.macro(
+  'files',
+  function getFiles(this: Request, key: string, options?: Partial<FileValidationOptions>) {
     let files: unknown[] = lodash.get(this.allFiles(), key)
     files = Array.isArray(files) ? files : files ? [files] : []
 
@@ -69,12 +78,12 @@ export default function extendRequest(Request: RequestConstructorContract) {
       file.validate()
       return file
     })
-  })
+  }
+)
 
-  /**
-   * Fetch all files
-   */
-  Request.macro('allFiles', function allFiles() {
-    return this['__raw_files'] || {}
-  })
-}
+/**
+ * Fetch all files
+ */
+Request.macro('allFiles', function allFiles(this: Request) {
+  return this['__raw_files'] || {}
+})

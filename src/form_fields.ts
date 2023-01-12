@@ -7,16 +7,19 @@
  * file that was distributed with this source code.
  */
 
-import { lodash } from '@poppinss/utils'
+import lodash from '@poppinss/utils/lodash'
 
 /**
  * A jar of form fields to store form data by handling
  * array gracefully
  */
 export class FormFields {
-  private fields: any = {}
+  #fields: any = {}
+  #config: { convertEmptyStringsToNull: boolean }
 
-  constructor(private config: { convertEmptyStringsToNull: boolean }) {}
+  constructor(config: { convertEmptyStringsToNull: boolean }) {
+    this.#config = config
+  }
 
   /**
    * Add a new key/value pair. The keys with array like
@@ -35,13 +38,13 @@ export class FormFields {
    * formfields.add('username[0]', 'nikk')
    * ```
    */
-  public add(key: string, value: any): void {
+  add(key: string, value: any): void {
     let isArray = false
 
     /**
      * Convert empty strings to null
      */
-    if (this.config.convertEmptyStringsToNull && value === '') {
+    if (this.#config.convertEmptyStringsToNull && value === '') {
       value = null
     }
 
@@ -57,17 +60,17 @@ export class FormFields {
     /**
      * Check to see if value exists or set it (if missing)
      */
-    const existingValue = lodash.get(this.fields, key)
+    const existingValue = lodash.get(this.#fields, key)
 
     if (!existingValue) {
-      lodash.set(this.fields, key, isArray ? [value] : value)
+      lodash.set(this.#fields, key, isArray ? [value] : value)
       return
     }
 
     /**
      * Mutate existing value if it's an array
      */
-    if (existingValue instanceof Array) {
+    if (Array.isArray(existingValue)) {
       existingValue.push(value)
       return
     }
@@ -75,13 +78,13 @@ export class FormFields {
     /**
      * Set new value + existing value
      */
-    lodash.set(this.fields, key, [existingValue, value])
+    lodash.set(this.#fields, key, [existingValue, value])
   }
 
   /**
    * Returns the copy of form fields
    */
-  public get() {
-    return this.fields
+  get() {
+    return this.#fields
   }
 }

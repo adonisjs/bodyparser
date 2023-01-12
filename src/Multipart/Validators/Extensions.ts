@@ -7,50 +7,54 @@
  * file that was distributed with this source code.
  */
 
-/// <reference path="../../../adonis-typings/bodyparser.ts" />
-
-import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser'
+import { MultipartFile } from '../file.js'
 
 /**
  * Validates the file extension
  */
 export class ExtensionValidator {
-  private allowedExtensions?: string[] = []
-  public validated: boolean = false
+  #file: MultipartFile
+  #allowedExtensions?: string[] = []
+
+  validated: boolean = false
 
   /**
    * Update the expected file extensions
    */
-  public get extensions(): string[] | undefined {
-    return this.allowedExtensions
+  get extensions(): string[] | undefined {
+    return this.#allowedExtensions
   }
-  public set extensions(extnames: string[] | undefined) {
-    if (this.allowedExtensions && this.allowedExtensions.length) {
+
+  set extensions(extnames: string[] | undefined) {
+    if (this.#allowedExtensions && this.#allowedExtensions.length) {
       throw new Error('Cannot update allowed extension names after file has been validated')
     }
 
     this.validated = false
-    this.allowedExtensions = extnames
+    this.#allowedExtensions = extnames
   }
 
-  constructor(private file: MultipartFileContract) {}
+  constructor(file: MultipartFile) {
+    this.#file = file
+  }
 
   /**
    * Report error to the file
    */
-  private reportError() {
+  #reportError() {
     /**
      * File is invalid, so report the error
      */
-    const suffix = this.allowedExtensions!.length === 1 ? 'is' : 'are'
+    const suffix = this.#allowedExtensions!.length === 1 ? 'is' : 'are'
+
     const message = [
-      `Invalid file extension ${this.file.extname}.`,
-      `Only ${this.allowedExtensions!.join(', ')} ${suffix} allowed`,
+      `Invalid file extension ${this.#file.extname}.`,
+      `Only ${this.#allowedExtensions!.join(', ')} ${suffix} allowed`,
     ].join(' ')
 
-    this.file.errors.push({
-      fieldName: this.file.fieldName,
-      clientName: this.file.clientName,
+    this.#file.errors.push({
+      fieldName: this.#file.fieldName,
+      clientName: this.#file.clientName,
       message: message,
       type: 'extname',
     })
@@ -60,8 +64,8 @@ export class ExtensionValidator {
    * Validating the file in the streaming mode. During this mode
    * we defer the validation, until we get the file extname.
    */
-  private validateWhenGettingStreamed() {
-    if (!this.file.extname) {
+  #validateWhenGettingStreamed() {
+    if (!this.#file.extname) {
       return
     }
 
@@ -70,33 +74,33 @@ export class ExtensionValidator {
     /**
      * Valid extension type
      */
-    if (this.allowedExtensions!.includes(this.file.extname)) {
+    if (this.#allowedExtensions!.includes(this.#file.extname)) {
       return
     }
 
-    this.reportError()
+    this.#reportError()
   }
 
   /**
    * Validate the file extension after it has been streamed
    */
-  private validateAfterConsumed() {
+  #validateAfterConsumed() {
     this.validated = true
 
     /**
      * Valid extension type
      */
-    if (this.allowedExtensions!.includes(this.file.extname || '')) {
+    if (this.#allowedExtensions!.includes(this.#file.extname || '')) {
       return
     }
 
-    this.reportError()
+    this.#reportError()
   }
 
   /**
    * Validate the file
    */
-  public validate(): void {
+  validate(): void {
     /**
      * Do not validate if already validated
      */
@@ -107,18 +111,18 @@ export class ExtensionValidator {
     /**
      * Do not run validations, when constraints on the extension are not set
      */
-    if (!Array.isArray(this.allowedExtensions) || this.allowedExtensions.length === 0) {
+    if (!Array.isArray(this.#allowedExtensions) || this.#allowedExtensions.length === 0) {
       this.validated = true
       return
     }
 
-    if (this.file.state === 'streaming') {
-      this.validateWhenGettingStreamed()
+    if (this.#file.state === 'streaming') {
+      this.#validateWhenGettingStreamed()
       return
     }
 
-    if (this.file.state === 'consumed') {
-      this.validateAfterConsumed()
+    if (this.#file.state === 'consumed') {
+      this.#validateAfterConsumed()
     }
   }
 }

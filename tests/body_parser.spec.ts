@@ -7,48 +7,37 @@
  * file that was distributed with this source code.
  */
 
-/// <reference path="../adonis-typings/bodyparser.ts" />
-/// <reference path="../adonis-typings/index.ts" />
-
 import 'reflect-metadata'
-import { join } from 'path'
-import { tmpdir } from 'os'
+import fs from 'fs-extra'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
-import { createServer } from 'http'
-import { lodash } from '@poppinss/utils'
-import { pathExists, remove, readFile, outputFile } from 'fs-extra'
-import { RequestConstructorContract } from '@ioc:Adonis/Core/Request'
-import { Request as BaseRequest } from '@adonisjs/http-server/build/src/Request'
+import { fileURLToPath } from 'node:url'
+import { createServer } from 'node:http'
+import { RequestFactory } from '@adonisjs/http-server/test_factories/request'
+import { ResponseFactory } from '@adonisjs/http-server/test_factories/response'
+import { HttpContextFactory } from '@adonisjs/http-server/test_factories/http_context'
 
-import { MultipartFileContract } from '@ioc:Adonis/Core/BodyParser'
-import { ApplicationContract } from '@ioc:Adonis/Core/Application'
+import { Multipart } from '../src/multipart/main.js'
+import { MultipartFile } from '../src/multipart/file.js'
+import { packageFilePath, packageFileSize } from '../test_helpers/main.js'
+import { BodyParserMiddlewareFactory } from '../test_factories/middleware_factory.js'
 
-import { Multipart } from '../src/Multipart'
-import extendRequest from '../src/Bindings/Request'
-import { BodyParserMiddleware } from '../src/BodyParser'
-import { packageFilePath, packageFileSize, setupApp, fs } from '../test-helpers'
+const BASE_URL = new URL('./tmp/', import.meta.url)
+const BASE_PATH = fileURLToPath(BASE_URL)
 
-const Request = BaseRequest as unknown as RequestConstructorContract
-let app: ApplicationContract
-
-test.group('BodyParser Middleware | generic', (group) => {
-  group.each.setup(() => {
-    extendRequest(Request)
-  })
-
+test.group('BodyParser Middleware', (group) => {
   group.each.setup(async () => {
-    app = await setupApp()
-    return async () => await fs.cleanup()
+    return () => fs.remove(BASE_PATH)
   })
 
   test('do not parse get requests', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -63,11 +52,10 @@ test.group('BodyParser Middleware | generic', (group) => {
 
   test('by pass when body is empty', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -82,11 +70,10 @@ test.group('BodyParser Middleware | generic', (group) => {
 
   test('by pass when content type is not supported', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -104,22 +91,16 @@ test.group('BodyParser Middleware | generic', (group) => {
 })
 
 test.group('BodyParser Middleware | form data', (group) => {
-  group.each.setup(() => {
-    extendRequest(Request)
-  })
-
   group.each.setup(async () => {
-    app = await setupApp()
-    return async () => await fs.cleanup()
+    return () => fs.remove(BASE_PATH)
   })
 
   test('handle request with form data', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -134,17 +115,16 @@ test.group('BodyParser Middleware | form data', (group) => {
 
   test('abort if request size is over limit', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        form: {
-          limit: 2,
-        },
-      })
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          form: {
+            limit: 2,
+          },
+        })
+        .create()
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -160,22 +140,21 @@ test.group('BodyParser Middleware | form data', (group) => {
       .send({ username: 'virk' })
       .expect(413)
 
-    assert.deepEqual(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+    assert.deepEqual(text, 'request entity too large')
   })
 
   test('abort if specified encoding is not supported', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        form: {
-          encoding: 'foo',
-        },
-      })
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          form: {
+            encoding: 'foo',
+          },
+        })
+        .create()
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -191,16 +170,15 @@ test.group('BodyParser Middleware | form data', (group) => {
       .send({ username: 'virk' })
       .expect(415)
 
-    assert.deepEqual(text, 'E_ENCODING_UNSUPPORTED: specified encoding unsupported')
+    assert.deepEqual(text, 'specified encoding unsupported')
   })
 
   test('ignore fields with empty name', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -214,11 +192,10 @@ test.group('BodyParser Middleware | form data', (group) => {
 
   test('convert empty strings to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -235,22 +212,16 @@ test.group('BodyParser Middleware | form data', (group) => {
 })
 
 test.group('BodyParser Middleware | json', (group) => {
-  group.each.setup(() => {
-    extendRequest(Request)
-  })
-
   group.each.setup(async () => {
-    app = await setupApp()
-    return async () => await fs.cleanup()
+    return () => fs.remove(BASE_PATH)
   })
 
   test('handle request with json body', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -265,17 +236,16 @@ test.group('BodyParser Middleware | json', (group) => {
 
   test('abort if request size is over limit', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        json: {
-          limit: 2,
-        },
-      })
-
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          json: {
+            limit: 2,
+          },
+        })
+        .create()
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -291,16 +261,15 @@ test.group('BodyParser Middleware | json', (group) => {
       .send({ username: 'virk' })
       .expect(413)
 
-    assert.deepEqual(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+    assert.deepEqual(text, 'request entity too large')
   })
 
   test('ignore fields with empty name', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -315,22 +284,16 @@ test.group('BodyParser Middleware | json', (group) => {
 })
 
 test.group('BodyParser Middleware | raw body', (group) => {
-  group.each.setup(() => {
-    extendRequest(Request)
-  })
-
   group.each.setup(async () => {
-    app = await setupApp()
-    return async () => await fs.cleanup()
+    return () => fs.remove(BASE_PATH)
   })
 
   test('handle request with raw body', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -348,17 +311,17 @@ test.group('BodyParser Middleware | raw body', (group) => {
 
   test('abort if request size is over limit', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        raw: {
-          limit: 2,
-        },
-      })
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          raw: {
+            limit: 2,
+          },
+        })
+        .create()
 
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
       try {
         await middleware.handle(ctx, async () => {})
       } catch (error) {
@@ -373,35 +336,31 @@ test.group('BodyParser Middleware | raw body', (group) => {
       .send(JSON.stringify({ username: 'virk' }))
       .expect(413)
 
-    assert.deepEqual(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+    assert.deepEqual(text, 'request entity too large')
   })
 })
 
 test.group('BodyParser Middleware | multipart', (group) => {
-  group.each.setup(() => {
-    extendRequest(Request)
-  })
-
   group.each.setup(async () => {
-    app = await setupApp()
-    return async () => await fs.cleanup()
+    return () => fs.remove(BASE_PATH)
   })
 
   test('handle request with just files', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
+        const pkgFile = ctx.request['__raw_files'].package as MultipartFile
+
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(
           JSON.stringify({
-            tmpPath: ctx.request['__raw_files'].package.tmpPath,
-            size: ctx.request['__raw_files'].package.size,
-            validated: ctx.request['__raw_files'].package.validated,
+            tmpPath: pkgFile.tmpPath,
+            size: pkgFile.size,
+            validated: pkgFile.validated,
           })
         )
       })
@@ -416,18 +375,19 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('handle request with files and fields', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
+        const pkgFile = ctx.request['__raw_files'].package as MultipartFile
+
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(
           JSON.stringify({
-            size: ctx.request['__raw_files'].package.size,
-            validated: ctx.request['__raw_files'].package.validated,
+            size: pkgFile.size,
+            validated: pkgFile.validated,
             username: ctx.request.input('username'),
           })
         )
@@ -446,11 +406,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('handle request array of files', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -474,22 +433,19 @@ test.group('BodyParser Middleware | multipart', (group) => {
     let index = 0
 
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        multipart: {
-          autoProcess: true,
-          tmpFileName() {
-            return `${index++}.tmp`
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          multipart: {
+            tmpFileName() {
+              return `${index++}.tmp`
+            },
+            limit: packageFileSize * 2 - 10,
           },
-          types: ['multipart/form-data'],
-          limit: packageFileSize * 2 - 10,
-        },
-      })
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+        })
+        .create()
 
       try {
         await middleware.handle(ctx, async () => {})
@@ -504,10 +460,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
       .attach('package[]', packageFilePath)
       .attach('package[]', packageFilePath)
 
-    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: request entity too large')
+    assert.equal(text, 'request entity too large')
 
-    const file1 = await pathExists(join(tmpdir(), '0.tmp'))
-    const file2 = await pathExists(join(tmpdir(), '1.tmp'))
+    const file1 = await fs.pathExists(join(tmpdir(), '0.tmp'))
+    const file2 = await fs.pathExists(join(tmpdir(), '1.tmp'))
 
     assert.isTrue(file1)
     assert.isFalse(file2)
@@ -515,11 +471,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('handle request with empty field name', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -537,11 +492,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('handle request with empty file name', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200)
@@ -558,17 +512,16 @@ test.group('BodyParser Middleware | multipart', (group) => {
     assert.plan(2)
 
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        multipart: {
-          autoProcess: false,
-        },
-      })
-
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          multipart: {
+            autoProcess: false,
+          },
+        })
+        .create()
 
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
@@ -585,23 +538,30 @@ test.group('BodyParser Middleware | multipart', (group) => {
     assert.plan(2)
 
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        multipart: {
-          autoProcess: true,
-          processManually: ['/'],
-        },
-      })
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      ctx.route = {
+        pattern: '/',
+        execute: () => {},
+        handler: () => {},
+        meta: {},
+        middleware: {} as any,
+      }
 
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          multipart: {
+            autoProcess: true,
+            processManually: ['/'],
+          },
+        })
+        .create()
 
       await middleware.handle(ctx, async () => {
-        assert.deepEqual(ctx.request['__raw_files'], {})
-        assert.instanceOf(ctx.request['multipart'], Multipart)
-        await ctx.request['multipart'].process()
+        assert.deepEqual(ctx.request.__raw_files, {})
+        assert.instanceOf(ctx.request.multipart, Multipart)
+        await ctx.request.multipart.process()
         res.end()
       })
     })
@@ -613,21 +573,25 @@ test.group('BodyParser Middleware | multipart', (group) => {
     assert.plan(2)
 
     const server = createServer(async (req, res) => {
-      const ctx = app.container
-        .use('Adonis/Core/HttpContext')
-        .create('/project/:id/file', { id: 1 }, req, res)
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      ctx.route = {
+        pattern: '/project/:id/file',
+        execute: () => {},
+        handler: () => {},
+        meta: {},
+        middleware: {} as any,
+      }
 
-      lodash.merge(app.container.use('Adonis/Core/Config').get('bodyparser'), {
-        multipart: {
-          autoProcess: true,
-          processManually: ['/project/:id/file'],
-        },
-      })
-
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          multipart: {
+            autoProcess: true,
+            processManually: ['/project/:id/file'],
+          },
+        })
+        .create()
 
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
@@ -642,19 +606,20 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('detect file ext and mime type using magic number', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
+        const avatar = ctx.request['__raw_files'].avatar as MultipartFile
+
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(
           JSON.stringify({
-            type: ctx.request['__raw_files'].avatar.type,
-            subtype: ctx.request['__raw_files'].avatar.subtype,
-            extname: ctx.request['__raw_files'].avatar.extname,
+            type: avatar.type,
+            subtype: avatar.subtype,
+            extname: avatar.extname,
           })
         )
       })
@@ -662,7 +627,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     const { body } = await supertest(server)
       .post('/')
-      .attach('avatar', join(__dirname, '../unicorn.png'), {
+      .attach('avatar', join(BASE_PATH, '..', '../unicorn.png'), {
         contentType: 'application/json',
       })
 
@@ -675,11 +640,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('validate file when access via request.file method', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -715,11 +679,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('validate array of files when access via request.file method', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -776,11 +739,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('pull first file even when source is an array', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -819,11 +781,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test("return null when file doesn't exists", async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -838,11 +799,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test("return empty array file doesn't exists", async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -857,11 +817,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('get file from nested object', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -889,14 +848,13 @@ test.group('BodyParser Middleware | multipart', (group) => {
   })
 
   test('move file to a given location', async ({ assert }) => {
-    const uploadsDir = join(__dirname, 'uploads')
+    const uploadsDir = join(BASE_PATH, 'uploads')
 
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         const pkgFile = ctx.request.file('package')!
@@ -915,22 +873,19 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
 
-    const uploadedFileContents = await readFile(join(uploadsDir, 'package.json'), 'utf-8')
-    const originalFileContents = await readFile(packageFilePath, 'utf-8')
+    const uploadedFileContents = await fs.readFile(join(uploadsDir, 'package.json'), 'utf-8')
+    const originalFileContents = await fs.readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
-
-    await remove(uploadsDir)
   })
 
   test('move file with custom name', async ({ assert }) => {
-    const uploadsDir = join(__dirname, 'uploads')
+    const uploadsDir = join(BASE_PATH, 'uploads')
 
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         const pkgFile = ctx.request.file('package')!
@@ -951,22 +906,19 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
 
-    const uploadedFileContents = await readFile(join(uploadsDir, 'myapp.json'), 'utf-8')
-    const originalFileContents = await readFile(packageFilePath, 'utf-8')
+    const uploadedFileContents = await fs.readFile(join(uploadsDir, 'myapp.json'), 'utf-8')
+    const originalFileContents = await fs.readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
-
-    await remove(uploadsDir)
   })
 
   test('raise error when destination file already exists', async ({ assert }) => {
-    const uploadsDir = join(__dirname, 'uploads')
+    const uploadsDir = join(BASE_PATH, 'uploads')
 
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         const pkgFile = ctx.request.file('package')!
@@ -985,20 +937,16 @@ test.group('BodyParser Middleware | multipart', (group) => {
       })
     })
 
-    await outputFile(join(uploadsDir, 'package.json'), JSON.stringify({}))
-
+    await fs.outputFile(join(uploadsDir, 'package.json'), JSON.stringify({}))
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
-
-    await remove(uploadsDir)
   })
 
   test('validate file extension and file size seperately', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1045,11 +993,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('calling validate multiple times must be a noop', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1102,11 +1049,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
     assert,
   }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1151,11 +1097,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('updating sizeLimit multiple times must not be allowed', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1182,11 +1127,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('updating allowedExtensions multiple times must not be allowed', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1213,17 +1157,16 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('get all files as an object', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
         const allFiles = ctx.request.allFiles()
         const files = Object.keys(allFiles).map((field) => {
-          const file = allFiles[field] as MultipartFileContract
+          const file = allFiles[field] as MultipartFile
           return {
             field: field,
             tmpPath: file.tmpPath!,
@@ -1250,11 +1193,10 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
   test('convert empty strings to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
@@ -1269,39 +1211,5 @@ test.group('BodyParser Middleware | multipart', (group) => {
       .field('username', '')
 
     assert.deepEqual(body, { username: null })
-  })
-
-  test('move file using drive', async ({ assert }) => {
-    const server = createServer(async (req, res) => {
-      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
-      const middleware = new BodyParserMiddleware(
-        app.container.use('Adonis/Core/Config'),
-        app.container.use('Adonis/Core/Drive')
-      )
-
-      await middleware.handle(ctx, async () => {
-        const pkgFile = ctx.request.file('package')!
-
-        try {
-          await pkgFile.moveToDisk('./')
-          assert.equal(pkgFile.state, 'moved')
-          res.writeHead(200, { 'content-type': 'application/json' })
-          res.write(JSON.stringify({ filePath: pkgFile.filePath }))
-          res.end()
-        } catch (error) {
-          res.writeHead(500, { 'content-type': 'application/json' })
-          res.end(error.message)
-        }
-      })
-    })
-
-    const { body } = await supertest(server)
-      .post('/')
-      .attach('package', packageFilePath)
-      .expect(200)
-
-    const uploadedFileContents = await readFile(body.filePath, 'utf-8')
-    const originalFileContents = await readFile(packageFilePath, 'utf-8')
-    assert.equal(uploadedFileContents, originalFileContents)
   })
 })

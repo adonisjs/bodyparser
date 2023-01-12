@@ -1,23 +1,21 @@
 /*
  * @adonisjs/bodyparser
  *
- * (c) Harminder Virk <virk@adonisjs.com>
+ * (c) AdonisJS
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-/// <reference path="../adonis-typings/bodyparser.ts" />
-
-import { extname } from 'path'
-import { fromBuffer, extensions } from 'file-type'
+import { extname } from 'node:path'
 import mediaTyper from 'media-typer'
+import { fileTypeFromBuffer, supportedExtensions } from 'file-type'
 
 /**
  * We can detect file types for these files using the magic
  * number
  */
-export const supportMagicFileTypes = extensions
+export const supportMagicFileTypes = supportedExtensions
 
 /**
  * Attempts to parse the file mime type using the file magic number
@@ -40,7 +38,7 @@ export async function getFileType(
   /**
    * Attempt to detect file type from it's content
    */
-  const magicType = await fromBuffer(fileContents)
+  const magicType = await fileTypeFromBuffer(fileContents)
   if (magicType) {
     return Object.assign({ ext: magicType.ext }, parseMimeType(magicType.mime))
   }

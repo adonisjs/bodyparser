@@ -7,51 +7,48 @@
  * file that was distributed with this source code.
  */
 
-/// <reference path="../../adonis-typings/bodyparser.ts" />
-
-import { tmpdir } from 'os'
+// @ts-expect-error
 import coBody from '@poppinss/co-body'
-import { join, isAbsolute } from 'path'
+
+import cuid from 'cuid'
+import { tmpdir } from 'node:os'
 import { Exception } from '@poppinss/utils'
-import { inject } from '@adonisjs/application'
-import { cuid } from '@poppinss/utils/build/helpers'
+import { join, isAbsolute } from 'node:path'
+import { HttpContext } from '@adonisjs/http-server'
 
-import type { ConfigContract } from '@ioc:Adonis/Core/Config'
-import type { DriveManagerContract } from '@ioc:Adonis/Core/Drive'
-import type { BodyParserConfig } from '@ioc:Adonis/Core/BodyParser'
-import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
+import { Multipart } from './multipart/main.js'
+import type { BodyParserConfig } from './types.js'
+import { streamFile } from './multipart/stream_file.js'
 
-import { Multipart } from '../Multipart'
-import { streamFile } from '../Multipart/streamFile'
+import './bindings/request.js'
+import { NextFn } from '@poppinss/middleware/types'
 
 /**
  * BodyParser middleware parses the incoming request body and set it as
  * request body to be read later in the request lifecycle.
  */
-@inject(['Adonis/Core/Config', 'Adonis/Core/Drive'])
 export class BodyParserMiddleware {
   /**
    * Bodyparser config
    */
-  private config: BodyParserConfig
+  #config: BodyParserConfig
 
-  constructor(Config: ConfigContract, private drive: DriveManagerContract) {
-    this.config = Config.get('bodyparser', {})
+  constructor(config: BodyParserConfig) {
+    this.#config = config
   }
 
   /**
    * Returns config for a given type
    */
-  private getConfigFor<K extends keyof BodyParserConfig>(type: K): BodyParserConfig[K] {
-    const config = this.config[type]
-    config['returnRawBody'] = true
+  #getConfigFor<K extends keyof BodyParserConfig>(type: K): BodyParserConfig[K] {
+    const config = this.#config[type]
     return config
   }
 
   /**
    * Ensures that types exists and have length
    */
-  private ensureTypes(types: string[]): boolean {
+  #ensureTypes(types: string[]): boolean {
     return !!(types && types.length)
   }
 
@@ -59,22 +56,28 @@ export class BodyParserMiddleware {
    * Returns a boolean telling if request `content-type` header
    * matches the expected types or not
    */
-  private isType(request: HttpContextContract['request'], types: string[]): boolean {
-    return !!(this.ensureTypes(types) && request.is(types))
+  #isType(request: HttpContext['request'], types: string[]): boolean {
+    return !!(this.#ensureTypes(types) && request.is(types))
   }
 
   /**
    * Returns a proper Adonis style exception for popular error codes
    * returned by https://github.com/stream-utils/raw-body#readme.
    */
-  private getExceptionFor(error: { type: string; status: number; message: string }) {
+  #getExceptionFor(error: { type: string; status: number; message: string }) {
     switch (error.type) {
       case 'encoding.unsupported':
-        return new Exception(error.message, error.status, 'E_ENCODING_UNSUPPORTED')
+        return new Exception(error.message, {
+          status: error.status,
+          code: 'E_ENCODING_UNSUPPORTED',
+        })
       case 'entity.too.large':
-        return new Exception(error.message, error.status, 'E_REQUEST_ENTITY_TOO_LARGE')
+        return new Exception(error.message, {
+          status: error.status,
+          code: 'E_REQUEST_ENTITY_TOO_LARGE',
+        })
       case 'request.aborted':
-        return new Exception(error.message, error.status, 'E_REQUEST_ABORTED')
+        return new Exception(error.message, { status: error.status, code: 'E_REQUEST_ABORTED' })
       default:
         return error
     }
@@ -83,7 +86,7 @@ export class BodyParserMiddleware {
   /**
    * Returns the tmp path for storing the files temporarly
    */
-  private getTmpPath(config: BodyParserConfig['multipart']) {
+  #getTmpPath(config: BodyParserConfig['multipart']) {
     if (typeof config.tmpFileName === 'function') {
       const tmpPath = config.tmpFileName()
       return isAbsolute(tmpPath) ? tmpPath : join(tmpdir(), tmpPath)
@@ -96,9 +99,9 @@ export class BodyParserMiddleware {
    * Handle HTTP request body by parsing it as per the user
    * config
    */
-  public async handle(ctx: HttpContextContract, next: () => Promise<void>): Promise<void> {
+  async handle(ctx: HttpContext, next: NextFn) {
     /**
-     * Initiating the `__raw_files` private property as an object
+     * Initiating the `__raw_files` #property as an object
      */
     ctx.request['__raw_files'] = {}
     const requestMethod = ctx.request.method()
@@ -106,7 +109,7 @@ export class BodyParserMiddleware {
     /**
      * Only process for whitelisted nodes
      */
-    if (!this.config.whitelistedMethods.includes(requestMethod)) {
+    if (!this.#config.whitelistedMethods.includes(requestMethod)) {
       ctx.logger.trace(`bodyparser skipping method ${requestMethod}`)
       return next()
     }
@@ -126,21 +129,17 @@ export class BodyParserMiddleware {
     /**
      * Handle multipart form
      */
-    const multipartConfig = this.getConfigFor('multipart')
+    const multipartConfig = this.#getConfigFor('multipart')
 
-    if (this.isType(ctx.request, multipartConfig.types)) {
+    if (this.#isType(ctx.request, multipartConfig.types)) {
       ctx.logger.trace('bodyparser parsing as multipart body')
 
-      ctx.request.multipart = new Multipart(
-        ctx,
-        {
-          maxFields: multipartConfig.maxFields,
-          limit: multipartConfig.limit,
-          fieldsLimit: multipartConfig.fieldsLimit,
-          convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
-        },
-        this.drive
-      )
+      ctx.request.multipart = new Multipart(ctx, {
+        maxFields: multipartConfig.maxFields,
+        limit: multipartConfig.limit,
+        fieldsLimit: multipartConfig.fieldsLimit,
+        convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
+      })
 
       /**
        * Skip parsing when `autoProcess` is disabled or route matches one
@@ -148,7 +147,7 @@ export class BodyParserMiddleware {
        */
       if (
         !multipartConfig.autoProcess ||
-        multipartConfig.processManually.indexOf(ctx.route!.pattern) > -1
+        (ctx.route && multipartConfig.processManually.indexOf(ctx.route.pattern) > -1)
       ) {
         return next()
       }
@@ -165,7 +164,7 @@ export class BodyParserMiddleware {
          * is incorrect.
          */
         try {
-          const tmpPath = this.getTmpPath(multipartConfig)
+          const tmpPath = this.#getTmpPath(multipartConfig)
           await streamFile(part, tmpPath, reporter)
           return { tmpPath }
         } catch (error) {
@@ -173,14 +172,10 @@ export class BodyParserMiddleware {
         }
       })
 
-      const action = ctx.profiler.profile('bodyparser:multipart')
-
       try {
         await ctx.request.multipart.process()
-        action.end()
         return next()
       } catch (error) {
-        action.end({ error })
         throw error
       }
     }
@@ -188,60 +183,60 @@ export class BodyParserMiddleware {
     /**
      * Handle url-encoded form data
      */
-    const formConfig = this.getConfigFor('form')
-    if (this.isType(ctx.request, formConfig.types)) {
+    const formConfig = this.#getConfigFor('form')
+    if (this.#isType(ctx.request, formConfig.types)) {
       ctx.logger.trace('bodyparser parsing as form request')
-      const action = ctx.profiler.profile('bodyparser:urlencoded')
 
       try {
-        const { parsed, raw } = await coBody.form(ctx.request.request, formConfig)
+        const { parsed, raw } = await coBody.form(ctx.request.request, {
+          ...formConfig,
+          returnRawBody: true,
+        })
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
-        action.end()
         return next()
       } catch (error) {
-        action.end({ error })
-        throw this.getExceptionFor(error)
+        throw this.#getExceptionFor(error)
       }
     }
 
     /**
      * Handle content with JSON types
      */
-    const jsonConfig = this.getConfigFor('json')
-    if (this.isType(ctx.request, jsonConfig.types)) {
+    const jsonConfig = this.#getConfigFor('json')
+    if (this.#isType(ctx.request, jsonConfig.types)) {
       ctx.logger.trace('bodyparser parsing as json body')
-      const action = ctx.profiler.profile('bodyparser:json')
 
       try {
-        const { parsed, raw } = await coBody.json(ctx.request.request, jsonConfig)
+        const { parsed, raw } = await coBody.json(ctx.request.request, {
+          ...jsonConfig,
+          returnRawBody: true,
+        })
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
-        action.end()
         return next()
       } catch (error) {
-        action.end({ error })
-        throw this.getExceptionFor(error)
+        throw this.#getExceptionFor(error)
       }
     }
 
     /**
      * Handles raw request body
      */
-    const rawConfig = this.getConfigFor('raw')
-    if (this.isType(ctx.request, rawConfig.types)) {
+    const rawConfig = this.#getConfigFor('raw')
+    if (this.#isType(ctx.request, rawConfig.types)) {
       ctx.logger.trace('bodyparser parsing as raw body')
-      const action = ctx.profiler.profile('bodyparser:raw')
 
       try {
-        const { raw } = await coBody.text(ctx.request.request, rawConfig)
+        const { raw } = await coBody.text(ctx.request.request, {
+          ...rawConfig,
+          returnRawBody: true,
+        })
         ctx.request.setInitialBody({})
         ctx.request.updateRawBody(raw)
-        action.end()
         return next()
       } catch (error) {
-        action.end({ error })
-        throw this.getExceptionFor(error)
+        throw this.#getExceptionFor(error)
       }
     }
 
