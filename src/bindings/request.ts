@@ -1,7 +1,7 @@
 /*
  * @adonisjs/bodyparser
  *
- * (c) Harminder Virk <virk@adonisjs.com>
+ * (c) AdonisJS
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -14,6 +14,7 @@ import { MultipartFile } from '../multipart/file.js'
 import type { Multipart } from '../multipart/main.js'
 import type { FileValidationOptions } from '../types.js'
 import debug from '../debug.js'
+import { RuntimeException } from '@poppinss/utils'
 
 /**
  * Extending request class with custom properties.
@@ -91,5 +92,11 @@ Request.macro(
  * Fetch all files
  */
 Request.macro('allFiles', function allFiles(this: Request) {
-  return this['__raw_files'] || {}
+  if (!this.__raw_files) {
+    throw new RuntimeException(
+      'Cannot read files. Make sure the bodyparser middleware is registered'
+    )
+  }
+
+  return this['__raw_files']
 })

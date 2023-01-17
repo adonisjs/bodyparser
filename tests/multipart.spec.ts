@@ -1,7 +1,7 @@
 /*
  * @adonisjs/bodyparser
  *
- * (c) Harminder Virk <virk@adonisjs.com>
+ * (c) AdonisJS
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,8 +11,9 @@ import fs from 'fs-extra'
 import { join } from 'node:path'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
-import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:http'
+import { fileURLToPath } from 'node:url'
+import fileGenerator from '@poppinss/file-generator'
 import { RequestFactory } from '@adonisjs/http-server/test_factories/request'
 import { ResponseFactory } from '@adonisjs/http-server/test_factories/response'
 import { HttpContextFactory } from '@adonisjs/http-server/test_factories/http_context'
@@ -22,10 +23,14 @@ import { MultipartFile } from '../src/multipart/file.js'
 import {
   sleep,
   xlsFilePath,
+  largePdfFile,
   xlsxFilePath,
   packageFilePath,
   packageFileSize,
+  unicornFilePath,
+  unicornNoExtFilePath,
 } from '../test_helpers/main.js'
+import string from '@poppinss/utils/string'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)
@@ -581,7 +586,7 @@ test.group('Multipart', (group) => {
       res.end()
     })
 
-    await supertest(server).post('/').attach('profile', join(BASE_PATH, '..', '..', 'unicorn.png'))
+    await supertest(server).post('/').attach('profile', unicornFilePath)
 
     assert.property(files, 'profile')
     assert.isFalse(files!.profile instanceof MultipartFile && files!.profile.isValid)
@@ -831,11 +836,9 @@ test.group('Multipart', (group) => {
       res.end()
     })
 
-    await supertest(server)
-      .post('/')
-      .attach('picture', join(BASE_PATH, '..', '..', 'unicorn-wo-ext'), {
-        contentType: 'image/png',
-      })
+    await supertest(server).post('/').attach('picture', unicornNoExtFilePath, {
+      contentType: 'image/png',
+    })
 
     assert.property(files, 'picture')
     assert.instanceOf(files!.picture, MultipartFile)
@@ -928,6 +931,88 @@ test.group('Multipart', (group) => {
     assert.isTrue(report.isValid)
     assert.equal(report.state, 'consumed')
     assert.equal(report.extname, 'xls')
+    assert.lengthOf(report.errors, 0)
+  })
+
+  test('process medium sized files', async ({ assert }) => {
+    let files: null | Record<string, MultipartFile | MultipartFile[]> = null
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: '20 mb' })
+
+      multipart.onFile('report', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', (line) => {
+            reporter(line)
+          })
+          part.on('error', reject)
+          part.on('end', resolve)
+        })
+      })
+
+      await multipart.process()
+      files = ctx.request['__raw_files']
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('report', largePdfFile)
+    assert.property(files, 'report')
+
+    const report = files!.report as MultipartFile
+
+    assert.isTrue(report.isValid)
+    assert.equal(report.state, 'consumed')
+    assert.isAbove(report.size, string.bytes.parse('10mb'))
+  })
+
+  test('process large xlsx file', async ({ assert }) => {
+    let files: null | Record<string, MultipartFile | MultipartFile[]> = null
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: '10 mb' })
+
+      multipart.onFile(
+        '*',
+        {
+          extnames: ['xlsx'],
+        },
+        (part, reporter) => {
+          return new Promise((resolve, reject) => {
+            part.on('error', reject)
+            part.on('end', resolve)
+            part.on('data', reporter)
+          })
+        }
+      )
+
+      try {
+        await multipart.process()
+      } catch (error) {
+        console.log(error)
+      }
+      files = ctx.request['__raw_files'] || null
+      res.end()
+    })
+
+    const xlsFile = await fileGenerator.generateXlsx('8 mb')
+    await supertest(server).post('/').attach('report', xlsFile.contents, {
+      filename: xlsFile.name,
+      contentType: xlsFile.mime,
+    })
+
+    assert.property(files, 'report')
+    assert.instanceOf(files!.report, MultipartFile)
+
+    const report = files!.report as MultipartFile
+
+    assert.isTrue(report.isValid)
+    assert.equal(report.state, 'consumed')
+    assert.equal(report.extname, 'xlsx')
     assert.lengthOf(report.errors, 0)
   })
 })

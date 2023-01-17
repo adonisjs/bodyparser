@@ -1,7 +1,7 @@
 /*
  * @adonisjs/bodyparser
  *
- * (c) Harminder Virk <virk@adonisjs.com>
+ * (c) AdonisJS
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -106,7 +106,7 @@ export class BodyParserMiddleware {
    */
   async handle(ctx: HttpContext, next: NextFn) {
     /**
-     * Initiating the `__raw_files` #property as an object
+     * Initiating the `__raw_files` property as an object
      */
     ctx.request['__raw_files'] = {}
     const requestUrl = ctx.request.url()

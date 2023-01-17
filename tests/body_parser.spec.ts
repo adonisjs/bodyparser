@@ -1,7 +1,7 @@
 /*
  * @adonisjs/bodyparser
  *
- * (c) Harminder Virk <virk@adonisjs.com>
+ * (c) AdonisJS
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -21,7 +21,7 @@ import { HttpContextFactory } from '@adonisjs/http-server/test_factories/http_co
 
 import { Multipart } from '../src/multipart/main.js'
 import { MultipartFile } from '../src/multipart/file.js'
-import { packageFilePath, packageFileSize } from '../test_helpers/main.js'
+import { packageFilePath, packageFileSize, unicornFilePath } from '../test_helpers/main.js'
 import { BodyParserMiddlewareFactory } from '../test_factories/middleware_factory.js'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
@@ -625,11 +625,9 @@ test.group('BodyParser Middleware | multipart', (group) => {
       })
     })
 
-    const { body } = await supertest(server)
-      .post('/')
-      .attach('avatar', join(BASE_PATH, '..', '../unicorn.png'), {
-        contentType: 'application/json',
-      })
+    const { body } = await supertest(server).post('/').attach('avatar', unicornFilePath, {
+      contentType: 'application/json',
+    })
 
     assert.deepEqual(body, {
       type: 'image',
