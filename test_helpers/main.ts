@@ -25,3 +25,20 @@ export const packageFilePath = fileURLToPath(new URL('../package.json', import.m
 export const packageFileSize = pkgFileContents.length
 
 export const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time))
+export const retry = (callback: () => Promise<void>, maxCounts: number) => {
+  let counts = 0
+  async function run() {
+    try {
+      await callback()
+    } catch (error) {
+      counts++
+      if (counts === maxCounts) {
+        throw error
+      }
+
+      await run()
+    }
+  }
+
+  return run
+}

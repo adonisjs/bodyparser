@@ -13,6 +13,7 @@ import { test } from '@japa/runner'
 import { fileURLToPath } from 'node:url'
 
 import { streamFile } from '../src/multipart/stream_file.js'
+import { retry } from '../test_helpers/main.js'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)
@@ -22,7 +23,7 @@ const MAIN_FILE = join(BASE_PATH, 'hello-in.txt')
 
 test.group('streamFile', (group) => {
   group.each.teardown(async () => {
-    await fs.remove(BASE_PATH)
+    await retry(() => fs.remove(BASE_PATH), 3)()
   })
 
   test('write readable stream to the destination', async ({ assert }) => {
@@ -54,5 +55,5 @@ test.group('streamFile', (group) => {
     } catch (error) {
       assert.equal(error, 'blowup')
     }
-  }).retry(3)
+  })
 })
