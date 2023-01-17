@@ -14,7 +14,7 @@ import cuid from 'cuid'
 import { tmpdir } from 'node:os'
 import { Exception } from '@poppinss/utils'
 import { join, isAbsolute } from 'node:path'
-import type { NextFn } from '@poppinss/middleware/types'
+import type { NextFn } from '@adonisjs/http-server/types'
 import type { HttpContext } from '@adonisjs/http-server'
 
 import debug from './debug.js'
