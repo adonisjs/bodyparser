@@ -15,14 +15,15 @@ import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:http'
-import { RequestFactory } from '@adonisjs/http-server/test_factories/request'
-import { ResponseFactory } from '@adonisjs/http-server/test_factories/response'
-import { HttpContextFactory } from '@adonisjs/http-server/test_factories/http_context'
-
+import {
+  RequestFactory,
+  ResponseFactory,
+  HttpContextFactory,
+} from '@adonisjs/http-server/factories'
 import { Multipart } from '../src/multipart/main.js'
 import { MultipartFile } from '../src/multipart/file.js'
-import { packageFilePath, packageFileSize, unicornFilePath } from '../test_helpers/main.js'
 import { BodyParserMiddlewareFactory } from '../test_factories/middleware_factory.js'
+import { packageFilePath, packageFileSize, unicornFilePath } from '../test_helpers/main.js'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)

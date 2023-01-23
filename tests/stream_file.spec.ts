@@ -12,8 +12,8 @@ import { join } from 'node:path'
 import { test } from '@japa/runner'
 import { fileURLToPath } from 'node:url'
 
-import { streamFile } from '../src/multipart/stream_file.js'
 import { retry } from '../test_helpers/main.js'
+import { streamFile } from '../src/multipart/stream_file.js'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)

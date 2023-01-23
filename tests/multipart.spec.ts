@@ -14,10 +14,11 @@ import { test } from '@japa/runner'
 import { createServer } from 'node:http'
 import { fileURLToPath } from 'node:url'
 import fileGenerator from '@poppinss/file-generator'
-import { RequestFactory } from '@adonisjs/http-server/test_factories/request'
-import { ResponseFactory } from '@adonisjs/http-server/test_factories/response'
-import { HttpContextFactory } from '@adonisjs/http-server/test_factories/http_context'
-
+import {
+  RequestFactory,
+  ResponseFactory,
+  HttpContextFactory,
+} from '@adonisjs/http-server/factories'
 import { Multipart } from '../src/multipart/main.js'
 import { MultipartFile } from '../src/multipart/file.js'
 import {
