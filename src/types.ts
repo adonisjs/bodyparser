@@ -162,3 +162,5 @@ export type FileJSON = {
   errors: FileUploadError[]
   meta: any
 }
+
+export { MultipartFile }

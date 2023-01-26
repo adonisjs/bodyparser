@@ -13,6 +13,7 @@
   "exports": {
     ".": "./build/index.js",
     "./factories": "./build/test_factories/main.js",
+    "./bodyparser_middleware": "./build/src/bodyparser_middleware.js",
     "./types": "./build/src/types.js"
   },
   "scripts": {
