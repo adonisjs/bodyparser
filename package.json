@@ -12,7 +12,7 @@
   ],
   "exports": {
     ".": "./build/index.js",
-    "./test_factories/*": "./build/test_factories/*.js",
+    "./factories": "./build/test_factories/main.js",
     "./types": "./build/src/types.js"
   },
   "scripts": {
