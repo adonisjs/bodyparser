@@ -53,6 +53,16 @@ function isInstanceOfFile(file: any): file is MultipartFile {
 debug('extending request class with "file", "files" and "allFiles" macros')
 
 /**
+ * Serialize files alongside rest of the request files
+ */
+Request.macro('toJSON', function (this: Request) {
+  return {
+    ...this.serialize(),
+    files: this['__raw_files'] || {},
+  }
+})
+
+/**
  * Fetch a single file
  */
 Request.macro(
