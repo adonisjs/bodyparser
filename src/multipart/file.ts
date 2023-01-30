@@ -10,7 +10,7 @@
 import { move } from 'fs-extra'
 import { join } from 'node:path'
 import { Exception } from '@poppinss/utils'
-import { Macroable } from '@poppinss/macroable'
+import Macroable from '@poppinss/macroable'
 
 import { SizeValidator } from './validators/size.js'
 import { ExtensionValidator } from './validators/extensions.js'
