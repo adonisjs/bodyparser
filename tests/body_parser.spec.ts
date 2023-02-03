@@ -282,6 +282,26 @@ test.group('BodyParser Middleware | json', (group) => {
 
     assert.deepEqual(body, { '': 'virk' })
   })
+
+  test('convert empty strings to null', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify(ctx.request.all()))
+      })
+    })
+
+    const { body } = await supertest(server).post('/').type('json').send({ name: '' })
+
+    assert.deepEqual(body, {
+      name: null,
+    })
+  })
 })
 
 test.group('BodyParser Middleware | raw body', (group) => {

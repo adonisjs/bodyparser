@@ -36,6 +36,7 @@ export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig
         'application/vnd.api+json',
         'application/csp-report',
       ],
+      convertEmptyStringsToNull: true,
       ...config.json,
     },
 

@@ -43,6 +43,7 @@ type BodyParserBaseConfig = {
  */
 export type BodyParserJSONConfig = BodyParserBaseConfig & {
   strict: boolean
+  convertEmptyStringsToNull: boolean
 }
 
 /**
