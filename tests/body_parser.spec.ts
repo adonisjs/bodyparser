@@ -8,12 +8,10 @@
  */
 
 import 'reflect-metadata'
-import fs from 'fs-extra'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
-import { fileURLToPath } from 'node:url'
 import { createServer } from 'node:http'
 import {
   RequestFactory,
@@ -25,14 +23,7 @@ import { MultipartFile } from '../src/multipart/file.js'
 import { BodyParserMiddlewareFactory } from '../test_factories/middleware_factory.js'
 import { packageFilePath, packageFileSize, unicornFilePath } from '../test_helpers/main.js'
 
-const BASE_URL = new URL('./tmp/', import.meta.url)
-const BASE_PATH = fileURLToPath(BASE_URL)
-
-test.group('BodyParser Middleware', (group) => {
-  group.each.setup(async () => {
-    return () => fs.remove(BASE_PATH)
-  })
-
+test.group('BodyParser Middleware', () => {
   test('do not parse get requests', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -91,11 +82,7 @@ test.group('BodyParser Middleware', (group) => {
   })
 })
 
-test.group('BodyParser Middleware | form data', (group) => {
-  group.each.setup(async () => {
-    return () => fs.remove(BASE_PATH)
-  })
-
+test.group('BodyParser Middleware | form data', () => {
   test('handle request with form data', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -212,11 +199,7 @@ test.group('BodyParser Middleware | form data', (group) => {
   })
 })
 
-test.group('BodyParser Middleware | json', (group) => {
-  group.each.setup(async () => {
-    return () => fs.remove(BASE_PATH)
-  })
-
+test.group('BodyParser Middleware | json', () => {
   test('handle request with json body', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -304,11 +287,7 @@ test.group('BodyParser Middleware | json', (group) => {
   })
 })
 
-test.group('BodyParser Middleware | raw body', (group) => {
-  group.each.setup(async () => {
-    return () => fs.remove(BASE_PATH)
-  })
-
+test.group('BodyParser Middleware | raw body', () => {
   test('handle request with raw body', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -361,11 +340,7 @@ test.group('BodyParser Middleware | raw body', (group) => {
   })
 })
 
-test.group('BodyParser Middleware | multipart', (group) => {
-  group.each.setup(async () => {
-    return () => fs.remove(BASE_PATH)
-  })
-
+test.group('BodyParser Middleware | multipart', () => {
   test('handle request with just files', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -450,7 +425,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
     assert.deepEqual(body, { multiple: true })
   })
 
-  test('abort request when total bytes are over limit', async ({ assert }) => {
+  test('abort request when total bytes are over limit', async ({ assert, fs }) => {
     let index = 0
 
     const server = createServer(async (req, res) => {
@@ -483,8 +458,8 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     assert.equal(text, 'request entity too large')
 
-    const file1 = await fs.pathExists(join(tmpdir(), '0.tmp'))
-    const file2 = await fs.pathExists(join(tmpdir(), '1.tmp'))
+    const file1 = await fs.adapter.pathExists(join(tmpdir(), '0.tmp'))
+    const file2 = await fs.adapter.pathExists(join(tmpdir(), '1.tmp'))
 
     assert.isTrue(file1)
     assert.isFalse(file2)
@@ -866,9 +841,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
     assert.deepEqual(body.errors, [])
   })
 
-  test('move file to a given location', async ({ assert }) => {
-    const uploadsDir = join(BASE_PATH, 'uploads')
-
+  test('move file to a given location', async ({ assert, fs }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()
@@ -879,7 +852,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
         const pkgFile = ctx.request.file('package')!
 
         try {
-          await pkgFile.move(uploadsDir)
+          await pkgFile.move(fs.basePath)
           assert.equal(pkgFile.state, 'moved')
           res.writeHead(200, { 'content-type': 'application/json' })
           res.end()
@@ -892,14 +865,12 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
 
-    const uploadedFileContents = await fs.readFile(join(uploadsDir, 'package.json'), 'utf-8')
-    const originalFileContents = await fs.readFile(packageFilePath, 'utf-8')
+    const uploadedFileContents = await fs.contents('package.json')
+    const originalFileContents = await fs.adapter.readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
   })
 
-  test('move file with custom name', async ({ assert }) => {
-    const uploadsDir = join(BASE_PATH, 'uploads')
-
+  test('move file with custom name', async ({ assert, fs }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()
@@ -910,7 +881,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
         const pkgFile = ctx.request.file('package')!
 
         try {
-          await pkgFile.move(uploadsDir, {
+          await pkgFile.move(fs.basePath, {
             name: `myapp.${pkgFile.subtype}`,
           })
           assert.equal(pkgFile.state, 'moved')
@@ -925,14 +896,12 @@ test.group('BodyParser Middleware | multipart', (group) => {
 
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
 
-    const uploadedFileContents = await fs.readFile(join(uploadsDir, 'myapp.json'), 'utf-8')
-    const originalFileContents = await fs.readFile(packageFilePath, 'utf-8')
+    const uploadedFileContents = await fs.contents('myapp.json')
+    const originalFileContents = await fs.adapter.readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
   })
 
-  test('raise error when destination file already exists', async ({ assert }) => {
-    const uploadsDir = join(BASE_PATH, 'uploads')
-
+  test('raise error when destination file already exists', async ({ assert, fs }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()
@@ -943,11 +912,11 @@ test.group('BodyParser Middleware | multipart', (group) => {
         const pkgFile = ctx.request.file('package')!
 
         try {
-          await pkgFile.move(uploadsDir, { overwrite: false })
+          await pkgFile.move(fs.basePath, { overwrite: false })
         } catch (error) {
           assert.equal(
             error.message,
-            `"package.json" already exists at "${uploadsDir}". Set "overwrite = true" to overwrite it`
+            `"package.json" already exists at "${fs.basePath}". Set "overwrite = true" to overwrite it`
           )
           assert.equal(pkgFile.state, 'consumed')
           res.writeHead(200, { 'content-type': 'application/json' })
@@ -956,7 +925,7 @@ test.group('BodyParser Middleware | multipart', (group) => {
       })
     })
 
-    await fs.outputFile(join(uploadsDir, 'package.json'), JSON.stringify({}))
+    await fs.create('package.json', JSON.stringify({}))
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
   })
 

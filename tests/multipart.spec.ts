@@ -7,7 +7,6 @@
  * file that was distributed with this source code.
  */
 
-import fs from 'fs-extra'
 import { join } from 'node:path'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
@@ -36,11 +35,7 @@ import string from '@poppinss/utils/string'
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)
 
-test.group('Multipart', (group) => {
-  group.setup(async () => {
-    return () => fs.remove(BASE_PATH)
-  })
-
+test.group('Multipart', () => {
   test('process file by attaching handler on field name', async ({ assert }) => {
     let files: null | Record<string, MultipartFile | MultipartFile[]> = null
 
@@ -223,13 +218,9 @@ test.group('Multipart', (group) => {
     assert.equal(files!.package instanceof MultipartFile && files!.package.size, packageFileSize)
   })
 
-  test('work fine when stream is piped to a destination', async ({ assert, cleanup }) => {
-    await fs.ensureDir(BASE_PATH)
-
-    const SAMPLE_FILE_PATH = join(BASE_PATH, './sample.json')
-    cleanup(async () => {
-      await fs.remove(SAMPLE_FILE_PATH)
-    })
+  test('work fine when stream is piped to a destination', async ({ assert, fs }) => {
+    await fs.adapter.ensureDir(fs.basePath)
+    const SAMPLE_FILE_PATH = join(fs.basePath, './sample.json')
 
     let files: null | Record<string, MultipartFile | MultipartFile[]> = null
 
@@ -248,14 +239,14 @@ test.group('Multipart', (group) => {
 
           part.on('error', reject)
           part.on('end', resolve)
-          part.pipe(fs.createWriteStream(SAMPLE_FILE_PATH))
+          part.pipe(fs.adapter.createWriteStream(SAMPLE_FILE_PATH))
         })
       })
 
       await multipart.process()
       files = ctx.request['__raw_files']
 
-      const hasFile = await fs.pathExists(SAMPLE_FILE_PATH)
+      const hasFile = await fs.adapter.pathExists(SAMPLE_FILE_PATH)
       res.end(String(hasFile))
     })
 
