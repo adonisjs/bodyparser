@@ -31,12 +31,12 @@
     "vscode:test": "node --loader=ts-node/esm bin/test.ts"
   },
   "devDependencies": {
-    "@adonisjs/application": "^7.0.1-0",
+    "@adonisjs/application": "^7.1.0-0",
     "@adonisjs/encryption": "^5.1.2-0",
-    "@adonisjs/events": "^8.4.6-0",
+    "@adonisjs/events": "^8.4.7-0",
     "@adonisjs/fold": "^9.9.2-0",
-    "@adonisjs/http-server": "^6.7.0-0",
-    "@adonisjs/logger": "^5.4.1-0",
+    "@adonisjs/http-server": "^6.7.1-0",
+    "@adonisjs/logger": "^5.4.2-0",
     "@commitlint/cli": "^17.4.2",
     "@commitlint/config-conventional": "^17.4.2",
     "@japa/assert": "^1.4.1",
@@ -81,7 +81,7 @@
     "media-typer": "^1.1.0"
   },
   "peerDependencies": {
-    "@adonisjs/http-server": "^6.7.0-0"
+    "@adonisjs/http-server": "^6.7.1-0"
   },
   "keywords": [
     "adonisjs",
