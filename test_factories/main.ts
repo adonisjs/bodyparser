@@ -7,4 +7,5 @@
  * file that was distributed with this source code.
  */
 
+export { MultipartFileFactory } from './file_factory.js'
 export { BodyParserMiddlewareFactory } from './middleware_factory.js'

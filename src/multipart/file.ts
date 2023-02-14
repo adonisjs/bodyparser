@@ -21,8 +21,10 @@ import type { FileUploadError, FileValidationOptions } from '../types.js'
  * an errors occurred during the upload process.
  */
 export class MultipartFile extends Macroable {
+  /**
+   * File validators
+   */
   #sizeValidator = new SizeValidator(this)
-
   #extensionValidator = new ExtensionValidator(this)
 
   /**
