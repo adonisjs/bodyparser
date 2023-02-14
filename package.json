@@ -35,10 +35,10 @@
     "@adonisjs/encryption": "^5.1.2-0",
     "@adonisjs/events": "^8.4.7-0",
     "@adonisjs/fold": "^9.9.2-0",
-    "@adonisjs/http-server": "^6.7.1-0",
+    "@adonisjs/http-server": "^6.8.0-0",
     "@adonisjs/logger": "^5.4.2-0",
-    "@commitlint/cli": "^17.4.2",
-    "@commitlint/config-conventional": "^17.4.2",
+    "@commitlint/cli": "^17.4.3",
+    "@commitlint/config-conventional": "^17.4.3",
     "@japa/assert": "^1.4.1",
     "@japa/file-system": "^1.0.1",
     "@japa/run-failed-tests": "^1.1.1",
@@ -82,7 +82,7 @@
     "media-typer": "^1.1.0"
   },
   "peerDependencies": {
-    "@adonisjs/http-server": "^6.7.1-0"
+    "@adonisjs/http-server": "^6.8.0-0"
   },
   "keywords": [
     "adonisjs",
