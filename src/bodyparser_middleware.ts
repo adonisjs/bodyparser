@@ -10,10 +10,10 @@
 // @ts-expect-error
 import coBody from '@poppinss/co-body'
 
-import cuid from 'cuid'
 import { tmpdir } from 'node:os'
 import { Exception } from '@poppinss/utils'
 import { join, isAbsolute } from 'node:path'
+import { createId } from '@paralleldrive/cuid2'
 import type { NextFn } from '@adonisjs/http-server/types'
 import type { HttpContext } from '@adonisjs/http-server'
 
@@ -97,7 +97,7 @@ export class BodyParserMiddleware {
       return isAbsolute(tmpPath) ? tmpPath : join(tmpdir(), tmpPath)
     }
 
-    return join(tmpdir(), cuid())
+    return join(tmpdir(), createId())
   }
 
   /**
