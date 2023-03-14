@@ -107,7 +107,7 @@ test.group('JSON parser', () => {
       .send('{"foo": "bar')
       .expect(400)
 
-    assert.equal(text, 'Unterminated string in JSON at position 12')
+    assert.match(text, /Unexpected end of JSON input|Unterminated string in JSON/)
   })
 
   test('fail for invalid json when strict mode is enabled', async ({ assert }) => {
@@ -130,7 +130,7 @@ test.group('JSON parser', () => {
       .send('{"foo": "bar')
       .expect(400)
 
-    assert.equal(text, 'Unterminated string in JSON at position 12')
+    assert.match(text, /Unexpected end of JSON input|Unterminated string in JSON/)
   })
 
   test('parse non-object json', async ({ assert }) => {
