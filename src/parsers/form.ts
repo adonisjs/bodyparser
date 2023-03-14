@@ -10,7 +10,7 @@
 import raw from 'raw-body'
 import inflate from 'inflation'
 import qs, { IParseOptions } from 'qs'
-import { IncomingMessage } from 'node:http'
+import type { IncomingMessage } from 'node:http'
 import { BodyParserFormConfig } from '../types.js'
 
 /**
@@ -70,7 +70,6 @@ export async function parseForm(req: IncomingMessage, options: Partial<BodyParse
     const parsed = qs.parse(requestBody, queryStringOptions)
     return { parsed, raw: requestBody }
   } catch (error) {
-    console.log(error)
     error.status = 400
     error.body = requestBody
     throw error

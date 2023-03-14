@@ -19,6 +19,7 @@ import type { HttpContext } from '@adonisjs/http-server'
 
 import debug from './debug.js'
 import { parseForm } from './parsers/form.js'
+import { parseJSON } from './parsers/json.js'
 import { Multipart } from './multipart/main.js'
 import type { BodyParserConfig } from './types.js'
 import { streamFile } from './multipart/stream_file.js'
@@ -212,10 +213,7 @@ export class BodyParserMiddleware {
       debug('parsing JSON body, URI: "%s"', requestUrl)
 
       try {
-        const { parsed, raw } = await coBody.json(ctx.request.request, {
-          ...jsonConfig,
-          returnRawBody: true,
-        })
+        const { parsed, raw } = await parseJSON(ctx.request.request, jsonConfig)
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
         return next()
