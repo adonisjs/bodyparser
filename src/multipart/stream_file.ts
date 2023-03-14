@@ -7,9 +7,10 @@
  * file that was distributed with this source code.
  */
 
-import fs from 'fs-extra'
 import eos from 'end-of-stream'
 import { Readable } from 'node:stream'
+import { createWriteStream } from 'node:fs'
+import { open, unlink } from 'node:fs/promises'
 
 /**
  * Writes readable stream to the given location by properly cleaning up readable
@@ -22,20 +23,20 @@ export function streamFile(
   dataListener?: (line: Buffer) => void
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    fs.open(location, 'w')
+    open(location, 'w')
       .then((fd) => {
         /**
          * Create write stream and reject promise on error
          * event
          */
-        const writeStream = fs.createWriteStream(location)
+        const writeStream = createWriteStream(location)
         writeStream.on('error', reject)
 
         /**
          * Handle closing of read stream from multiple sources
          */
         eos(readStream, (error?: Error | null) => {
-          fs.close(fd)
+          fd.close()
 
           /**
            * Resolve when their are no errors in
@@ -53,7 +54,7 @@ export function streamFile(
 
           process.nextTick(() => {
             writeStream.end()
-            fs.unlink(writeStream.path).catch(() => {})
+            unlink(writeStream.path).catch(() => {})
           })
         })
 
