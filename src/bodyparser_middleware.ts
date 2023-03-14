@@ -7,15 +7,12 @@
  * file that was distributed with this source code.
  */
 
-// @ts-expect-error
-import coBody from '@poppinss/co-body'
-
 import { tmpdir } from 'node:os'
 import { Exception } from '@poppinss/utils'
 import { join, isAbsolute } from 'node:path'
 import { createId } from '@paralleldrive/cuid2'
-import type { NextFn } from '@adonisjs/http-server/types'
 import type { HttpContext } from '@adonisjs/http-server'
+import type { NextFn } from '@adonisjs/http-server/types'
 
 import debug from './debug.js'
 import { parseForm } from './parsers/form.js'
@@ -28,6 +25,7 @@ import { streamFile } from './multipart/stream_file.js'
  * Bindings to extend request
  */
 import './bindings/request.js'
+import { parseText } from './parsers/text.js'
 
 /**
  * BodyParser middleware parses the incoming request body and set it as
@@ -230,12 +228,8 @@ export class BodyParserMiddleware {
       debug('parsing raw body, URI: "%s"', requestUrl)
 
       try {
-        const { raw } = await coBody.text(ctx.request.request, {
-          ...rawConfig,
-          returnRawBody: true,
-        })
         ctx.request.setInitialBody({})
-        ctx.request.updateRawBody(raw)
+        ctx.request.updateRawBody(await parseText(ctx.request.request, rawConfig))
         return next()
       } catch (error) {
         throw this.#getExceptionFor(error)

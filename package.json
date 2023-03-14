@@ -72,7 +72,6 @@
   },
   "dependencies": {
     "@paralleldrive/cuid2": "^2.2.0",
-    "@poppinss/co-body": "^1.2.0",
     "@poppinss/macroable": "^1.0.0-3",
     "@poppinss/multiparty": "^2.0.1",
     "@poppinss/utils": "^6.5.0-1",

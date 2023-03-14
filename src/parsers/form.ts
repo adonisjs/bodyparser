@@ -66,12 +66,6 @@ export async function parseForm(req: IncomingMessage, options: Partial<BodyParse
   }
 
   const requestBody = await raw(inflate(req), normalizedOptions)
-  try {
-    const parsed = qs.parse(requestBody, queryStringOptions)
-    return { parsed, raw: requestBody }
-  } catch (error) {
-    error.status = 400
-    error.body = requestBody
-    throw error
-  }
+  const parsed = qs.parse(requestBody, queryStringOptions)
+  return { parsed, raw: requestBody }
 }
