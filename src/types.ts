@@ -22,7 +22,7 @@ type QueryStringConfig = {
   ignoreQueryPrefix?: boolean
   delimiter?: RegExp | string
   allowDots?: boolean
-  charset?: string
+  charset?: 'utf-8' | 'iso-8859-1' | undefined
   charsetSentinel?: boolean
   interpretNumericEntities?: boolean
   parseArrays?: boolean

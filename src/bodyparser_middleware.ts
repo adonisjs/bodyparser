@@ -18,6 +18,7 @@ import type { NextFn } from '@adonisjs/http-server/types'
 import type { HttpContext } from '@adonisjs/http-server'
 
 import debug from './debug.js'
+import { parseForm } from './parsers/form.js'
 import { Multipart } from './multipart/main.js'
 import type { BodyParserConfig } from './types.js'
 import { streamFile } from './multipart/stream_file.js'
@@ -194,10 +195,7 @@ export class BodyParserMiddleware {
       debug('parsing urlencoded form, URI: "%s"', requestUrl)
 
       try {
-        const { parsed, raw } = await coBody.form(ctx.request.request, {
-          ...formConfig,
-          returnRawBody: true,
-        })
+        const { parsed, raw } = await parseForm(ctx.request.request, formConfig)
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
         return next()

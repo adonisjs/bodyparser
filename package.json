@@ -76,10 +76,15 @@
     "@poppinss/macroable": "^1.0.0-3",
     "@poppinss/multiparty": "^2.0.1",
     "@poppinss/utils": "^6.5.0-1",
+    "@types/inflation": "^2.0.1",
+    "@types/qs": "^6.9.7",
     "bytes": "^3.1.2",
     "end-of-stream": "^1.4.4",
     "file-type": "^18.2.1",
-    "media-typer": "^1.1.0"
+    "inflation": "^2.0.0",
+    "media-typer": "^1.1.0",
+    "qs": "^6.11.1",
+    "raw-body": "^2.5.2"
   },
   "peerDependencies": {
     "@adonisjs/http-server": "^6.8.2-0"
