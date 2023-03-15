@@ -7,9 +7,12 @@
  * file that was distributed with this source code.
  */
 
-import { extname } from 'node:path'
+import type { Mode } from 'node:fs'
 import mediaTyper from 'media-typer'
+import { dirname, extname } from 'node:path'
+import { RuntimeException } from '@poppinss/utils'
 import { fileTypeFromBuffer, supportedExtensions } from 'file-type'
+import { access, mkdir, copyFile, unlink, rename } from 'node:fs/promises'
 
 /**
  * We can detect file types for these files using the magic
@@ -61,4 +64,50 @@ export function computeFileTypeFromName(
     { ext: extname(clientName).replace(/^\./, '') },
     parseMimeType(headers['content-type'])
   )
+}
+
+/**
+ * Check if a file already exists
+ */
+export async function pathExists(filePath: string) {
+  try {
+    await access(filePath)
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Move file from source to destination with a fallback to move file across
+ * paritions and devices.
+ */
+export async function moveFile(
+  sourcePath: string,
+  destinationPath: string,
+  options: { overwrite: boolean; directoryMode?: Mode } = { overwrite: true }
+) {
+  if (!sourcePath || !destinationPath) {
+    throw new RuntimeException('"sourcePath" and "destinationPath" required')
+  }
+
+  if (!options.overwrite && (await pathExists(destinationPath))) {
+    throw new RuntimeException(`The destination file already exists: "${destinationPath}"`)
+  }
+
+  await mkdir(dirname(destinationPath), {
+    recursive: true,
+    mode: options.directoryMode,
+  })
+
+  try {
+    await rename(sourcePath, destinationPath)
+  } catch (error) {
+    if (error.code === 'EXDEV') {
+      await copyFile(sourcePath, destinationPath)
+      await unlink(sourcePath)
+    } else {
+      throw error
+    }
+  }
 }

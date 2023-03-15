@@ -7,11 +7,11 @@
  * file that was distributed with this source code.
  */
 
-import { move } from 'fs-extra'
 import { join } from 'node:path'
 import { Exception } from '@poppinss/utils'
 import Macroable from '@poppinss/macroable'
 
+import { moveFile } from '../helpers.js'
 import { SizeValidator } from './validators/size.js'
 import { ExtensionValidator } from './validators/extensions.js'
 import type { FileUploadError, FileValidationOptions } from '../types.js'
@@ -185,7 +185,7 @@ export class MultipartFile extends Macroable {
     const filePath = join(location, options.name!)
 
     try {
-      await move(this.tmpPath, filePath, { overwrite: options.overwrite! })
+      await moveFile(this.tmpPath, filePath, { overwrite: options.overwrite! })
       this.markAsMoved(options.name!, filePath)
     } catch (error) {
       if (error.message.includes('dest already exists')) {
