@@ -5,14 +5,18 @@
   "main": "build/index.js",
   "type": "module",
   "files": [
+    "src",
+    "factories",
+    "index.ts",
     "build/src",
-    "build/test_factories",
+    "build/factories",
     "build/index.d.ts",
+    "build/index.d.ts.map",
     "build/index.js"
   ],
   "exports": {
     ".": "./build/index.js",
-    "./factories": "./build/test_factories/main.js",
+    "./factories": "./build/factories/main.js",
     "./bodyparser_middleware": "./build/src/bodyparser_middleware.js",
     "./types": "./build/src/types.js"
   },

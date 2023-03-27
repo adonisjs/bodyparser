@@ -20,7 +20,7 @@ import {
 } from '@adonisjs/http-server/factories'
 import { Multipart } from '../src/multipart/main.js'
 import { MultipartFile } from '../src/multipart/file.js'
-import { BodyParserMiddlewareFactory } from '../test_factories/middleware_factory.js'
+import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.js'
 import { packageFilePath, packageFileSize, unicornFilePath } from '../test_helpers/main.js'
 
 test.group('BodyParser Middleware', () => {
