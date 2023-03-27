@@ -75,7 +75,7 @@ export type BodyParserMultipartConfig = BodyParserBaseConfig & {
  * Body parser config for all supported form types
  */
 export type BodyParserConfig = {
-  whitelistedMethods: string[]
+  allowedMethods: string[]
   json: BodyParserJSONConfig
   form: BodyParserFormConfig
   raw: BodyParserRawConfig
@@ -86,7 +86,7 @@ export type BodyParserConfig = {
  * Body parser config with partial config
  */
 export type BodyParserOptionalConfig = {
-  whitelistedMethods?: string[]
+  allowedMethods?: string[]
   json?: Partial<BodyParserJSONConfig>
   form?: Partial<BodyParserFormConfig>
   raw?: Partial<BodyParserRawConfig>

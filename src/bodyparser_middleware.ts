@@ -115,7 +115,7 @@ export class BodyParserMiddleware {
     /**
      * Only process for whitelisted nodes
      */
-    if (!this.#config.whitelistedMethods.includes(requestMethod)) {
+    if (!this.#config.allowedMethods.includes(requestMethod)) {
       debug('skipping HTTP request method "%s", URI: "%s"', requestMethod, requestUrl)
       return next()
     }

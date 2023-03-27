@@ -15,7 +15,7 @@ import { BodyParserConfig, BodyParserOptionalConfig } from './types.js'
  */
 export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig {
   return {
-    whitelistedMethods: config.whitelistedMethods || ['POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedMethods: config.allowedMethods || ['POST', 'PUT', 'PATCH', 'DELETE'],
 
     form: {
       encoding: 'utf-8',
