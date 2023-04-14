@@ -600,6 +600,82 @@ test.group('BodyParser Middleware | multipart', () => {
     await supertest(server).post('/').attach('package', packageFilePath).field('username', 'virk')
   })
 
+  test('do not process request when autoProcess route does not match', async ({ assert }) => {
+    assert.plan(2)
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      ctx.route = {
+        pattern: '/project/:id/file',
+        execute: () => {},
+        handler: () => {},
+        meta: {},
+        middleware: {} as any,
+      }
+
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          multipart: {
+            autoProcess: ['/projects/:id/assets'],
+          },
+        })
+        .create()
+
+      await middleware.handle(ctx, async () => {
+        assert.deepEqual(ctx.request['__raw_files'], {})
+        assert.instanceOf(ctx.request['multipart'], Multipart)
+        await ctx.request['multipart'].process()
+        res.end()
+      })
+    })
+
+    await supertest(server).post('/').attach('package', packageFilePath).field('username', 'virk')
+  })
+
+  test('process request when autoProcess route does matches', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      ctx.route = {
+        pattern: '/projects/:id/assets',
+        execute: () => {},
+        handler: () => {},
+        meta: {},
+        middleware: {} as any,
+      }
+
+      const middleware = new BodyParserMiddlewareFactory()
+        .merge({
+          multipart: {
+            autoProcess: ['/projects/:id/assets'],
+          },
+        })
+        .create()
+
+      await middleware.handle(ctx, async () => {
+        const pkgFile = ctx.request['__raw_files'].package as MultipartFile
+
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            tmpPath: pkgFile.tmpPath,
+            size: pkgFile.size,
+            validated: pkgFile.validated,
+          })
+        )
+      })
+    })
+
+    const { body } = await supertest(server).post('/').attach('package', packageFilePath)
+
+    assert.isAbove(body.size, 0)
+    assert.exists(body.tmpPath)
+    assert.isFalse(body.validated)
+  })
+
   test('detect file ext and mime type using magic number', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()

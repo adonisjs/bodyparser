@@ -63,7 +63,7 @@ export type BodyParserRawConfig = BodyParserBaseConfig
  * Parser config for parsing multipart requests
  */
 export type BodyParserMultipartConfig = BodyParserBaseConfig & {
-  autoProcess: boolean
+  autoProcess: boolean | string[]
   maxFields: number
   processManually: string[]
   convertEmptyStringsToNull: boolean

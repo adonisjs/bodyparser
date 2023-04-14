@@ -148,12 +148,28 @@ export class BodyParserMiddleware {
       })
 
       /**
-       * Skip parsing when `autoProcess` is disabled or route matches one
-       * of the defined processManually route patterns.
+       * Skip parsing when `autoProcess` is disabled
+       */
+      if (multipartConfig.autoProcess === false) {
+        return next()
+      }
+
+      /**
+       * Skip parsing when the current route matches one of the defined
+       * processManually route patterns.
+       */
+      if (ctx.route && multipartConfig.processManually.includes(ctx.route.pattern)) {
+        return next()
+      }
+
+      /**
+       * Skip parsing when the current route matches is not part of auto processing
+       * array
        */
       if (
-        !multipartConfig.autoProcess ||
-        (ctx.route && multipartConfig.processManually.indexOf(ctx.route.pattern) > -1)
+        ctx.route &&
+        Array.isArray(multipartConfig.autoProcess) &&
+        !multipartConfig.autoProcess.includes(ctx.route.pattern)
       ) {
         return next()
       }
