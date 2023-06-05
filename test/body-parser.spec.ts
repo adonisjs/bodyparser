@@ -1158,7 +1158,6 @@ test.group('BodyParser Middleware | multipart', (group) => {
       )
 
       await middleware.handle(ctx, async () => {
-        res.writeHead(200, { 'content-type': 'application/json' })
         const pkgFile = ctx.request.file('package', { size: 10 })!
 
         try {
@@ -1189,7 +1188,6 @@ test.group('BodyParser Middleware | multipart', (group) => {
       )
 
       await middleware.handle(ctx, async () => {
-        res.writeHead(200, { 'content-type': 'application/json' })
         const pkgFile = ctx.request.file('package', { extnames: ['json'] })!
 
         try {
