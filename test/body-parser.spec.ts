@@ -13,7 +13,7 @@
 import 'reflect-metadata'
 import { join } from 'path'
 import { tmpdir } from 'os'
-import { fetch } from 'undici'
+import fetch from 'node-fetch'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'http'
