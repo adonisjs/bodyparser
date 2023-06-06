@@ -7,10 +7,12 @@
  * file that was distributed with this source code.
  */
 
-import { Readable } from 'stream'
+import { promisify } from 'util'
 import { unlink } from 'fs-extra'
 import { createWriteStream } from 'fs'
-import { pipeline } from 'stream/promises'
+import { Readable, pipeline } from 'stream'
+
+const pump = promisify(pipeline)
 
 /**
  * Writes readable stream to the given location by properly cleaning up readable
@@ -29,7 +31,7 @@ export async function streamFile(
 
   const writeStream = createWriteStream(location)
   try {
-    await pipeline(readStream, writeStream)
+    await pump(readStream, writeStream)
   } catch (error) {
     unlink(writeStream.path).catch(() => {})
     throw error
