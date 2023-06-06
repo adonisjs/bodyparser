@@ -7,63 +7,31 @@
  * file that was distributed with this source code.
  */
 
-import eos from 'end-of-stream'
 import { Readable } from 'stream'
-import { open, close, createWriteStream, unlink } from 'fs-extra'
+import { unlink } from 'fs-extra'
+import { createWriteStream } from 'fs'
+import { pipeline } from 'stream/promises'
 
 /**
  * Writes readable stream to the given location by properly cleaning up readable
  * and writable streams in case of any errors. Also an optional data listener
  * can listen for the `data` event.
  */
-export function streamFile(
+export async function streamFile(
   readStream: Readable,
   location: string,
   dataListener?: (line: Buffer) => void
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
-    open(location, 'w')
-      .then((fd) => {
-        /**
-         * Create write stream and reject promise on error
-         * event
-         */
-        const writeStream = createWriteStream(location)
-        writeStream.on('error', reject)
+  if (typeof dataListener === 'function') {
+    readStream.pause()
+    readStream.on('data', dataListener)
+  }
 
-        /**
-         * Handle closing of read stream from multiple sources
-         */
-        eos(readStream, (error: Error) => {
-          close(fd)
-
-          /**
-           * Resolve when their are no errors in
-           * streaming
-           */
-          if (!error) {
-            resolve()
-            return
-          }
-
-          /**
-           * Otherwise cleanup write stream
-           */
-          reject(error)
-
-          process.nextTick(() => {
-            writeStream.end()
-            unlink(writeStream.path).catch(() => {})
-          })
-        })
-
-        if (typeof dataListener === 'function') {
-          readStream.pause()
-          readStream.on('data', dataListener)
-        }
-
-        readStream.pipe(writeStream)
-      })
-      .catch(reject)
-  })
+  const writeStream = createWriteStream(location)
+  try {
+    await pipeline(readStream, writeStream)
+  } catch (error) {
+    unlink(writeStream.path).catch(() => {})
+    throw error
+  }
 }

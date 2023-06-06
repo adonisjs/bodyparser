@@ -322,7 +322,9 @@ export class Multipart implements MultipartContract {
             this.ctx.request.request.resume()
           }
 
-          if (error.message.match(/maxFields [0-9]+ exceeded/)) {
+          if (error.message.match(/stream ended unexpectedly/)) {
+            reject(new Exception('Invalid multipart request', 400, 'E_INVALID_MULTIPART_REQUEST'))
+          } else if (error.message.match(/maxFields [0-9]+ exceeded/)) {
             reject(new Exception('Fields length limit exceeded', 413, 'E_REQUEST_ENTITY_TOO_LARGE'))
           } else if (error.message.match(/maxFieldsSize [0-9]+ exceeded/)) {
             reject(

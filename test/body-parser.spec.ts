@@ -13,6 +13,7 @@
 import 'reflect-metadata'
 import { join } from 'path'
 import { tmpdir } from 'os'
+import fetch from 'node-fetch'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'http'
@@ -231,6 +232,68 @@ test.group('BodyParser Middleware | form data', (group) => {
     assert.deepEqual(body, {
       name: null,
     })
+  })
+
+  test('abort when multipart body is invalid', async ({ assert, cleanup }) => {
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
+
+      try {
+        await middleware.handle(ctx, async () => {})
+      } catch (error) {
+        res.writeHead(error.status)
+        res.end(error.message)
+      }
+    })
+
+    cleanup(() => server.close())
+    await new Promise<void>((resolve) => server.listen(3333, 'localhost', () => resolve()))
+
+    const response = await fetch('http://localhost:3333', {
+      method: 'POST',
+      headers: {
+        'Content-type': `multipart/form-data; boundary=9d01a3fb93deedb4d0a81389271d097f28fd67e2fcbff2932befc0458ad7`,
+      },
+      body: '--9d01a3fb93deedb4d0a81389271d097f28fd67e2fcbff2932befc0458ad7\x0d\x0aContent-Disposition: form-data; name="test"; filename="csv_files/test.csv"\x0d\x0aContent-Type: application/octet-stream\x0d\x0a\x0d\x0atest123',
+    })
+
+    assert.equal(await response.text(), 'E_INVALID_MULTIPART_REQUEST: Invalid multipart request')
+  })
+
+  test('abort when multipart body is invalid newline characters', async ({ assert, cleanup }) => {
+    const server = createServer(async (req, res) => {
+      const ctx = app.container.use('Adonis/Core/HttpContext').create('/', {}, req, res)
+
+      const middleware = new BodyParserMiddleware(
+        app.container.use('Adonis/Core/Config'),
+        app.container.use('Adonis/Core/Drive')
+      )
+
+      try {
+        await middleware.handle(ctx, async () => {})
+      } catch (error) {
+        res.writeHead(error.status)
+        res.end(error.message)
+      }
+    })
+
+    cleanup(() => server.close())
+    await new Promise<void>((resolve) => server.listen(3333, 'localhost', () => resolve()))
+
+    const response = await fetch('http://localhost:3333', {
+      method: 'POST',
+      headers: {
+        'Content-type': `multipart/form-data; boundary=XXX`,
+      },
+      body: '--XXX\nContent-Disposition: form-data; name="file"; filename="filename.csv"\nContent-Type: text/csv\n\nA,B,C\n1,1.1,name1\n2,2.2,name2\n\n--XXX--',
+    })
+
+    assert.equal(await response.text(), 'Expected CR Received 10')
   })
 })
 
