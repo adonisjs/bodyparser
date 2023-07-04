@@ -161,6 +161,7 @@ declare module '@ioc:Adonis/Core/BodyParser' {
     clientName: string
     size: number
     filePath?: string
+    fileName?: string
     type?: string
     extname?: string
     subtype?: string

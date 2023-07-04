@@ -17,6 +17,7 @@ import { cuid } from '@poppinss/utils/build/helpers'
 import { DisksList, WriteOptions, DriveManagerContract } from '@ioc:Adonis/Core/Drive'
 
 import {
+    FileJSON,
   FileUploadError,
   FileValidationOptions,
   MultipartFileContract,
@@ -256,7 +257,7 @@ export class File implements MultipartFileContract {
   /**
    * Returns file JSON representation
    */
-  public toJSON() {
+  public toJSON(): FileJSON {
     return {
       fieldName: this.fieldName,
       clientName: this.clientName,
