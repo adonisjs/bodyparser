@@ -17,7 +17,7 @@ import { cuid } from '@poppinss/utils/build/helpers'
 import { DisksList, WriteOptions, DriveManagerContract } from '@ioc:Adonis/Core/Drive'
 
 import {
-    FileJSON,
+  FileJSON,
   FileUploadError,
   FileValidationOptions,
   MultipartFileContract,
