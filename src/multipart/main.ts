@@ -342,7 +342,14 @@ export class Multipart {
             this.#ctx.request.request.resume()
           }
 
-          if (error.message.match(/maxFields [0-9]+ exceeded/)) {
+          if (error.message.match(/stream ended unexpectedly/)) {
+            reject(
+              new Exception('Invalid multipart request', {
+                status: 400,
+                code: 'E_INVALID_MULTIPART_REQUEST',
+              })
+            )
+          } else if (error.message.match(/maxFields [0-9]+ exceeded/)) {
             reject(
               new Exception('Fields length limit exceeded', {
                 status: 413,
