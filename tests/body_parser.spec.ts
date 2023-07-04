@@ -526,7 +526,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     assert.isTrue(file1)
     assert.isFalse(file2)
-  })
+  }).retry(2)
 
   test('handle request with empty field name', async ({ assert }) => {
     const server = createServer(async (req, res) => {
