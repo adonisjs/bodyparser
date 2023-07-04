@@ -154,6 +154,7 @@ export type FileJSON = {
   clientName: string
   size: number
   filePath?: string
+  fileName?: string
   type?: string
   extname?: string
   subtype?: string

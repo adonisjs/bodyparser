@@ -14,7 +14,7 @@ import Macroable from '@poppinss/macroable'
 import { moveFile } from '../helpers.js'
 import { SizeValidator } from './validators/size.js'
 import { ExtensionValidator } from './validators/extensions.js'
-import type { FileUploadError, FileValidationOptions } from '../types.js'
+import type { FileJSON, FileUploadError, FileValidationOptions } from '../types.js'
 
 /**
  * The file holds the meta/data for an uploaded file, along with
@@ -200,7 +200,7 @@ export class MultipartFile extends Macroable {
   /**
    * Returns file JSON representation
    */
-  toJSON() {
+  toJSON(): FileJSON {
     return {
       fieldName: this.fieldName,
       clientName: this.clientName,
