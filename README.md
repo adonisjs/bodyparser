@@ -2,7 +2,7 @@
 
 <br />
 
-[![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url] [![synk-image]][synk-url]
+[![gh-workflow-image]][gh-workflow-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url]
 
 ## Introduction
 This repo provides the BodyParser middleware to process AdonisJS HTTP request body. The middleware has parsers for **JSON**, **URLencoded form**, and **Multipart** content types.
@@ -21,8 +21,8 @@ In order to ensure that the AdonisJS community is welcoming to all, please revie
 ## License
 AdonisJS Bodyparser is open-sourced software licensed under the [MIT license](LICENSE.md).
 
-[gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/adonisjs/bodyparser/test.yml?style=for-the-badge
-[gh-workflow-url]: https://github.com/adonisjs/bodyparser/actions/workflows/test.yml "Github action"
+[gh-workflow-image]: https://img.shields.io/github/actions/workflow/status/adonisjs/bodyparser/checks.yml?style=for-the-badge
+[gh-workflow-url]: https://github.com/adonisjs/bodyparser/actions/workflows/checks.yml "Github action"
 
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]:  "typescript"
@@ -32,6 +32,3 @@ AdonisJS Bodyparser is open-sourced software licensed under the [MIT license](LI
 
 [license-image]: https://img.shields.io/npm/l/@adonisjs/bodyparser?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md "license"
-
-[synk-image]: https://img.shields.io/snyk/vulnerabilities/github/adonisjs/bodyparser?label=Synk%20Vulnerabilities&style=for-the-badge
-[synk-url]: https://snyk.io/test/github/adonisjs/bodyparser?targetFile=package.json "synk"
