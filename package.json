@@ -5,10 +5,7 @@
   "main": "build/index.js",
   "type": "module",
   "files": [
-    "build/src",
-    "build/factories",
-    "build/index.d.ts",
-    "build/index.js"
+    "build"
   ],
   "engines": {
     "node": ">=18.16.0"
@@ -24,7 +21,7 @@
     "test": "cross-env NODE_DEBUG=adonisjs:bodyparser c8 npm run quick:test",
     "clean": "del-cli build",
     "typecheck": "tsc --noEmit",
-    "compile": "npm run lint && npm run clean && tsc",
+    "compile": "npm run lint && npm run clean && tsup-node",
     "build": "npm run compile",
     "release": "np",
     "version": "npm run build",
@@ -69,6 +66,7 @@
     "reflect-metadata": "^0.1.13",
     "supertest": "^6.3.3",
     "ts-node": "^10.9.1",
+    "tsup": "^7.2.0",
     "typescript": "^5.2.2",
     "undici": "^5.26.3"
   },
@@ -132,5 +130,18 @@
   "eslintConfig": {
     "extends": "@adonisjs/eslint-config/package"
   },
-  "prettier": "@adonisjs/prettier-config"
+  "prettier": "@adonisjs/prettier-config",
+  "tsup": {
+    "entry": [
+      "./index.ts",
+      "./src/types.ts",
+      "./src/bodyparser_middleware.ts",
+      "./factories/main.ts"
+    ],
+    "outDir": "./build",
+    "clean": true,
+    "format": "esm",
+    "dts": true,
+    "target": "esnext"
+  }
 }
