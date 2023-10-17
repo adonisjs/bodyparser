@@ -13,7 +13,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
+import { pathExists } from 'fs-extra'
 import { createServer } from 'node:http'
+import { readFile } from 'node:fs/promises'
 import {
   RequestFactory,
   ResponseFactory,
@@ -521,8 +523,8 @@ test.group('BodyParser Middleware | multipart', () => {
 
     assert.equal(text, 'request entity too large')
 
-    const file1 = await fs.adapter.pathExists(join(tmpdir(), '0.tmp'))
-    const file2 = await fs.adapter.pathExists(join(tmpdir(), '1.tmp'))
+    const file1 = await pathExists(join(tmpdir(), '0.tmp'))
+    const file2 = await pathExists(join(tmpdir(), '1.tmp'))
 
     assert.isTrue(file1)
     assert.isFalse(file2)
@@ -1005,7 +1007,7 @@ test.group('BodyParser Middleware | multipart', () => {
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
 
     const uploadedFileContents = await fs.contents('package.json')
-    const originalFileContents = await fs.adapter.readFile(packageFilePath, 'utf-8')
+    const originalFileContents = await readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
   })
 
@@ -1036,7 +1038,7 @@ test.group('BodyParser Middleware | multipart', () => {
     await supertest(server).post('/').attach('package', packageFilePath).expect(200)
 
     const uploadedFileContents = await fs.contents('myapp.json')
-    const originalFileContents = await fs.adapter.readFile(packageFilePath, 'utf-8')
+    const originalFileContents = await readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
   })
 

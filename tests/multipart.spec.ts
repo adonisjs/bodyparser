@@ -31,6 +31,8 @@ import {
   unicornNoExtFilePath,
 } from '../test_helpers/main.js'
 import string from '@poppinss/utils/string'
+import { ensureDir, pathExists } from 'fs-extra'
+import { createWriteStream } from 'node:fs'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)
@@ -219,7 +221,7 @@ test.group('Multipart', () => {
   })
 
   test('work fine when stream is piped to a destination', async ({ assert, fs }) => {
-    await fs.adapter.ensureDir(fs.basePath)
+    await ensureDir(fs.basePath)
     const SAMPLE_FILE_PATH = join(fs.basePath, './sample.json')
 
     let files: null | Record<string, MultipartFile | MultipartFile[]> = null
@@ -239,14 +241,14 @@ test.group('Multipart', () => {
 
           part.on('error', reject)
           part.on('end', resolve)
-          part.pipe(fs.adapter.createWriteStream(SAMPLE_FILE_PATH))
+          part.pipe(createWriteStream(SAMPLE_FILE_PATH))
         })
       })
 
       await multipart.process()
       files = ctx.request['__raw_files']
 
-      const hasFile = await fs.adapter.pathExists(SAMPLE_FILE_PATH)
+      const hasFile = await pathExists(SAMPLE_FILE_PATH)
       res.end(String(hasFile))
     })
 
