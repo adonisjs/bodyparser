@@ -490,7 +490,7 @@ test.group('BodyParser Middleware | multipart', () => {
     assert.deepEqual(body, { multiple: true })
   })
 
-  test('abort request when total bytes are over limit', async ({ assert, fs }) => {
+  test('abort request when total bytes are over limit', async ({ assert }) => {
     let index = 0
 
     const server = createServer(async (req, res) => {
