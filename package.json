@@ -21,7 +21,8 @@
     "test": "cross-env NODE_DEBUG=adonisjs:bodyparser c8 npm run quick:test",
     "clean": "del-cli build",
     "typecheck": "tsc --noEmit",
-    "compile": "npm run lint && npm run clean && tsup-node",
+    "compile": "npm run lint && npm run clean && tsup-node && npm run build:types",
+    "build:types": "tsc --emitDeclarationOnly --declaration",
     "build": "npm run compile",
     "release": "np",
     "version": "npm run build",
@@ -141,7 +142,7 @@
     "outDir": "./build",
     "clean": true,
     "format": "esm",
-    "dts": true,
+    "dts": false,
     "target": "esnext"
   }
 }
