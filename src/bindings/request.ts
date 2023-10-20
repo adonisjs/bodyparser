@@ -13,21 +13,7 @@ import { RuntimeException } from '@poppinss/utils'
 
 import debug from '../debug.js'
 import { MultipartFile } from '../multipart/file.js'
-import type { Multipart } from '../multipart/main.js'
 import type { FileValidationOptions } from '../types.js'
-
-/**
- * Extending request class with custom properties.
- */
-declare module '@adonisjs/http-server' {
-  export interface Request {
-    multipart: Multipart
-    __raw_files: Record<string, MultipartFile | MultipartFile[]>
-    allFiles(): Record<string, MultipartFile | MultipartFile[]>
-    file(key: string, options?: Partial<FileValidationOptions>): MultipartFile | null
-    files(key: string, options?: Partial<FileValidationOptions>): MultipartFile[]
-  }
-}
 
 /**
  * Updates the validation options on the file instance
