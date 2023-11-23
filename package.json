@@ -36,13 +36,13 @@
     "quick:test": "node --loader=ts-node/esm bin/test.ts"
   },
   "devDependencies": {
-    "@adonisjs/application": "^8.0.0-0",
-    "@adonisjs/encryption": "^5.1.2-3",
+    "@adonisjs/application": "^8.0.0-2",
+    "@adonisjs/encryption": "^5.1.2-4",
     "@adonisjs/eslint-config": "^1.1.9",
-    "@adonisjs/events": "^9.0.0-0",
-    "@adonisjs/fold": "^9.9.3-10",
-    "@adonisjs/http-server": "^7.0.0-0",
-    "@adonisjs/logger": "^5.4.2-6",
+    "@adonisjs/events": "^9.0.0-1",
+    "@adonisjs/fold": "^9.9.3-11",
+    "@adonisjs/http-server": "^7.0.0-2",
+    "@adonisjs/logger": "^5.4.2-7",
     "@adonisjs/prettier-config": "^1.1.9",
     "@adonisjs/tsconfig": "^1.1.9",
     "@commitlint/cli": "^18.4.3",
@@ -88,7 +88,7 @@
     "raw-body": "^2.5.2"
   },
   "peerDependencies": {
-    "@adonisjs/http-server": "^7.0.0-0"
+    "@adonisjs/http-server": "^7.0.0-2"
   },
   "keywords": [
     "adonisjs",
