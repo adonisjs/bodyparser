@@ -24,7 +24,7 @@ import {
 import { Multipart } from '../src/multipart/main.js'
 import { MultipartFile } from '../src/multipart/file.js'
 import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.js'
-import { packageFilePath, packageFileSize, unicornFilePath } from '../test_helpers/main.js'
+import { packageFilePath, packageFileSize, unicornFilePath } from '../tests_helpers/main.js'
 
 test.group('BodyParser Middleware', () => {
   test('do not parse get requests', async ({ assert }) => {

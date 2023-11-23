@@ -5,7 +5,10 @@
   "main": "build/index.js",
   "type": "module",
   "files": [
-    "build"
+    "build",
+    "!build/bin",
+    "!build/tests",
+    "!build/tests_helpers"
   ],
   "engines": {
     "node": ">=18.16.0"
@@ -21,8 +24,8 @@
     "test": "cross-env NODE_DEBUG=adonisjs:bodyparser c8 npm run quick:test",
     "clean": "del-cli build",
     "typecheck": "tsc --noEmit",
-    "compile": "npm run lint && npm run clean && tsup-node && npm run build:types",
-    "build:types": "tsc --emitDeclarationOnly --declaration",
+    "precompile": "npm run lint && npm run clean",
+    "compile": "tsup-node && tsc --emitDeclarationOnly --declaration",
     "build": "npm run compile",
     "release": "np",
     "version": "npm run build",
@@ -143,6 +146,7 @@
     "clean": true,
     "format": "esm",
     "dts": false,
+    "sourcemap": true,
     "target": "esnext"
   }
 }

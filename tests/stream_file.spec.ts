@@ -12,7 +12,7 @@ import { join } from 'node:path'
 import { test } from '@japa/runner'
 import { fileURLToPath } from 'node:url'
 
-import { retry } from '../test_helpers/main.js'
+import { retry } from '../tests_helpers/main.js'
 import { streamFile } from '../src/multipart/stream_file.js'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)

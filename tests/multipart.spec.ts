@@ -12,6 +12,9 @@ import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
 import { fileURLToPath } from 'node:url'
+import { createWriteStream } from 'node:fs'
+import string from '@poppinss/utils/string'
+import { ensureDir, pathExists } from 'fs-extra'
 import fileGenerator from '@poppinss/file-generator'
 import {
   RequestFactory,
@@ -29,10 +32,7 @@ import {
   packageFileSize,
   unicornFilePath,
   unicornNoExtFilePath,
-} from '../test_helpers/main.js'
-import string from '@poppinss/utils/string'
-import { ensureDir, pathExists } from 'fs-extra'
-import { createWriteStream } from 'node:fs'
+} from '../tests_helpers/main.js'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)
