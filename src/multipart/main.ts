@@ -8,20 +8,20 @@
  */
 
 // @ts-expect-error
-import multiparty from "@poppinss/multiparty";
+import multiparty from '@poppinss/multiparty'
 
-import bytes from "bytes";
-import { Exception } from "@poppinss/utils";
-import type { HttpContext } from "@adonisjs/http-server";
+import bytes from 'bytes'
+import { Exception } from '@poppinss/utils'
+import type { HttpContext } from '@adonisjs/http-server'
 
-import debug from "../debug.js";
-import { FormFields } from "../form_fields.js";
-import { PartHandler } from "./part_handler.js";
+import debug from '../debug.js'
+import { FormFields } from '../form_fields.js'
+import { PartHandler } from './part_handler.js'
 import type {
   MultipartStream,
   FileValidationOptions,
   PartHandler as PartHandlerType,
-} from "../types.js";
+} from '../types.js'
 
 /**
  * Multipart class offers a low level API to interact the incoming
@@ -29,87 +29,85 @@ import type {
  * write files to s3 without saving them to the disk first.
  */
 export class Multipart {
-  #ctx: HttpContext;
+  #ctx: HttpContext
   #config: Partial<{
-    limit: string | number;
-    fieldsLimit: string | number;
-    maxFields: number;
-    convertEmptyStringsToNull: boolean;
-  }>;
+    limit: string | number
+    fieldsLimit: string | number
+    maxFields: number
+    convertEmptyStringsToNull: boolean
+  }>
 
   /**
    * The registered handlers to handle the file uploads
    */
   #handlers: {
     [key: string]: {
-      handler: PartHandlerType;
-      options: Partial<FileValidationOptions & { deferValidations: boolean }>;
-    };
-  } = {};
+      handler: PartHandlerType
+      options: Partial<FileValidationOptions & { deferValidations: boolean }>
+    }
+  } = {}
 
   /**
    * Collected fields from the multipart stream
    */
-  #fields: FormFields;
+  #fields: FormFields
 
   /**
    * Collected files from the multipart stream. Files are only collected
    * when there is an attached listener for a given file.
    */
-  #files: FormFields;
+  #files: FormFields
 
   /**
    * We track the finishing of `this.onFile` async handlers
    * to make sure that `process` promise resolves for all
    * handlers to finish.
    */
-  #pendingHandlers = 0;
+  #pendingHandlers = 0
 
   /**
    * The reference to underlying multiparty form
    */
-  #form: multiparty.Form;
+  #form: multiparty.Form
 
   /**
    * Total size limit of the multipart stream. If it goes beyond
    * the limit, then an exception will be raised.
    */
-  #upperLimit?: number;
+  #upperLimit?: number
 
   /**
    * Total size in bytes for all the fields (not the files)
    */
-  #maxFieldsSize?: number;
+  #maxFieldsSize?: number
 
   /**
    * A track of total number of file bytes processed so far
    */
-  #processedBytes: number = 0;
+  #processedBytes: number = 0
 
   /**
    * The current state of the multipart form handler
    */
-  state: "idle" | "processing" | "error" | "success" = "idle";
+  state: 'idle' | 'processing' | 'error' | 'success' = 'idle'
 
   constructor(
     ctx: HttpContext,
     config: Partial<{
-      limit: string | number;
-      fieldsLimit: string | number;
-      maxFields: number;
-      convertEmptyStringsToNull: boolean;
-    }> = {},
+      limit: string | number
+      fieldsLimit: string | number
+      maxFields: number
+      convertEmptyStringsToNull: boolean
+    }> = {}
   ) {
-    this.#ctx = ctx;
-    this.#config = config;
+    this.#ctx = ctx
+    this.#config = config
     this.#fields = new FormFields({
-      convertEmptyStringsToNull:
-        this.#config.convertEmptyStringsToNull === true,
-    });
+      convertEmptyStringsToNull: this.#config.convertEmptyStringsToNull === true,
+    })
     this.#files = new FormFields({
-      convertEmptyStringsToNull:
-        this.#config.convertEmptyStringsToNull === true,
-    });
+      convertEmptyStringsToNull: this.#config.convertEmptyStringsToNull === true,
+    })
   }
 
   /**
@@ -117,7 +115,7 @@ export class Multipart {
    * consumed along with all handlers execution
    */
   #isClosed(): boolean {
-    return this.#form["flushing"] <= 0 && this.#pendingHandlers <= 0;
+    return this.#form['flushing'] <= 0 && this.#pendingHandlers <= 0
   }
 
   /**
@@ -125,7 +123,7 @@ export class Multipart {
    * find the handler
    */
   #getHandlerName(name: string): string {
-    return name.replace(/\[\d*\]/, "");
+    return name.replace(/\[\d*\]/, '')
   }
 
   /**
@@ -134,15 +132,15 @@ export class Multipart {
    */
   #validateProcessedBytes(chunkLength: number) {
     if (!this.#upperLimit) {
-      return;
+      return
     }
 
-    this.#processedBytes += chunkLength;
+    this.#processedBytes += chunkLength
     if (this.#processedBytes > this.#upperLimit) {
-      return new Exception("request entity too large", {
-        code: "E_REQUEST_ENTITY_TOO_LARGE",
+      return new Exception('request entity too large', {
+        code: 'E_REQUEST_ENTITY_TOO_LARGE',
         status: 413,
-      });
+      })
     }
   }
 
@@ -158,78 +156,78 @@ export class Multipart {
      * and empty name is more of a bad client scanerio.
      */
     if (!part.name || !part.filename) {
-      part.resume();
-      return;
+      part.resume()
+      return
     }
 
-    const name = this.#getHandlerName(part.name);
+    const name = this.#getHandlerName(part.name)
 
     /**
      * Skip, if their is no handler to consume the part.
      */
-    const handler = this.#handlers[name] || this.#handlers["*"];
+    const handler = this.#handlers[name] || this.#handlers['*']
     if (!handler) {
-      debug('skipping multipart part as there are no handlers "%s"', name);
-      part.resume();
-      return;
+      debug('skipping multipart part as there are no handlers "%s"', name)
+      part.resume()
+      return
     }
 
-    debug('processing multipart part "%s"', name);
-    this.#pendingHandlers++;
+    debug('processing multipart part "%s"', name)
+    this.#pendingHandlers++
 
     /**
      * Instantiate the part handler
      */
-    const partHandler = new PartHandler(part, handler.options);
-    partHandler.begin();
+    const partHandler = new PartHandler(part, handler.options)
+    partHandler.begin()
 
     /**
      * Track the file instance created by the part handler. The end user
      * must be able to access these files.
      */
-    this.#files.add(partHandler.file.fieldName, partHandler.file);
-    part.file = partHandler.file;
+    this.#files.add(partHandler.file.fieldName, partHandler.file)
+    part.file = partHandler.file
 
     try {
       const response = await handler.handler(part, async (line) => {
-        if (this.state !== "processing") {
-          return;
+        if (this.state !== 'processing') {
+          return
         }
 
-        const lineLength = line.length;
+        const lineLength = line.length
 
         /**
          * Keeping an eye on total bytes processed so far and shortcircuit
          * request when more than expected bytes have been received.
          */
-        const error = this.#validateProcessedBytes(lineLength);
+        const error = this.#validateProcessedBytes(lineLength)
         if (error) {
-          part.emit("error", error);
-          this.abort(error);
-          return;
+          part.emit('error', error)
+          this.abort(error)
+          return
         }
 
         try {
-          await partHandler.reportProgress(line, lineLength);
+          await partHandler.reportProgress(line, lineLength)
         } catch (err) {
           this.#ctx.logger.fatal(
-            'Unhandled multipart stream error. Make sure to handle "error" events for all manually processed streams',
-          );
+            'Unhandled multipart stream error. Make sure to handle "error" events for all manually processed streams'
+          )
         }
-      });
+      })
 
       /**
        * Stream consumed successfully
        */
-      await partHandler.reportSuccess(response || {});
+      await partHandler.reportSuccess(response || {})
     } catch (error) {
       /**
        * The stream handler reported an exception
        */
-      await partHandler.reportError(error);
+      await partHandler.reportError(error)
     }
 
-    this.#pendingHandlers--;
+    this.#pendingHandlers--
   }
 
   /**
@@ -237,48 +235,44 @@ export class Multipart {
    */
   #handleField(key: string, value: string) {
     if (!key) {
-      return;
+      return
     }
 
-    this.#fields.add(key, value);
+    this.#fields.add(key, value)
   }
 
   /**
    * Processes the user config and computes the `upperLimit` value from
    * it.
    */
-  #processConfig(
-    config?: Partial<{ limit: string | number; maxFields: number }>,
-  ) {
-    this.#config = Object.assign(this.#config, config);
+  #processConfig(config?: Partial<{ limit: string | number; maxFields: number }>) {
+    this.#config = Object.assign(this.#config, config)
 
     /**
      * Getting bytes from the `config.fieldsLimit` option, which can
      * also be a string.
      */
     this.#maxFieldsSize =
-      typeof this.#config!.fieldsLimit === "string"
+      typeof this.#config!.fieldsLimit === 'string'
         ? bytes(this.#config.fieldsLimit)
-        : this.#config!.fieldsLimit;
+        : this.#config!.fieldsLimit
 
     /**
      * Getting bytes from the `config.limit` option, which can
      * also be a string
      */
     this.#upperLimit =
-      typeof this.#config!.limit === "string"
-        ? bytes(this.#config!.limit)
-        : this.#config!.limit;
+      typeof this.#config!.limit === 'string' ? bytes(this.#config!.limit) : this.#config!.limit
   }
 
   /**
    * Mark the process as finished
    */
-  #finish(newState: "error" | "success") {
-    if (this.state === "idle" || this.state === "processing") {
-      this.state = newState;
-      (this.#ctx.request as any)["__raw_files"] = this.#files.get();
-      this.#ctx.request.setInitialBody(this.#fields.get());
+  #finish(newState: 'error' | 'success') {
+    if (this.state === 'idle' || this.state === 'processing') {
+      this.state = newState
+      ;(this.#ctx.request as any)['__raw_files'] = this.#files.get()
+      this.#ctx.request.setInitialBody(this.#fields.get())
     }
   }
 
@@ -298,92 +292,90 @@ export class Multipart {
   onFile(
     name: string,
     options: Partial<FileValidationOptions & { deferValidations: boolean }>,
-    handler: PartHandlerType,
+    handler: PartHandlerType
   ): this {
-    this.#handlers[name] = { handler, options };
-    return this;
+    this.#handlers[name] = { handler, options }
+    return this
   }
 
   /**
    * Abort request by emitting error
    */
   abort(error: any): void {
-    this.#form.emit("error", error);
+    this.#form.emit('error', error)
   }
 
   /**
    * Process the request by going all the file and field
    * streams.
    */
-  process(
-    config?: Partial<{ limit: string | number; maxFields: number }>,
-  ): Promise<void> {
+  process(config?: Partial<{ limit: string | number; maxFields: number }>): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.state !== "idle") {
+      if (this.state !== 'idle') {
         reject(
-          new Exception("multipart stream has already been consumed", {
-            code: "E_RUNTIME_EXCEPTION",
-          }),
-        );
-        return;
+          new Exception('multipart stream has already been consumed', {
+            code: 'E_RUNTIME_EXCEPTION',
+          })
+        )
+        return
       }
 
-      this.state = "processing";
-      this.#processConfig(config);
+      this.state = 'processing'
+      this.#processConfig(config)
 
       this.#form = new multiparty.Form({
         maxFields: this.#config!.maxFields,
         maxFieldsSize: this.#maxFieldsSize,
-      });
+      })
 
-      debug("processing multipart body");
+      debug('processing multipart body')
 
       /**
        * Raise error when form encounters an
        * error
        */
-      this.#form.on("error", (error: Error) => {
-        this.#finish("error");
+      this.#form.on('error', (error: Error) => {
+        this.#finish('error')
 
         process.nextTick(() => {
           if (this.#ctx.request.request.readable) {
-            this.#ctx.request.request.resume();
+            this.#ctx.request.request.resume()
           }
 
           if (error.message.match(/stream ended unexpectedly/)) {
             reject(
-              new Exception("Invalid multipart request", {
+              new Exception('Invalid multipart request', {
                 status: 400,
-                code: "E_INVALID_MULTIPART_REQUEST",
-              }),
-            );
+                code: 'E_INVALID_MULTIPART_REQUEST',
+              })
+            )
           } else if (error.message.match(/maxFields [0-9]+ exceeded/)) {
             reject(
-              new Exception("Fields length limit exceeded", {
+              new Exception('Fields length limit exceeded', {
                 status: 413,
-                code: "E_REQUEST_ENTITY_TOO_LARGE",
-              }),
-            );
+                code: 'E_REQUEST_ENTITY_TOO_LARGE',
+              })
+            )
           } else if (error.message.match(/maxFieldsSize [0-9]+ exceeded/)) {
             reject(
-              new Exception("Fields size in bytes exceeded", {
+              new Exception('Fields size in bytes exceeded', {
                 status: 413,
-                code: "E_REQUEST_ENTITY_TOO_LARGE",
-              }),
-            );
+                code: 'E_REQUEST_ENTITY_TOO_LARGE',
+              })
+            )
           } else {
-            reject(error);
+            reject(error)
           }
-        });
-      });
+        })
+      })
 
       /**
        * Process each part at a time and also resolve the
        * promise when all parts are consumed and processed
        * by their handlers
        */
-      this.#form.on("part", async (part: MultipartStream) => {
-        await this.#handlePart(part);
+      this.#form.on('part', async (part: MultipartStream) => {
+        await this.#handlePart(part)
 
         /**
          * When a stream finishes before the handler, the close `event`
@@ -391,34 +383,34 @@ export class Multipart {
          * check and resolve from here
          */
         if (this.#isClosed()) {
-          this.#finish("success");
-          resolve();
+          this.#finish('success')
+          resolve()
         }
-      });
+      })
 
       /**
        * Listen for fields
        */
-      this.#form.on("field", (key: string, value: any) => {
+      this.#form.on('field', (key: string, value: any) => {
         try {
-          this.#handleField(key, value);
+          this.#handleField(key, value)
         } catch (error) {
-          this.abort(error);
+          this.abort(error)
         }
-      });
+      })
 
       /**
        * Resolve promise on close, when all internal
        * file handlers are done processing files
        */
-      this.#form.on("close", () => {
+      this.#form.on('close', () => {
         if (this.#isClosed()) {
-          this.#finish("success");
-          resolve();
+          this.#finish('success')
+          resolve()
         }
-      });
+      })
 
-      this.#form.parse(this.#ctx.request.request);
-    });
+      this.#form.parse(this.#ctx.request.request)
+    })
   }
 }
