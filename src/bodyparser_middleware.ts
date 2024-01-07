@@ -116,7 +116,7 @@ export class BodyParserMiddleware {
      * Only process for whitelisted nodes
      */
     if (!this.#config.allowedMethods.includes(requestMethod)) {
-      debug('skipping HTTP request method "%s", URI: "%s"', requestMethod, requestUrl)
+      debug('skipping HTTP request "%s:%s"', requestMethod, requestUrl)
       return next()
     }
 
@@ -128,7 +128,7 @@ export class BodyParserMiddleware {
      * clients with missing headers.
      */
     if (!ctx.request.hasBody()) {
-      debug('skipping as request has no body, URI: "%s"', requestUrl)
+      debug('skipping as request has no body "%s:%s"', requestMethod, requestUrl)
       return next()
     }
 
@@ -138,7 +138,7 @@ export class BodyParserMiddleware {
     const multipartConfig = this.#getConfigFor('multipart')
 
     if (this.#isType(ctx.request, multipartConfig.types)) {
-      debug('parsing multipart body, URI: "%s"', requestUrl)
+      debug('detected multipart request "%s:%s"', requestMethod, requestUrl)
 
       ctx.request.multipart = new Multipart(ctx, {
         maxFields: multipartConfig.maxFields,
@@ -151,6 +151,7 @@ export class BodyParserMiddleware {
        * Skip parsing when `autoProcess` is disabled
        */
       if (multipartConfig.autoProcess === false) {
+        debug('skipping auto processing of multipart request "%s:%s"', requestMethod, requestUrl)
         return next()
       }
 
@@ -159,18 +160,20 @@ export class BodyParserMiddleware {
        * processManually route patterns.
        */
       if (ctx.route && multipartConfig.processManually.includes(ctx.route.pattern)) {
+        debug('skipping auto processing of multipart request "%s:%s"', requestMethod, requestUrl)
         return next()
       }
 
       /**
-       * Skip parsing when the current route matches is not part of auto processing
-       * array
+       * Skip parsing when the current route matches one of the "autoProcess"
+       * patterns
        */
       if (
         ctx.route &&
         Array.isArray(multipartConfig.autoProcess) &&
         !multipartConfig.autoProcess.includes(ctx.route.pattern)
       ) {
+        debug('skipping auto processing of multipart request "%s:%s"', requestMethod, requestUrl)
         return next()
       }
 
@@ -179,6 +182,7 @@ export class BodyParserMiddleware {
        * deferred for the end user when they will access file using `request.file`
        * method.
        */
+      debug('auto processing multipart request "%s:%s"', requestMethod, requestUrl)
       ctx.request.multipart.onFile('*', { deferValidations: true }, async (part, reporter) => {
         /**
          * We need to abort the main request when we are unable to process any
@@ -207,7 +211,7 @@ export class BodyParserMiddleware {
      */
     const formConfig = this.#getConfigFor('form')
     if (this.#isType(ctx.request, formConfig.types)) {
-      debug('parsing urlencoded form, URI: "%s"', requestUrl)
+      debug('detected urlencoded request "%s:%s"', requestMethod, requestUrl)
 
       try {
         const { parsed, raw } = await parseForm(ctx.request.request, formConfig)
@@ -224,7 +228,7 @@ export class BodyParserMiddleware {
      */
     const jsonConfig = this.#getConfigFor('json')
     if (this.#isType(ctx.request, jsonConfig.types)) {
-      debug('parsing JSON body, URI: "%s"', requestUrl)
+      debug('detected JSON request "%s:%s"', requestMethod, requestUrl)
 
       try {
         const { parsed, raw } = await parseJSON(ctx.request.request, jsonConfig)
@@ -241,7 +245,7 @@ export class BodyParserMiddleware {
      */
     const rawConfig = this.#getConfigFor('raw')
     if (this.#isType(ctx.request, rawConfig.types)) {
-      debug('parsing raw body, URI: "%s"', requestUrl)
+      debug('parsing raw body "%s:%s"', requestMethod, requestUrl)
 
       try {
         ctx.request.setInitialBody({})

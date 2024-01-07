@@ -88,7 +88,7 @@ export async function parseJSON(req: IncomingMessage, options: Partial<BodyParse
    * Test JSON body to ensure it is valid JSON in strict mode
    */
   if (strict && !strictJSONReg.test(requestBody)) {
-    throw new Exception('invalid JSON, only supports object and array', { status: 422 })
+    throw new Exception('Invalid JSON, only supports object and array', { status: 422 })
   }
 
   try {

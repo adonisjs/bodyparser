@@ -179,7 +179,7 @@ test.group('JSON parser', () => {
       .send('"foo"')
       .expect(422)
 
-    assert.equal(text, 'invalid JSON, only supports object and array')
+    assert.equal(text, 'Invalid JSON, only supports object and array')
   })
 
   test('convert empty string to null', async ({ assert }) => {
