@@ -8,7 +8,7 @@
 This repo provides the BodyParser middleware to process AdonisJS HTTP request body. The middleware has parsers for **JSON**, **URLencoded form**, and **Multipart** content types.
 
 ## Official Documentation
-The documentation is available on the [AdonisJS website](https://docs.adonisjs.com/guides/bodyparser_middleware)
+The documentation is available on the [AdonisJS website](https://docs.adonisjs.com/guides/bodyparser-middleware)
 
 ## Contributing
 One of the primary goals of AdonisJS is to have a vibrant community of users and contributors who believes in the principles of the framework.
