@@ -140,6 +140,13 @@ export class BodyParserMiddleware {
     if (this.#isType(ctx.request, multipartConfig.types)) {
       debug('detected multipart request "%s:%s"', requestMethod, requestUrl)
 
+      if (!multipartConfig.enabled) {
+        throw new Exception('request content-type not supported', {
+          status: 415,
+          code: 'E_REQUEST_UNSUPPORTED_MEDIA_TYPE',
+        })
+      }
+
       ctx.request.multipart = new Multipart(ctx, {
         maxFields: multipartConfig.maxFields,
         limit: multipartConfig.limit,

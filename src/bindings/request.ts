@@ -90,7 +90,7 @@ Request.macro(
 Request.macro('allFiles', function allFiles(this: Request) {
   if (!this.__raw_files) {
     throw new RuntimeException(
-      'Cannot read files. Make sure the bodyparser middleware is registered'
+      'Cannot read files. Make sure the bodyparser middleware is registered and enabled'
     )
   }
 

@@ -48,6 +48,7 @@ export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig
     },
 
     multipart: {
+      enabled: true,
       autoProcess: true,
       processManually: [],
       encoding: 'utf-8',
