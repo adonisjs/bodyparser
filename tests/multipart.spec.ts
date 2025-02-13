@@ -959,7 +959,7 @@ test.group('Multipart', () => {
 
     assert.isTrue(report.isValid)
     assert.equal(report.state, 'consumed')
-    assert.isAbove(report.size, string.bytes.parse('10mb'))
+    assert.isAbove(report.size, string.bytes.parse('10mb')!)
   })
 
   test('process large xlsx file', async ({ assert }) => {

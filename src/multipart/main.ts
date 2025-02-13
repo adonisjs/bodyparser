@@ -254,7 +254,7 @@ export class Multipart {
      */
     this.#maxFieldsSize =
       typeof this.#config!.fieldsLimit === 'string'
-        ? bytes(this.#config.fieldsLimit)
+        ? bytes(this.#config.fieldsLimit)!
         : this.#config!.fieldsLimit
 
     /**
@@ -262,7 +262,7 @@ export class Multipart {
      * also be a string
      */
     this.#upperLimit =
-      typeof this.#config!.limit === 'string' ? bytes(this.#config!.limit) : this.#config!.limit
+      typeof this.#config!.limit === 'string' ? bytes(this.#config!.limit)! : this.#config!.limit
   }
 
   /**

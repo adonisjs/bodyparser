@@ -37,7 +37,7 @@ export class SizeValidator {
     if (this.#maximumAllowedLimit) {
       this.#bytesLimit =
         typeof this.#maximumAllowedLimit === 'string'
-          ? bytes(this.#maximumAllowedLimit)
+          ? bytes(this.#maximumAllowedLimit)!
           : this.#maximumAllowedLimit
     }
   }
