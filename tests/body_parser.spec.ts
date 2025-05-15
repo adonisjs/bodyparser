@@ -21,6 +21,8 @@ import {
   ResponseFactory,
   HttpContextFactory,
 } from '@adonisjs/http-server/factories'
+import { AppFactory } from '@adonisjs/application/factories'
+
 import { Multipart } from '../src/multipart/main.js'
 import { MultipartFile } from '../src/multipart/file.js'
 import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.js'
@@ -1338,5 +1340,40 @@ test.group('BodyParser Middleware | multipart', () => {
       .field('username', '')
 
     assert.deepEqual(body, { username: null })
+  })
+
+  test('merge request fields and files', async ({ assert }) => {
+    const app = new AppFactory().create(new URL('./', import.meta.url))
+    app.rcContents({
+      experimental: {
+        mergeMultipartFieldsAndFiles: true,
+      },
+    })
+    await app.init()
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory()
+        .withFeatureFlags(app.experimentalFlags)
+        .create()
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify(request.all()))
+      })
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('packages[0].json_file', packageFilePath)
+      .field('packages[0].name', '@adonisjs/bodyparser')
+
+    assert.isArray(body!.packages)
+    assert.equal(body!.packages[0].name, '@adonisjs/bodyparser')
+    assert.isTrue(body!.packages[0].json_file.isValid)
+    assert.equal(body!.packages[0].json_file.state, 'consumed')
+    assert.equal(body!.packages[0].json_file.size, packageFileSize)
   })
 })

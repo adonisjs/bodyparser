@@ -37,6 +37,10 @@ export class Multipart {
     convertEmptyStringsToNull: boolean
   }>
 
+  #featureFlags: {
+    mergeFieldsAndFiles: boolean
+  }
+
   /**
    * The registered handlers to handle the file uploads
    */
@@ -98,10 +102,19 @@ export class Multipart {
       fieldsLimit: string | number
       maxFields: number
       convertEmptyStringsToNull: boolean
-    }> = {}
+    }> = {},
+    /**
+     * Will be enabled in the next major release
+     */
+    featureFlags: {
+      mergeFieldsAndFiles: boolean
+    } = {
+      mergeFieldsAndFiles: false,
+    }
   ) {
     this.#ctx = ctx
     this.#config = config
+    this.#featureFlags = featureFlags
     this.#fields = new FormFields({
       convertEmptyStringsToNull: this.#config.convertEmptyStringsToNull === true,
     })
@@ -186,6 +199,9 @@ export class Multipart {
      * must be able to access these files.
      */
     this.#files.add(partHandler.file.fieldName, partHandler.file)
+    if (this.#featureFlags.mergeFieldsAndFiles) {
+      this.#fields.add(partHandler.file.fieldName, partHandler.file)
+    }
     part.file = partHandler.file
 
     try {

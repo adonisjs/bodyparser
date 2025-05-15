@@ -8,6 +8,8 @@
  */
 
 import lodash from '@poppinss/utils/lodash'
+import type { FeatureFlags } from '@adonisjs/application'
+import type { ExperimentalFlagsList } from '@adonisjs/application/types'
 
 import { defineConfig } from '../src/define_config.js'
 import { BodyParserMiddleware } from '../src/bodyparser_middleware.js'
@@ -18,6 +20,7 @@ import type { BodyParserConfig, BodyParserOptionalConfig } from '../src/types.js
  */
 export class BodyParserMiddlewareFactory {
   #config: BodyParserConfig = defineConfig({})
+  #featureFlags?: FeatureFlags<ExperimentalFlagsList>
 
   #getConfig(): BodyParserConfig {
     return this.#config
@@ -28,7 +31,15 @@ export class BodyParserMiddlewareFactory {
     return this
   }
 
+  /**
+   * Specify the feature flags to share with the bodyparser
+   */
+  withFeatureFlags(featureFlags: FeatureFlags<ExperimentalFlagsList>) {
+    this.#featureFlags = featureFlags
+    return this
+  }
+
   create() {
-    return new BodyParserMiddleware(this.#getConfig())
+    return new BodyParserMiddleware(this.#getConfig(), this.#featureFlags)
   }
 }

@@ -13,6 +13,8 @@ import { join, isAbsolute } from 'node:path'
 import { createId } from '@paralleldrive/cuid2'
 import type { HttpContext } from '@adonisjs/http-server'
 import type { NextFn } from '@adonisjs/http-server/types'
+import type { FeatureFlags } from '@adonisjs/application'
+import type { ExperimentalFlagsList } from '@adonisjs/application/types'
 
 import debug from './debug.js'
 import { parseForm } from './parsers/form.js'
@@ -37,8 +39,15 @@ export class BodyParserMiddleware {
    */
   #config: BodyParserConfig
 
-  constructor(config: BodyParserConfig) {
+  /**
+   * Feature flags to decide how to process multipart files and
+   * fields
+   */
+  #featureFlags?: FeatureFlags<ExperimentalFlagsList>
+
+  constructor(config: BodyParserConfig, featureFlags?: FeatureFlags<ExperimentalFlagsList>) {
     this.#config = config
+    this.#featureFlags = featureFlags
     debug('using config %O', this.#config)
   }
 
@@ -140,12 +149,18 @@ export class BodyParserMiddleware {
     if (this.#isType(ctx.request, multipartConfig.types)) {
       debug('detected multipart request "%s:%s"', requestMethod, requestUrl)
 
-      ctx.request.multipart = new Multipart(ctx, {
-        maxFields: multipartConfig.maxFields,
-        limit: multipartConfig.limit,
-        fieldsLimit: multipartConfig.fieldsLimit,
-        convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
-      })
+      ctx.request.multipart = new Multipart(
+        ctx,
+        {
+          maxFields: multipartConfig.maxFields,
+          limit: multipartConfig.limit,
+          fieldsLimit: multipartConfig.fieldsLimit,
+          convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
+        },
+        {
+          mergeFieldsAndFiles: this.#featureFlags?.enabled('mergeMultipartFieldsAndFiles') ?? false,
+        }
+      )
 
       /**
        * Skip parsing when `autoProcess` is disabled
