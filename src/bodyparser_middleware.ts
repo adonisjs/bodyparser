@@ -9,7 +9,6 @@
 
 import { tmpdir } from 'node:os'
 import { join, isAbsolute } from 'node:path'
-import { createId } from '@paralleldrive/cuid2'
 import { Exception } from '@poppinss/utils/exception'
 import type { HttpContext } from '@adonisjs/http-server'
 import type { NextFn } from '@poppinss/middleware/types'
@@ -106,7 +105,7 @@ export class BodyParserMiddleware {
       return isAbsolute(tmpPath) ? tmpPath : join(tmpdir(), tmpPath)
     }
 
-    return join(tmpdir(), createId())
+    return join(tmpdir(), crypto.randomUUID())
   }
 
   /**
