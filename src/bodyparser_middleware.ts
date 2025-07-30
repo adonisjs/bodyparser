@@ -38,15 +38,8 @@ export class BodyParserMiddleware {
    */
   #config: BodyParserConfig
 
-  /**
-   * Feature flags to decide how to process multipart files and
-   * fields
-   */
-  #featureFlags?: FeatureFlags<ExperimentalFlagsList>
-
-  constructor(config: BodyParserConfig, featureFlags?: FeatureFlags<ExperimentalFlagsList>) {
+  constructor(config: BodyParserConfig, _featureFlags?: FeatureFlags<ExperimentalFlagsList>) {
     this.#config = config
-    this.#featureFlags = featureFlags
     debug('using config %O', this.#config)
   }
 
@@ -156,9 +149,7 @@ export class BodyParserMiddleware {
           fieldsLimit: multipartConfig.fieldsLimit,
           convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
         },
-        {
-          mergeFieldsAndFiles: this.#featureFlags?.enabled('mergeMultipartFieldsAndFiles') ?? false,
-        }
+        {}
       )
 
       /**
