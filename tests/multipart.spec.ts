@@ -397,7 +397,7 @@ test.group('Multipart', () => {
     assert.isTrue(files!.package instanceof MultipartFile && files!.package.isValid)
     assert.equal(files!.package instanceof MultipartFile && files!.package.size, packageFileSize)
     assert.equal(files!.package instanceof MultipartFile && files!.package.state, 'consumed')
-    assert.deepEqual(fields, { name: 'virk' })
+    assert.deepEqual(fields, { name: 'virk', ...files! })
   })
 
   test('FIELDS: raise error when process is invoked multiple times', async ({ assert }) => {
@@ -1031,13 +1031,7 @@ test.group('Multipart', () => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()
       const ctx = new HttpContextFactory().merge({ request, response }).create()
-      const multipart = new Multipart(
-        ctx,
-        { maxFields: 1000, limit: 8000 },
-        {
-          mergeFieldsAndFiles: true,
-        }
-      )
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 }, {})
 
       multipart.onFile('*', {}, async (part, reporter) => {
         part.on('data', reporter)
@@ -1066,64 +1060,6 @@ test.group('Multipart', () => {
     assert.isTrue(body!.packages[0].json_file.isValid)
     assert.equal(body!.packages[0].json_file.state, 'consumed')
     assert.equal(body!.packages[0].json_file.size, packageFileSize)
-
-    assert.isArray(files!.packages)
-    assert.notProperty(files!.packages[0], 'name')
-    assert.isTrue(files!.packages[0].json_file.isValid)
-    assert.equal(files!.packages[0].json_file.state, 'consumed')
-    assert.equal(files!.packages[0].json_file.size, packageFileSize)
-  })
-
-  test('do not merge fields and files "mergeFieldsAndFiles" flag is enabled', async ({
-    assert,
-  }) => {
-    const stack: string[] = []
-
-    let body: null | Record<
-      string,
-      {
-        name: string
-        json_file: MultipartFile
-      }[]
-    > = null
-    let files: null | Record<
-      string,
-      {
-        json_file: MultipartFile
-      }[]
-    > = null
-
-    const server = createServer(async (req, res) => {
-      const request = new RequestFactory().merge({ req, res }).create()
-      const response = new ResponseFactory().merge({ req, res }).create()
-      const ctx = new HttpContextFactory().merge({ request, response }).create()
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 })
-
-      multipart.onFile('*', {}, async (part, reporter) => {
-        part.on('data', reporter)
-
-        stack.push('before')
-        part.resume()
-        await sleep(100)
-        stack.push('after')
-      })
-
-      await multipart.process()
-      body = ctx.request.all()
-      files = ctx.request['__raw_files'] as any
-      stack.push('ended')
-      res.end()
-    })
-
-    await supertest(server)
-      .post('/')
-      .attach('packages[0].json_file', packageFilePath)
-      .field('packages[0].name', '@adonisjs/bodyparser')
-    assert.deepEqual(stack, ['before', 'after', 'ended'])
-
-    assert.isArray(body!.packages)
-    assert.equal(body!.packages[0].name, '@adonisjs/bodyparser')
-    assert.notProperty(body!.packages[0], 'json_file')
 
     assert.isArray(files!.packages)
     assert.notProperty(files!.packages[0], 'name')

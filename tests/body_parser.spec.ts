@@ -541,7 +541,12 @@ test.group('BodyParser Middleware | multipart', () => {
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.end(JSON.stringify(ctx.request.all()))
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            files: ctx.request.allFiles(),
+          })
+        )
       })
     })
 
@@ -550,7 +555,7 @@ test.group('BodyParser Middleware | multipart', () => {
       .attach('package', packageFilePath)
       .field('', 'virk')
 
-    assert.deepEqual(body, {})
+    assert.containSubset(body.body, { ...body.files })
   })
 
   test('handle request with empty file name', async ({ assert }) => {
@@ -1355,7 +1360,7 @@ test.group('BodyParser Middleware | multipart', () => {
       .attach('package', packageFilePath)
       .field('username', '')
 
-    assert.deepEqual(body, { username: null })
+    assert.containSubset(body, { username: null })
   })
 
   test('merge request fields and files', async ({ assert }) => {
