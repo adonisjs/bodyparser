@@ -8,11 +8,11 @@
  */
 
 import { tmpdir } from 'node:os'
-import { Exception } from '@poppinss/utils'
 import { join, isAbsolute } from 'node:path'
 import { createId } from '@paralleldrive/cuid2'
+import { Exception } from '@poppinss/utils/exception'
 import type { HttpContext } from '@adonisjs/http-server'
-import type { NextFn } from '@adonisjs/http-server/types'
+import type { NextFn } from '@poppinss/middleware/types'
 import type { FeatureFlags } from '@adonisjs/application'
 import type { ExperimentalFlagsList } from '@adonisjs/application/types'
 

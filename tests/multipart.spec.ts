@@ -32,7 +32,7 @@ import {
   packageFileSize,
   unicornFilePath,
   unicornNoExtFilePath,
-} from '../tests_helpers/main.js'
+} from './helpers.ts'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)

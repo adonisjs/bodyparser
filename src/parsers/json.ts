@@ -9,10 +9,11 @@
 
 import raw from 'raw-body'
 import inflate from 'inflation'
-import json from '@poppinss/utils/json'
-import { Exception } from '@poppinss/utils'
+import { safeParse } from '@poppinss/utils/json'
 import type { IncomingMessage } from 'node:http'
-import { BodyParserJSONConfig } from '../types.js'
+import { Exception } from '@poppinss/utils/exception'
+
+import { type BodyParserJSONConfig } from '../types.js'
 
 /**
  * Allowed whitespace is defined in RFC 7159
@@ -93,7 +94,7 @@ export async function parseJSON(req: IncomingMessage, options: Partial<BodyParse
 
   try {
     return {
-      parsed: json.safeParse(requestBody, reviver),
+      parsed: safeParse(requestBody, reviver),
       raw: requestBody,
     }
   } catch (error) {

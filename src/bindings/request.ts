@@ -9,7 +9,7 @@
 
 import lodash from '@poppinss/utils/lodash'
 import { Request } from '@adonisjs/http-server'
-import { RuntimeException } from '@poppinss/utils'
+import { RuntimeException } from '@poppinss/utils/exception'
 
 import debug from '../debug.js'
 import { MultipartFile } from '../multipart/file.js'

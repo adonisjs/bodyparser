@@ -8,8 +8,8 @@
  */
 
 import { join } from 'node:path'
-import { Exception } from '@poppinss/utils'
 import Macroable from '@poppinss/macroable'
+import { Exception } from '@poppinss/utils/exception'
 
 import { moveFile } from '../helpers.js'
 import { SizeValidator } from './validators/size.js'

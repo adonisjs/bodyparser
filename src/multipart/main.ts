@@ -11,7 +11,7 @@
 import multiparty from '@poppinss/multiparty'
 
 import bytes from 'bytes'
-import { Exception } from '@poppinss/utils'
+import { Exception } from '@poppinss/utils/exception'
 import type { HttpContext } from '@adonisjs/http-server'
 
 import debug from '../debug.js'

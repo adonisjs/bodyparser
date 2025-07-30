@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { Readable } from 'node:stream'
+import { type Readable } from 'node:stream'
 import { unlink } from 'node:fs/promises'
 import { createWriteStream } from 'node:fs'
 import { pipeline } from 'node:stream/promises'

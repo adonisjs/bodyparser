@@ -8,7 +8,7 @@
  */
 
 import { extname } from 'node:path'
-import { Exception } from '@poppinss/utils'
+import { Exception } from '@poppinss/utils/exception'
 
 import { MultipartFile } from './file.js'
 import type { MultipartStream, FileValidationOptions } from '../types.js'

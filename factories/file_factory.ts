@@ -8,7 +8,7 @@
  */
 
 import { MultipartFile } from '../src/multipart/file.js'
-import { FileValidationOptions } from '../src/types.js'
+import { type FileValidationOptions } from '../src/types.js'
 
 type FileFactoryParameters = {
   fieldName: string

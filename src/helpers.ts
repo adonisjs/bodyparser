@@ -10,7 +10,7 @@
 import type { Mode } from 'node:fs'
 import mediaTyper from 'media-typer'
 import { dirname, extname } from 'node:path'
-import { RuntimeException } from '@poppinss/utils'
+import { RuntimeException } from '@poppinss/utils/exception'
 import { fileTypeFromBuffer, supportedExtensions } from 'file-type'
 import { access, mkdir, copyFile, unlink, rename } from 'node:fs/promises'
 

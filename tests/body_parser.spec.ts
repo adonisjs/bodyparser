@@ -24,9 +24,9 @@ import {
 import { AppFactory } from '@adonisjs/application/factories'
 
 import { Multipart } from '../src/multipart/main.js'
-import { MultipartFile } from '../src/multipart/file.js'
+import { type MultipartFile } from '../src/multipart/file.js'
 import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.js'
-import { packageFilePath, packageFileSize, unicornFilePath } from '../tests_helpers/main.js'
+import { packageFilePath, packageFileSize, unicornFilePath } from './helpers.ts'
 
 test.group('BodyParser Middleware', () => {
   test('do not parse get requests', async ({ assert }) => {
@@ -610,6 +610,10 @@ test.group('BodyParser Middleware | multipart', () => {
         handler: () => {},
         meta: {},
         middleware: {} as any,
+        tokens: [],
+        domain: '',
+        matchers: {},
+        methods: ['GET'],
       }
 
       const middleware = new BodyParserMiddlewareFactory()
@@ -645,6 +649,10 @@ test.group('BodyParser Middleware | multipart', () => {
         handler: () => {},
         meta: {},
         middleware: {} as any,
+        tokens: [],
+        domain: '',
+        matchers: {},
+        methods: ['GET'],
       }
 
       const middleware = new BodyParserMiddlewareFactory()
@@ -680,6 +688,10 @@ test.group('BodyParser Middleware | multipart', () => {
         handler: () => {},
         meta: {},
         middleware: {} as any,
+        tokens: [],
+        domain: '',
+        matchers: {},
+        methods: ['GET'],
       }
 
       const middleware = new BodyParserMiddlewareFactory()
@@ -712,6 +724,10 @@ test.group('BodyParser Middleware | multipart', () => {
         handler: () => {},
         meta: {},
         middleware: {} as any,
+        tokens: [],
+        domain: '',
+        matchers: {},
+        methods: ['GET'],
       }
 
       const middleware = new BodyParserMiddlewareFactory()
