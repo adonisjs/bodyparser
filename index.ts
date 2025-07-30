@@ -8,7 +8,7 @@
  */
 
 import type { Multipart } from './src/multipart/main.js'
-import { MultipartFile } from './src/multipart/file.js'
+import { MultipartFile } from './src/multipart/file.ts'
 import type { FileValidationOptions } from './src/types.js'
 
 export { defineConfig } from './src/define_config.js'

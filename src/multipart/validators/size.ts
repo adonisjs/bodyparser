@@ -8,7 +8,7 @@
  */
 
 import bytes from 'bytes'
-import { type MultipartFile } from '../file.js'
+import { type MultipartFile } from '../file.ts'
 
 /**
  * Size validator validates the file size

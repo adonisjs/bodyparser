@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { MultipartFile } from '../src/multipart/file.js'
+import { MultipartFile } from '../src/multipart/file.ts'
 import { type FileValidationOptions } from '../src/types.js'
 
 type FileFactoryParameters = {

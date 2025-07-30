@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { type MultipartFile } from '../file.js'
+import { type MultipartFile } from '../file.ts'
 
 /**
  * Validates the file extension

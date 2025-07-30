@@ -8,7 +8,7 @@
  */
 
 import { type Readable } from 'node:stream'
-import type { MultipartFile } from './multipart/file.js'
+import type { MultipartFile } from './multipart/file.ts'
 
 /**
  * Qs module config

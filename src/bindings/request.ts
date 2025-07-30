@@ -12,7 +12,7 @@ import { Request } from '@adonisjs/http-server'
 import { RuntimeException } from '@poppinss/utils/exception'
 
 import debug from '../debug.js'
-import { MultipartFile } from '../multipart/file.js'
+import { MultipartFile } from '../multipart/file.ts'
 import type { FileValidationOptions } from '../types.js'
 
 /**

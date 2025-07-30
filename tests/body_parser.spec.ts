@@ -24,7 +24,7 @@ import {
 import { AppFactory } from '@adonisjs/application/factories'
 
 import { Multipart } from '../src/multipart/main.js'
-import { type MultipartFile } from '../src/multipart/file.js'
+import { type MultipartFile } from '../src/multipart/file.ts'
 import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.js'
 import { packageFilePath, packageFileSize, unicornFilePath } from './helpers.ts'
 

@@ -8,7 +8,7 @@
  */
 
 import { test } from '@japa/runner'
-import { MultipartFile } from '../src/multipart/file.js'
+import { MultipartFile } from '../src/multipart/file.ts'
 import { MultipartFileFactory } from '../factories/file_factory.js'
 
 test.group('Multipart file factory', () => {

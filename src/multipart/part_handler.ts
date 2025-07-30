@@ -10,7 +10,7 @@
 import { extname } from 'node:path'
 import { Exception } from '@poppinss/utils/exception'
 
-import { MultipartFile } from './file.js'
+import { MultipartFile } from './file.ts'
 import type { MultipartStream, FileValidationOptions } from '../types.js'
 import { computeFileTypeFromName, getFileType, supportMagicFileTypes } from '../helpers.js'
 

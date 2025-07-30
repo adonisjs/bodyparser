@@ -22,7 +22,7 @@ import {
   HttpContextFactory,
 } from '@adonisjs/http-server/factories'
 import { Multipart } from '../src/multipart/main.js'
-import { MultipartFile } from '../src/multipart/file.js'
+import { MultipartFile } from '../src/multipart/file.ts'
 import {
   sleep,
   xlsFilePath,
