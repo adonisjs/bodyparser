@@ -26,13 +26,3 @@ declare module '@adonisjs/http-server' {
     files(key: string, options?: Partial<FileValidationOptions>): MultipartFile[]
   }
 }
-
-/**
- * Extending feature flags to decide how to process the multipart
- * request body
- */
-declare module '@adonisjs/application/types' {
-  export interface ExperimentalFlagsList {
-    mergeMultipartFieldsAndFiles?: boolean
-  }
-}
