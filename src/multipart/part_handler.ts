@@ -16,17 +16,24 @@ import { computeFileTypeFromName, getFileType, supportMagicFileTypes } from '../
 
 /**
  * Part handler handles the progress of a stream and also internally validates
- * it's size and extension.
+ * its size and extension.
  *
  * This class offloads the task of validating a file stream, regardless of how
  * the stream is consumed. For example:
  *
- * In classic scanerio, we will process the file stream and write files to the
+ * In classic scenario, we will process the file stream and write files to the
  * tmp directory and in more advanced cases, the end user can handle the
  * stream by themselves and report each chunk to this class.
  */
 export class PartHandler {
+  /**
+   * The multipart stream part being handled
+   */
   #part: MultipartStream
+
+  /**
+   * Configuration options for file validation and processing
+   */
   #options: Partial<FileValidationOptions & { deferValidations: boolean }>
 
   /**
@@ -67,6 +74,12 @@ export class PartHandler {
    */
   file: MultipartFile
 
+  /**
+   * Creates a new part handler instance for processing multipart stream parts
+   *
+   * @param part - The multipart stream to handle
+   * @param options - Validation options and configuration
+   */
   constructor(
     part: MultipartStream,
     options: Partial<FileValidationOptions & { deferValidations: boolean }>
@@ -126,7 +139,7 @@ export class PartHandler {
   }
 
   /**
-   * Start the process the updating the file state
+   * Start the process of updating the file state
    * to streaming mode.
    */
   begin() {
@@ -136,6 +149,9 @@ export class PartHandler {
   /**
    * Handles the file upload progress by validating the file size and
    * extension.
+   *
+   * @param line - Buffer chunk from the stream
+   * @param bufferLength - Length of the buffer chunk in bytes
    */
   async reportProgress(line: Buffer, bufferLength: number) {
     /**
@@ -192,7 +208,9 @@ export class PartHandler {
   /**
    * Report errors encountered while processing the stream. These can be errors
    * apart from the one reported by this class. For example: The `s3` failure
-   * due to some bad credentails.
+   * due to some bad credentials.
+   *
+   * @param error - The error encountered during stream processing
    */
   async reportError(error: any) {
     if (this.file.state !== 'streaming') {
@@ -219,6 +237,8 @@ export class PartHandler {
 
   /**
    * Report success data about the file.
+   *
+   * @param data - Success data containing file paths and metadata
    */
   async reportSuccess(data?: { filePath?: string; tmpPath?: string } & { [key: string]: any }) {
     if (this.file.state !== 'streaming') {

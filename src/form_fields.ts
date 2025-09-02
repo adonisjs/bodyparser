@@ -10,20 +10,35 @@
 import lodash from '@poppinss/utils/lodash'
 
 /**
- * A jar of form fields to store form data by handling
- * array gracefully
+ * A collection of form fields that stores form data while handling
+ * arrays gracefully
  */
 export class FormFields {
+  /**
+   * Internal storage for form fields
+   */
   #fields: any = {}
+
+  /**
+   * Configuration options for field processing
+   */
   #config: { convertEmptyStringsToNull: boolean }
 
+  /**
+   * Creates a new FormFields instance
+   *
+   * @param config - Configuration options for field processing
+   */
   constructor(config: { convertEmptyStringsToNull: boolean }) {
     this.#config = config
   }
 
   /**
-   * Add a new key/value pair. The keys with array like
+   * Add a new key/value pair. The keys with array-like
    * expressions are handled properly.
+   *
+   * @param key - The field name, can include array notation
+   * @param value - The field value
    *
    * @example
    * ```
@@ -33,7 +48,7 @@ export class FormFields {
    * formfields.add('username[]', 'virk')
    * formfields.add('username[]', 'nikk')
    *
-   * // Indexed keys are orderd properly
+   * // Indexed keys are ordered properly
    * formfields.add('username[1]', 'virk')
    * formfields.add('username[0]', 'nikk')
    * ```
@@ -82,7 +97,7 @@ export class FormFields {
   }
 
   /**
-   * Returns the copy of form fields
+   * Returns a copy of the form fields
    */
   get() {
     return this.#fields

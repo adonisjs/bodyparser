@@ -24,12 +24,19 @@ import type {
 } from '../types.ts'
 
 /**
- * Multipart class offers a low level API to interact the incoming
+ * Multipart class offers a low level API to interact with the incoming
  * HTTP request data as a stream. This makes it super easy to
- * write files to s3 without saving them to the disk first.
+ * write files to S3 without saving them to the disk first.
  */
 export class Multipart {
+  /**
+   * The HTTP context for the current request
+   */
   #ctx: HttpContext
+
+  /**
+   * Configuration options for multipart processing
+   */
   #config: Partial<{
     limit: string | number
     fieldsLimit: string | number
@@ -91,6 +98,13 @@ export class Multipart {
    */
   state: 'idle' | 'processing' | 'error' | 'success' = 'idle'
 
+  /**
+   * Creates a new Multipart instance for processing multipart form data
+   *
+   * @param ctx - The HTTP context
+   * @param config - Configuration options for multipart processing
+   * @param _featureFlags - Feature flags (unused)
+   */
   constructor(
     ctx: HttpContext,
     config: Partial<{
@@ -282,6 +296,10 @@ export class Multipart {
    * Attach handler for a given file. To handle all files, you
    * can attach a wildcard handler.
    *
+   * @param name - The field name to handle, or '*' for wildcard
+   * @param options - Validation options and configuration
+   * @param handler - The handler function to process the file
+   *
    * @example
    * ```ts
    * multipart.onFile('package', {}, async (stream) => {
@@ -302,14 +320,18 @@ export class Multipart {
 
   /**
    * Abort request by emitting error
+   *
+   * @param error - The error that caused the abort
    */
   abort(error: any): void {
     this.#form.emit('error', error)
   }
 
   /**
-   * Process the request by going all the file and field
+   * Process the request by going through all the file and field
    * streams.
+   *
+   * @param config - Optional configuration overrides
    */
   process(config?: Partial<{ limit: string | number; maxFields: number }>): Promise<void> {
     return new Promise((resolve, reject) => {

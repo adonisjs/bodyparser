@@ -11,13 +11,27 @@ import bytes from 'bytes'
 import { type MultipartFile } from '../file.ts'
 
 /**
- * Size validator validates the file size
+ * Size validator validates the file size against configured limits
  */
 export class SizeValidator {
+  /**
+   * Reference to the multipart file being validated
+   */
   #file: MultipartFile
+
+  /**
+   * Maximum allowed file size limit
+   */
   #maximumAllowedLimit?: number | string
+
+  /**
+   * Parsed bytes limit from the maximum allowed limit
+   */
   #bytesLimit: number = 0
 
+  /**
+   * Whether the file has been validated
+   */
   validated: boolean = false
 
   /**
@@ -42,6 +56,11 @@ export class SizeValidator {
     }
   }
 
+  /**
+   * Creates a new SizeValidator instance
+   *
+   * @param file - The multipart file to validate
+   */
   constructor(file: MultipartFile) {
     this.#file = file
   }
@@ -82,7 +101,7 @@ export class SizeValidator {
   }
 
   /**
-   * Validate the file size
+   * Validate the file size against configured limits
    */
   validate() {
     if (this.validated) {

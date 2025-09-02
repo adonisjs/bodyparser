@@ -10,12 +10,22 @@
 import { type MultipartFile } from '../file.ts'
 
 /**
- * Validates the file extension
+ * Validates the file extension against a list of allowed extensions
  */
 export class ExtensionValidator {
+  /**
+   * Reference to the multipart file being validated
+   */
   #file: MultipartFile
+
+  /**
+   * Array of allowed file extensions
+   */
   #allowedExtensions?: string[] = []
 
+  /**
+   * Whether the file has been validated
+   */
   validated: boolean = false
 
   /**
@@ -34,6 +44,11 @@ export class ExtensionValidator {
     this.#allowedExtensions = extnames
   }
 
+  /**
+   * Creates a new ExtensionValidator instance
+   *
+   * @param file - The multipart file to validate
+   */
   constructor(file: MultipartFile) {
     this.#file = file
   }
@@ -98,7 +113,7 @@ export class ExtensionValidator {
   }
 
   /**
-   * Validate the file
+   * Validate the file extension against allowed extensions
    */
   validate(): void {
     /**

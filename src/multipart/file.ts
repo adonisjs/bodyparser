@@ -18,11 +18,11 @@ import type { FileJSON, FileUploadError, FileValidationOptions } from '../types.
 
 /**
  * The file holds the meta/data for an uploaded file, along with
- * an errors occurred during the upload process.
+ * any errors that occurred during the upload process.
  */
 export class MultipartFile extends Macroable {
   /**
-   * File validators
+   * File validators for size and extension validation
    */
   #sizeValidator = new SizeValidator(this)
   #extensionValidator = new ExtensionValidator(this)
@@ -54,12 +54,12 @@ export class MultipartFile extends Macroable {
   size: number = 0
 
   /**
-   * The extname for the file.
+   * The extension for the file
    */
   extname?: string
 
   /**
-   * Upload errors
+   * Upload errors that occurred during processing
    */
   errors: FileUploadError[] = []
 
@@ -82,18 +82,18 @@ export class MultipartFile extends Macroable {
   fileName?: string
 
   /**
-   * Tmp path, only exists when file is uploaded using the
-   * classic mode.
+   * Temporary path, only exists when file is uploaded using the
+   * classic mode
    */
   tmpPath?: string
 
   /**
-   * The file meta data
+   * The file metadata
    */
   meta: any = {}
 
   /**
-   * The state of the file
+   * The current state of the file
    */
   state: 'idle' | 'streaming' | 'consumed' | 'moved' = 'idle'
 
@@ -140,6 +140,12 @@ export class MultipartFile extends Macroable {
     this.#extensionValidator.extensions = extensions
   }
 
+  /**
+   * Creates a new MultipartFile instance
+   *
+   * @param data - Object containing field name, client name, and headers
+   * @param validationOptions - Validation options for the file
+   */
   constructor(
     data: { fieldName: string; clientName: string; headers: any },
     validationOptions: Partial<FileValidationOptions>
@@ -153,7 +159,7 @@ export class MultipartFile extends Macroable {
   }
 
   /**
-   * Validate the file
+   * Validate the file using configured validators
    */
   validate() {
     this.#extensionValidator.validate()
@@ -161,7 +167,10 @@ export class MultipartFile extends Macroable {
   }
 
   /**
-   * Mark file as moved
+   * Mark file as moved to its final destination
+   *
+   * @param fileName - The name of the moved file
+   * @param filePath - The full path where the file was moved
    */
   markAsMoved(fileName: string, filePath: string) {
     this.filePath = filePath
@@ -171,7 +180,10 @@ export class MultipartFile extends Macroable {
 
   /**
    * Moves the file to a given location. Multiple calls to the `move` method are allowed,
-   * incase you want to move a file to multiple locations.
+   * in case you want to move a file to multiple locations.
+   *
+   * @param location - The destination directory
+   * @param options - Move options including name and overwrite flag
    */
   async move(location: string, options?: { name?: string; overwrite?: boolean }): Promise<void> {
     if (!this.tmpPath) {

@@ -29,15 +29,21 @@ import './bindings/request.js'
 import { parseText } from './parsers/text.ts'
 
 /**
- * BodyParser middleware parses the incoming request body and set it as
+ * BodyParser middleware parses the incoming request body and sets it as
  * request body to be read later in the request lifecycle.
  */
 export class BodyParserMiddleware {
   /**
-   * Bodyparser config
+   * Body parser configuration
    */
   #config: BodyParserConfig
 
+  /**
+   * Creates a new BodyParserMiddleware instance
+   *
+   * @param config - The body parser configuration
+   * @param _featureFlags - Feature flags (unused)
+   */
   constructor(config: BodyParserConfig, _featureFlags?: FeatureFlags<ExperimentalFlagsList>) {
     this.#config = config
     debug('using config %O', this.#config)
@@ -102,8 +108,11 @@ export class BodyParserMiddleware {
   }
 
   /**
-   * Handle HTTP request body by parsing it as per the user
-   * config
+   * Handle HTTP request body by parsing it according to the user
+   * configuration
+   *
+   * @param ctx - The HTTP context
+   * @param next - The next middleware function
    */
   async handle(ctx: HttpContext, next: NextFn) {
     /**
