@@ -11,7 +11,7 @@ import { join } from 'node:path'
 import Macroable from '@poppinss/macroable'
 import { Exception } from '@poppinss/utils/exception'
 
-import { moveFile } from '../helpers.ts'
+import { moveFile } from '../utils.ts'
 import { SizeValidator } from './validators/size.ts'
 import { ExtensionValidator } from './validators/extensions.ts'
 import type { FileJSON, FileUploadError, FileValidationOptions } from '../types.ts'

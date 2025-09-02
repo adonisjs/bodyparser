@@ -12,7 +12,7 @@ import { Exception } from '@poppinss/utils/exception'
 
 import { MultipartFile } from './file.ts'
 import type { MultipartStream, FileValidationOptions } from '../types.ts'
-import { computeFileTypeFromName, getFileType, supportMagicFileTypes } from '../helpers.ts'
+import { computeFileTypeFromName, getFileType, supportMagicFileTypes } from '../utils.ts'
 
 /**
  * Part handler handles the progress of a stream and also internally validates
