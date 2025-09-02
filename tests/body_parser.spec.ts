@@ -56,13 +56,21 @@ test.group('BodyParser Middleware', () => {
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.end(JSON.stringify(ctx.request.all()))
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
       })
     })
 
     const { body } = await supertest(server).post('/').type('json')
 
-    assert.deepEqual(body, {})
+    assert.deepEqual(body, {
+      body: {},
+      bodyType: 'json',
+    })
   })
 
   test('by pass when content type is not supported', async ({ assert }) => {
@@ -74,7 +82,12 @@ test.group('BodyParser Middleware', () => {
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.end(JSON.stringify(ctx.request.all()))
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
       })
     })
 
@@ -83,7 +96,10 @@ test.group('BodyParser Middleware', () => {
       .set('content-type', 'my-type')
       .send(JSON.stringify({ username: 'virk' }))
 
-    assert.deepEqual(body, {})
+    assert.deepEqual(body, {
+      body: {},
+      bodyType: 'unknown',
+    })
   })
 })
 
@@ -97,13 +113,21 @@ test.group('BodyParser Middleware | form data', () => {
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.end(JSON.stringify(ctx.request.all()))
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
       })
     })
 
     const { body } = await supertest(server).post('/').type('form').send({ username: 'virk' })
 
-    assert.deepEqual(body, { username: 'virk' })
+    assert.deepEqual(body, {
+      body: { username: 'virk' },
+      bodyType: 'urlencoded',
+    })
   })
 
   test('abort if request size is over limit', async ({ assert }) => {
@@ -276,13 +300,21 @@ test.group('BodyParser Middleware | json', () => {
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.end(JSON.stringify(ctx.request.all()))
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
       })
     })
 
     const { body } = await supertest(server).post('/').type('json').send({ username: 'virk' })
 
-    assert.deepEqual(body, { username: 'virk' })
+    assert.deepEqual(body, {
+      body: { username: 'virk' },
+      bodyType: 'json',
+    })
   })
 
   test('abort if request size is over limit', async ({ assert }) => {
@@ -364,7 +396,12 @@ test.group('BodyParser Middleware | raw body', () => {
 
       await middleware.handle(ctx, async () => {
         res.writeHead(200, { 'content-type': 'application/json' })
-        res.end(ctx.request.raw())
+        res.end(
+          JSON.stringify({
+            body: ctx.request.raw(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
       })
     })
 
@@ -373,7 +410,10 @@ test.group('BodyParser Middleware | raw body', () => {
       .type('text')
       .send(JSON.stringify({ username: 'virk' }))
 
-    assert.deepEqual(body, { username: 'virk' })
+    assert.deepEqual(body, {
+      body: JSON.stringify({ username: 'virk' }),
+      bodyType: 'raw',
+    })
   })
 
   test('abort if request size is over limit', async ({ assert }) => {
@@ -424,6 +464,7 @@ test.group('BodyParser Middleware | multipart', () => {
             tmpPath: pkgFile.tmpPath,
             size: pkgFile.size,
             validated: pkgFile.validated,
+            bodyType: ctx.request.bodyType,
           })
         )
       })
@@ -433,6 +474,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
     assert.isAbove(body.size, 0)
     assert.exists(body.tmpPath)
+    assert.equal(body.bodyType, 'multipart')
     assert.isFalse(body.validated)
   })
 
@@ -577,7 +619,7 @@ test.group('BodyParser Middleware | multipart', () => {
   })
 
   test('do not process request when autoProcess is false', async ({ assert }) => {
-    assert.plan(2)
+    assert.plan(3)
 
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -594,6 +636,7 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
+        assert.equal(ctx.request.bodyType, 'multipart')
         await ctx.request['multipart'].process()
         res.end()
       })
@@ -603,7 +646,7 @@ test.group('BodyParser Middleware | multipart', () => {
   }).retry(3)
 
   test('do not process request when processManually static route matches', async ({ assert }) => {
-    assert.plan(2)
+    assert.plan(3)
 
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -633,6 +676,7 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request.__raw_files, {})
         assert.instanceOf(ctx.request.multipart, Multipart)
+        assert.equal(ctx.request.bodyType, 'multipart')
         await ctx.request.multipart.process()
         res.end()
       })
@@ -642,7 +686,7 @@ test.group('BodyParser Middleware | multipart', () => {
   }).retry(3)
 
   test('do not process request when processManually has dynamic route', async ({ assert }) => {
-    assert.plan(2)
+    assert.plan(3)
 
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -672,6 +716,7 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
+        assert.equal(ctx.request.bodyType, 'multipart')
         await ctx.request['multipart'].process()
         res.end()
       })
@@ -681,7 +726,7 @@ test.group('BodyParser Middleware | multipart', () => {
   })
 
   test('do not process request when autoProcess route does not match', async ({ assert }) => {
-    assert.plan(2)
+    assert.plan(3)
 
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
@@ -710,6 +755,7 @@ test.group('BodyParser Middleware | multipart', () => {
       await middleware.handle(ctx, async () => {
         assert.deepEqual(ctx.request['__raw_files'], {})
         assert.instanceOf(ctx.request['multipart'], Multipart)
+        assert.equal(ctx.request.bodyType, 'multipart')
         await ctx.request['multipart'].process()
         res.end()
       })
@@ -955,7 +1001,7 @@ test.group('BodyParser Middleware | multipart', () => {
     assert.isNull(body)
   })
 
-  test("return empty array file doesn't exists", async ({ assert }) => {
+  test("return empty array when file doesn't exists", async ({ assert }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()

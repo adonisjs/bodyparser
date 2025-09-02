@@ -151,6 +151,7 @@ export class BodyParserMiddleware {
         },
         {}
       )
+      ctx.request.bodyType = 'multipart'
 
       /**
        * Skip parsing when `autoProcess` is disabled
@@ -222,6 +223,7 @@ export class BodyParserMiddleware {
         const { parsed, raw } = await parseForm(ctx.request.request, formConfig)
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
+        ctx.request.bodyType = 'urlencoded'
         return next()
       } catch (error) {
         throw this.#getExceptionFor(error)
@@ -239,6 +241,7 @@ export class BodyParserMiddleware {
         const { parsed, raw } = await parseJSON(ctx.request.request, jsonConfig)
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
+        ctx.request.bodyType = 'json'
         return next()
       } catch (error) {
         throw this.#getExceptionFor(error)
@@ -255,12 +258,14 @@ export class BodyParserMiddleware {
       try {
         ctx.request.setInitialBody({})
         ctx.request.updateRawBody(await parseText(ctx.request.request, rawConfig))
+        ctx.request.bodyType = 'raw'
         return next()
       } catch (error) {
         throw this.#getExceptionFor(error)
       }
     }
 
+    ctx.request.bodyType = 'unknown'
     await next()
   }
 }

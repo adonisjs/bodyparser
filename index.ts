@@ -20,6 +20,7 @@ export { MultipartFile, Multipart }
 declare module '@adonisjs/http-server' {
   export interface Request {
     multipart: Multipart
+    bodyType: 'unknown' | 'urlencoded' | 'multipart' | 'json' | 'raw'
     __raw_files: Record<string, MultipartFile | MultipartFile[]>
     allFiles(): Record<string, MultipartFile | MultipartFile[]>
     file(key: string, options?: Partial<FileValidationOptions>): MultipartFile | null
