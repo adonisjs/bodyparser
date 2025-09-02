@@ -1,0 +1,14 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "name": "@adonisjs/bodyparser",
+  "out": "docs",
+  "theme": "default",
+  "includeVersion": true,
+  "excludeExternals": true,
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "readme": "none",
+  "gitRevision": "main",
+  "sort": ["source-order"]
+}

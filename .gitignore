@@ -13,3 +13,4 @@ yarn.lock
 shrinkwrap.yaml
 test/__app
 package-lock.json
+docs
