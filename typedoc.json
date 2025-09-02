@@ -1,10 +1,14 @@
 {
   "$schema": "https://typedoc.org/schema.json",
   "name": "@adonisjs/bodyparser",
-  "out": "docs",
-  "theme": "default",
   "includeVersion": true,
   "excludeExternals": true,
+  "entryPoints": [
+    "./index.ts",
+    "./src/types.ts",
+    "./src/bodyparser_middleware.ts",
+    "./factories/main.ts"
+  ],
   "excludePrivate": true,
   "excludeProtected": true,
   "excludeInternal": true,
