@@ -11,9 +11,9 @@ import lodash from '@poppinss/utils/lodash'
 import { Request } from '@adonisjs/http-server'
 import { RuntimeException } from '@poppinss/utils/exception'
 
-import debug from '../debug.js'
+import debug from '../debug.ts'
 import { MultipartFile } from '../multipart/file.ts'
-import type { FileValidationOptions } from '../types.js'
+import type { FileValidationOptions } from '../types.ts'
 
 /**
  * Updates the validation options on the file instance

@@ -11,9 +11,9 @@ import lodash from '@poppinss/utils/lodash'
 import type { FeatureFlags } from '@adonisjs/application'
 import type { ExperimentalFlagsList } from '@adonisjs/application/types'
 
-import { defineConfig } from '../src/define_config.js'
-import { BodyParserMiddleware } from '../src/bodyparser_middleware.js'
-import type { BodyParserConfig, BodyParserOptionalConfig } from '../src/types.js'
+import { defineConfig } from '../src/define_config.ts'
+import { BodyParserMiddleware } from '../src/bodyparser_middleware.ts'
+import type { BodyParserConfig, BodyParserOptionalConfig } from '../src/types.ts'
 
 /**
  * Factory to create bodyparser middleware instance

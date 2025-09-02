@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { type BodyParserConfig, type BodyParserOptionalConfig } from './types.js'
+import { type BodyParserConfig, type BodyParserOptionalConfig } from './types.ts'
 
 /**
  * Define config for the bodyparser middleware. Your defined config will be

@@ -9,7 +9,7 @@
 
 import { test } from '@japa/runner'
 import { MultipartFile } from '../src/multipart/file.ts'
-import { MultipartFileFactory } from '../factories/file_factory.js'
+import { MultipartFileFactory } from '../factories/file_factory.ts'
 
 test.group('Multipart file factory', () => {
   test('create file instance', ({ assert }) => {

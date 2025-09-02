@@ -14,14 +14,14 @@ import bytes from 'bytes'
 import { Exception } from '@poppinss/utils/exception'
 import type { HttpContext } from '@adonisjs/http-server'
 
-import debug from '../debug.js'
-import { FormFields } from '../form_fields.js'
-import { PartHandler } from './part_handler.js'
+import debug from '../debug.ts'
+import { FormFields } from '../form_fields.ts'
+import { PartHandler } from './part_handler.ts'
 import type {
   MultipartStream,
   FileValidationOptions,
   PartHandler as PartHandlerType,
-} from '../types.js'
+} from '../types.ts'
 
 /**
  * Multipart class offers a low level API to interact the incoming

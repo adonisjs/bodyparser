@@ -15,18 +15,18 @@ import type { NextFn } from '@poppinss/middleware/types'
 import type { FeatureFlags } from '@adonisjs/application'
 import type { ExperimentalFlagsList } from '@adonisjs/application/types'
 
-import debug from './debug.js'
-import { parseForm } from './parsers/form.js'
-import { parseJSON } from './parsers/json.js'
-import { Multipart } from './multipart/main.js'
-import type { BodyParserConfig } from './types.js'
-import { streamFile } from './multipart/stream_file.js'
+import debug from './debug.ts'
+import { parseForm } from './parsers/form.ts'
+import { parseJSON } from './parsers/json.ts'
+import { Multipart } from './multipart/main.ts'
+import type { BodyParserConfig } from './types.ts'
+import { streamFile } from './multipart/stream_file.ts'
 
 /**
  * Bindings to extend request
  */
 import './bindings/request.js'
-import { parseText } from './parsers/text.js'
+import { parseText } from './parsers/text.ts'
 
 /**
  * BodyParser middleware parses the incoming request body and set it as

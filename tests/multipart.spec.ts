@@ -21,7 +21,7 @@ import {
   ResponseFactory,
   HttpContextFactory,
 } from '@adonisjs/http-server/factories'
-import { Multipart } from '../src/multipart/main.js'
+import { Multipart } from '../src/multipart/main.ts'
 import { MultipartFile } from '../src/multipart/file.ts'
 import {
   sleep,

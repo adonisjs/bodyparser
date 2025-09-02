@@ -10,7 +10,7 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
-import { parseText } from '../../src/parsers/text.js'
+import { parseText } from '../../src/parsers/text.ts'
 
 test.group('Raw parser', () => {
   test('inflate request body', async ({ assert }) => {

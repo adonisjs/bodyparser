@@ -11,7 +11,7 @@ import raw from 'raw-body'
 import inflate from 'inflation'
 import qs, { type IParseOptions } from 'qs'
 import type { IncomingMessage } from 'node:http'
-import { type BodyParserFormConfig } from '../types.js'
+import { type BodyParserFormConfig } from '../types.ts'
 
 /**
  * Parse x-www-form-urlencoded request body

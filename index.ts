@@ -7,11 +7,11 @@
  * file that was distributed with this source code.
  */
 
-import type { Multipart } from './src/multipart/main.js'
+import type { Multipart } from './src/multipart/main.ts'
 import { MultipartFile } from './src/multipart/file.ts'
-import type { FileValidationOptions } from './src/types.js'
+import type { FileValidationOptions } from './src/types.ts'
 
-export { defineConfig } from './src/define_config.js'
+export { defineConfig } from './src/define_config.ts'
 export { MultipartFile, Multipart }
 
 /**

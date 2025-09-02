@@ -11,8 +11,8 @@ import { extname } from 'node:path'
 import { Exception } from '@poppinss/utils/exception'
 
 import { MultipartFile } from './file.ts'
-import type { MultipartStream, FileValidationOptions } from '../types.js'
-import { computeFileTypeFromName, getFileType, supportMagicFileTypes } from '../helpers.js'
+import type { MultipartStream, FileValidationOptions } from '../types.ts'
+import { computeFileTypeFromName, getFileType, supportMagicFileTypes } from '../helpers.ts'
 
 /**
  * Part handler handles the progress of a stream and also internally validates

@@ -23,9 +23,9 @@ import {
 } from '@adonisjs/http-server/factories'
 import { AppFactory } from '@adonisjs/application/factories'
 
-import { Multipart } from '../src/multipart/main.js'
+import { Multipart } from '../src/multipart/main.ts'
 import { type MultipartFile } from '../src/multipart/file.ts'
-import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.js'
+import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.ts'
 import { packageFilePath, packageFileSize, unicornFilePath } from './helpers.ts'
 
 test.group('BodyParser Middleware', () => {

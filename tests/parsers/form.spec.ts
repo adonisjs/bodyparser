@@ -10,7 +10,7 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
-import { parseForm } from '../../src/parsers/form.js'
+import { parseForm } from '../../src/parsers/form.ts'
 
 test.group('Form parser', () => {
   test('parse valid request body', async ({ assert }) => {

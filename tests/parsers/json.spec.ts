@@ -10,7 +10,7 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
-import { parseJSON } from '../../src/parsers/json.js'
+import { parseJSON } from '../../src/parsers/json.ts'
 
 test.group('JSON parser', () => {
   test('parse valid request body', async ({ assert }) => {

@@ -10,7 +10,7 @@
 import raw from 'raw-body'
 import inflate from 'inflation'
 import type { IncomingMessage } from 'node:http'
-import { type BodyParserRawConfig } from '../types.js'
+import { type BodyParserRawConfig } from '../types.ts'
 
 /**
  * Inflates request body

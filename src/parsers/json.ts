@@ -13,7 +13,7 @@ import { safeParse } from '@poppinss/utils/json'
 import type { IncomingMessage } from 'node:http'
 import { Exception } from '@poppinss/utils/exception'
 
-import { type BodyParserJSONConfig } from '../types.js'
+import { type BodyParserJSONConfig } from '../types.ts'
 
 /**
  * Allowed whitespace is defined in RFC 7159
