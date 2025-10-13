@@ -18,6 +18,9 @@ export const largePdfFile = fileURLToPath(
 export const xlsFilePath = fileURLToPath(new URL('../resources/sample.xls', import.meta.url))
 export const xlsxFilePath = fileURLToPath(new URL('../resources/sample.xlsx', import.meta.url))
 export const unicornFilePath = fileURLToPath(new URL('../resources/unicorn.png', import.meta.url))
+export const unicornUppercaseFilePath = fileURLToPath(
+  new URL('../resources/UNICORN-UPPERCASE.PNG', import.meta.url)
+)
 export const unicornNoExtFilePath = fileURLToPath(
   new URL('../resources/unicorn-wo-ext', import.meta.url)
 )
