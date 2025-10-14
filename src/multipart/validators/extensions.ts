@@ -41,7 +41,7 @@ export class ExtensionValidator {
     }
 
     this.validated = false
-    this.#allowedExtensions = extnames?.map((ext) => ext.toLowerCase())
+    this.#allowedExtensions = extnames
   }
 
   /**
@@ -63,7 +63,7 @@ export class ExtensionValidator {
     const suffix = this.#allowedExtensions!.length === 1 ? 'is' : 'are'
 
     const message = [
-      `Invalid file extension ${this.#file.extname?.toLowerCase()}.`,
+      `Invalid file extension ${this.#file.extname}.`,
       `Only ${this.#allowedExtensions!.join(', ')} ${suffix} allowed`,
     ].join(' ')
 
@@ -89,7 +89,7 @@ export class ExtensionValidator {
     /**
      * Valid extension type
      */
-    if (this.#allowedExtensions!.includes(this.#file.extname.toLowerCase())) {
+    if (this.#allowedExtensions!.includes(this.#file.extname)) {
       return
     }
 
@@ -105,7 +105,7 @@ export class ExtensionValidator {
     /**
      * Valid extension type
      */
-    if (this.#allowedExtensions!.includes(this.#file.extname?.toLowerCase() || '')) {
+    if (this.#allowedExtensions!.includes(this.#file.extname || '')) {
       return
     }
 

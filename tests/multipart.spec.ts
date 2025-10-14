@@ -653,7 +653,7 @@ test.group('Multipart', () => {
       multipart.onFile(
         '*',
         {
-          extnames: ['PNG'],
+          extnames: ['png'],
         },
         (part, reporter) => {
           return new Promise((resolve, reject) => {
@@ -976,7 +976,7 @@ test.group('Multipart', () => {
       multipart.onFile(
         '*',
         {
-          extnames: ['PNG'],
+          extnames: ['png'],
         },
         (part, reporter) => {
           return new Promise((resolve, reject) => {
@@ -1005,7 +1005,7 @@ test.group('Multipart', () => {
 
     assert.isTrue(image.isValid)
     assert.equal(image.state, 'consumed')
-    assert.equal(image.extname, 'PNG')
+    assert.equal(image.extname, 'png')
     assert.lengthOf(image.errors, 0)
   })
 
