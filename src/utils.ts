@@ -43,7 +43,7 @@ export async function getFileType(
    */
   const magicType = await fileTypeFromBuffer(fileContents)
   if (magicType) {
-    return Object.assign({ ext: magicType.ext }, parseMimeType(magicType.mime))
+    return Object.assign({ ext: magicType.ext.toLowerCase() }, parseMimeType(magicType.mime))
   }
 
   return null
@@ -61,7 +61,7 @@ export function computeFileTypeFromName(
    * and pull type/subtype from the headers content type.
    */
   return Object.assign(
-    { ext: extname(clientName).replace(/^\./, '') },
+    { ext: extname(clientName).replace(/^\./, '').toLowerCase() },
     parseMimeType(headers['content-type'])
   )
 }

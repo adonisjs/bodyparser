@@ -32,6 +32,7 @@ import {
   packageFileSize,
   unicornFilePath,
   unicornNoExtFilePath,
+  unicornUppercaseFilePath,
 } from './helpers.ts'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
@@ -639,6 +640,42 @@ test.group('Multipart', () => {
     ])
   })
 
+  test('does not report extension validation errors when file extension is uppercase', async ({
+    assert,
+  }) => {
+    let files: null | Record<string, MultipartFile | MultipartFile[]> = null
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 100_000 })
+
+      multipart.onFile(
+        '*',
+        {
+          extnames: ['png'],
+        },
+        (part, reporter) => {
+          return new Promise((resolve, reject) => {
+            part.on('error', reject)
+            part.on('end', resolve)
+            part.on('data', reporter)
+          })
+        }
+      )
+
+      await multipart.process()
+      files = ctx.request['__raw_files'] || null
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('image', unicornUppercaseFilePath)
+
+    assert.property(files, 'image')
+    assert.isTrue(files!.image instanceof MultipartFile && files!.image.isValid)
+    assert.equal(files!.image instanceof MultipartFile && files!.image.state, 'consumed')
+  })
+
   test('do not run validations when deferValidations is set to true', async ({ assert }) => {
     let files: null | Record<string, MultipartFile | MultipartFile[]> = null
     const server = createServer(async (req, res) => {
@@ -926,6 +963,50 @@ test.group('Multipart', () => {
     assert.equal(report.state, 'consumed')
     assert.equal(report.extname, 'xls')
     assert.lengthOf(report.errors, 0)
+  })
+
+  test('validates uppercase extension', async ({ assert }) => {
+    let files: null | Record<string, MultipartFile | MultipartFile[]> = null
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 100_000 })
+
+      multipart.onFile(
+        '*',
+        {
+          extnames: ['png'],
+        },
+        (part, reporter) => {
+          return new Promise((resolve, reject) => {
+            part.on('error', reject)
+            part.on('end', resolve)
+            part.on('data', reporter)
+          })
+        }
+      )
+
+      try {
+        await multipart.process()
+      } catch (error) {
+        console.log(error)
+      }
+      files = ctx.request['__raw_files'] || null
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('image', unicornUppercaseFilePath)
+
+    assert.property(files, 'image')
+    assert.instanceOf(files!.image, MultipartFile)
+
+    const image = files!.image as MultipartFile
+
+    assert.isTrue(image.isValid)
+    assert.equal(image.state, 'consumed')
+    assert.equal(image.extname, 'png')
+    assert.lengthOf(image.errors, 0)
   })
 
   test('process medium sized files', async ({ assert }) => {

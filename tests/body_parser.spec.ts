@@ -26,7 +26,12 @@ import { AppFactory } from '@adonisjs/application/factories'
 import { Multipart } from '../src/multipart/main.ts'
 import { type MultipartFile } from '../src/multipart/file.ts'
 import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.ts'
-import { packageFilePath, packageFileSize, unicornFilePath } from './helpers.ts'
+import {
+  packageFilePath,
+  packageFileSize,
+  unicornFilePath,
+  unicornUppercaseFilePath,
+} from './helpers.ts'
 
 test.group('BodyParser Middleware', () => {
   test('do not parse get requests', async ({ assert }) => {
@@ -1187,6 +1192,40 @@ test.group('BodyParser Middleware | multipart', () => {
         type: 'extname',
       },
     ])
+  })
+
+  test('validate uppercase file extension', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        const pkgFile = ctx.request.file('image')!
+        pkgFile.sizeLimit = 100_000
+        pkgFile.validate()
+
+        pkgFile.allowedExtensions = ['png']
+        pkgFile.validate()
+
+        res.end(
+          JSON.stringify({
+            tmpPath: pkgFile.tmpPath!,
+            size: pkgFile.size,
+            validated: pkgFile.validated,
+            isValid: pkgFile.isValid,
+            errors: pkgFile.errors,
+          })
+        )
+      })
+    })
+
+    const { body } = await supertest(server).post('/').attach('image', unicornUppercaseFilePath)
+    assert.exists(body.tmpPath)
+    assert.isTrue(body.validated)
+    assert.isTrue(body.isValid)
   })
 
   test('calling validate multiple times must be a noop', async ({ assert }) => {
