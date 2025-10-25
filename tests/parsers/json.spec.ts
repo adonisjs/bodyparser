@@ -10,12 +10,12 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
-import { parseJSON } from '../../src/parsers/json.ts'
+import { parseJSON, prepareJSONParserOptions } from '../../src/parsers/json.ts'
 
 test.group('JSON parser', () => {
   test('parse valid request body', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const body = await parseJSON(req, {})
+      const body = await parseJSON(req, prepareJSONParserOptions({}))
       res.writeHead(200, { 'content-type': 'application/json' })
       res.end(JSON.stringify(body))
     })
@@ -34,7 +34,7 @@ test.group('JSON parser', () => {
   test('should throw 415 with invalid content encoding', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {})
+        const body = await parseJSON(req, prepareJSONParserOptions({}))
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -55,9 +55,12 @@ test.group('JSON parser', () => {
 
   test('return empty string when content-length=0 and strict is false', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const body = await parseJSON(req, {
-        strict: false,
-      })
+      const body = await parseJSON(
+        req,
+        prepareJSONParserOptions({
+          strict: false,
+        })
+      )
       res.writeHead(200, { 'content-type': 'application/json' })
       res.end(JSON.stringify(body))
     })
@@ -72,9 +75,12 @@ test.group('JSON parser', () => {
 
   test('return empty object when content-length=0 and strict is true', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const body = await parseJSON(req, {
-        strict: true,
-      })
+      const body = await parseJSON(
+        req,
+        prepareJSONParserOptions({
+          strict: true,
+        })
+      )
       res.writeHead(200, { 'content-type': 'application/json' })
       res.end(JSON.stringify(body))
     })
@@ -90,9 +96,12 @@ test.group('JSON parser', () => {
   test('fail for invalid json when strict mode is disabled', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {
-          strict: false,
-        })
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            strict: false,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -113,9 +122,12 @@ test.group('JSON parser', () => {
   test('fail for invalid json when strict mode is enabled', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {
-          strict: true,
-        })
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            strict: true,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -136,9 +148,12 @@ test.group('JSON parser', () => {
   test('parse non-object json', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {
-          strict: false,
-        })
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            strict: false,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -162,9 +177,12 @@ test.group('JSON parser', () => {
   test('fail for non-object json in strict mode', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {
-          strict: true,
-        })
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            strict: true,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -185,9 +203,12 @@ test.group('JSON parser', () => {
   test('convert empty string to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {
-          convertEmptyStringsToNull: true,
-        })
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            convertEmptyStringsToNull: true,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -208,9 +229,12 @@ test.group('JSON parser', () => {
   test('do not convert empty string to null when disabled', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {
-          convertEmptyStringsToNull: false,
-        })
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            convertEmptyStringsToNull: false,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -231,9 +255,12 @@ test.group('JSON parser', () => {
   test('do not convert empty keys to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseJSON(req, {
-          convertEmptyStringsToNull: true,
-        })
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            convertEmptyStringsToNull: true,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -242,12 +269,81 @@ test.group('JSON parser', () => {
       }
     })
 
-    const { body } = await supertest(server).post('/').type('json').send({ '': '' }).expect(200)
+    const { body } = await supertest(server)
+      .post('/')
+      .type('json')
+      .send({ '': 'hello' })
+      .expect(200)
     assert.deepEqual(body, {
       parsed: {
-        '': '',
+        '': 'hello',
       },
-      raw: JSON.stringify({ '': '' }),
+      raw: JSON.stringify({ '': 'hello' }),
+    })
+  })
+
+  test('trim whitespaces and convert empty string to null', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      try {
+        const body = await parseJSON(
+          req,
+          prepareJSONParserOptions({
+            convertEmptyStringsToNull: true,
+            trimWhitespaces: true,
+          })
+        )
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify(body))
+      } catch (error) {
+        res.writeHead(error.status)
+        res.end(error.message)
+      }
+    })
+
+    const { body } = await supertest(server)
+      .post('/')
+      .type('json')
+      .send({
+        username: '  foo',
+        email: '',
+        age: 22,
+        password: 'secret ',
+        scores: [' 22', 10, ''],
+        profile: {
+          twitter: {
+            handle: ' AmanVirk1',
+            enabled: true,
+          },
+        },
+      })
+      .expect(200)
+    assert.deepEqual(body, {
+      parsed: {
+        username: 'foo',
+        email: null,
+        age: 22,
+        password: 'secret',
+        scores: ['22', 10, null],
+        profile: {
+          twitter: {
+            handle: 'AmanVirk1',
+            enabled: true,
+          },
+        },
+      },
+      raw: JSON.stringify({
+        username: '  foo',
+        email: '',
+        age: 22,
+        password: 'secret ',
+        scores: [' 22', 10, ''],
+        profile: {
+          twitter: {
+            handle: ' AmanVirk1',
+            enabled: true,
+          },
+        },
+      }),
     })
   })
 })

@@ -10,12 +10,12 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
-import { parseText } from '../../src/parsers/text.ts'
+import { parseText, prepareTextParserOptions } from '../../src/parsers/text.ts'
 
 test.group('Raw parser', () => {
   test('inflate request body', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const body = await parseText(req, {})
+      const body = await parseText(req, prepareTextParserOptions({}))
       res.writeHead(200)
       res.end(body)
     })
@@ -27,7 +27,7 @@ test.group('Raw parser', () => {
   test('fail with 415 when content encoding is invalid', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseText(req, {})
+        const body = await parseText(req, prepareTextParserOptions({}))
         res.writeHead(200)
         res.end(body)
       } catch (error) {

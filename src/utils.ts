@@ -111,3 +111,16 @@ export async function moveFile(
     }
   }
 }
+
+export const formBodyNormalizers = {
+  trimWhitespaces(value: string) {
+    return value.trim()
+  },
+  trimWhitespacesAndConvertToNull(value: string) {
+    value = value.trim()
+    return value === '' ? null : value
+  },
+  convertToNull(value: string) {
+    return value === '' ? null : value
+  },
+}

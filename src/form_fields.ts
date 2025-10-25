@@ -19,18 +19,15 @@ export class FormFields {
    */
   #fields: any = {}
 
-  /**
-   * Configuration options for field processing
-   */
-  #config: { convertEmptyStringsToNull: boolean }
+  #normalizer?: (value: string) => string | null
 
   /**
    * Creates a new FormFields instance
    *
    * @param config - Configuration options for field processing
    */
-  constructor(config: { convertEmptyStringsToNull: boolean }) {
-    this.#config = config
+  constructor(normalizer?: (value: string) => string | null) {
+    this.#normalizer = normalizer
   }
 
   /**
@@ -59,8 +56,8 @@ export class FormFields {
     /**
      * Convert empty strings to null
      */
-    if (this.#config.convertEmptyStringsToNull && value === '') {
-      value = null
+    if (this.#normalizer && typeof value === 'string') {
+      value = this.#normalizer(value)
     }
 
     /**

@@ -16,17 +16,17 @@ import type { FeatureFlags } from '@adonisjs/application'
 import type { ExperimentalFlagsList } from '@adonisjs/application/types'
 
 import debug from './debug.ts'
-import { parseForm } from './parsers/form.ts'
-import { parseJSON } from './parsers/json.ts'
 import { Multipart } from './multipart/main.ts'
 import type { BodyParserConfig } from './types.ts'
 import { streamFile } from './multipart/stream_file.ts'
+import { parseText, prepareTextParserOptions } from './parsers/text.ts'
+import { parseJSON, prepareJSONParserOptions } from './parsers/json.ts'
+import { parseForm, prepareFormParserOptions } from './parsers/form.ts'
 
 /**
  * Bindings to extend request
  */
 import './bindings/request.js'
-import { parseText } from './parsers/text.ts'
 
 /**
  * BodyParser middleware parses the incoming request body and sets it as
@@ -38,6 +38,12 @@ export class BodyParserMiddleware {
    */
   #config: BodyParserConfig
 
+  #parsersConfig: {
+    raw: ReturnType<typeof prepareTextParserOptions>
+    form: ReturnType<typeof prepareFormParserOptions>
+    json: ReturnType<typeof prepareJSONParserOptions>
+  }
+
   /**
    * Creates a new BodyParserMiddleware instance
    *
@@ -46,22 +52,12 @@ export class BodyParserMiddleware {
    */
   constructor(config: BodyParserConfig, _featureFlags?: FeatureFlags<ExperimentalFlagsList>) {
     this.#config = config
+    this.#parsersConfig = {
+      raw: prepareTextParserOptions(this.#config.raw),
+      form: prepareFormParserOptions(this.#config.form),
+      json: prepareJSONParserOptions(this.#config.json),
+    }
     debug('using config %O', this.#config)
-  }
-
-  /**
-   * Returns config for a given type
-   */
-  #getConfigFor<K extends keyof BodyParserConfig>(type: K): BodyParserConfig[K] {
-    const config = this.#config[type]
-    return config
-  }
-
-  /**
-   * Ensures that types exists and have length
-   */
-  #ensureTypes(types: string[]): boolean {
-    return !!(types && types.length)
   }
 
   /**
@@ -69,7 +65,7 @@ export class BodyParserMiddleware {
    * matches the expected types or not
    */
   #isType(request: HttpContext['request'], types: string[]): boolean {
-    return !!(this.#ensureTypes(types) && request.is(types))
+    return !!(types && types.length && request.is(types))
   }
 
   /**
@@ -145,18 +141,14 @@ export class BodyParserMiddleware {
     /**
      * Handle multipart form
      */
-    const multipartConfig = this.#getConfigFor('multipart')
-
+    const multipartConfig = this.#config['multipart']
     if (this.#isType(ctx.request, multipartConfig.types)) {
       debug('detected multipart request "%s:%s"', requestMethod, requestUrl)
 
       ctx.request.multipart = new Multipart(
         ctx,
         {
-          maxFields: multipartConfig.maxFields,
-          limit: multipartConfig.limit,
-          fieldsLimit: multipartConfig.fieldsLimit,
-          convertEmptyStringsToNull: multipartConfig.convertEmptyStringsToNull,
+          ...multipartConfig,
         },
         {}
       )
@@ -224,12 +216,12 @@ export class BodyParserMiddleware {
     /**
      * Handle url-encoded form data
      */
-    const formConfig = this.#getConfigFor('form')
+    const formConfig = this.#config['form']
     if (this.#isType(ctx.request, formConfig.types)) {
       debug('detected urlencoded request "%s:%s"', requestMethod, requestUrl)
 
       try {
-        const { parsed, raw } = await parseForm(ctx.request.request, formConfig)
+        const { parsed, raw } = await parseForm(ctx.request.request, this.#parsersConfig.form)
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
         ctx.request.bodyType = 'urlencoded'
@@ -242,12 +234,12 @@ export class BodyParserMiddleware {
     /**
      * Handle content with JSON types
      */
-    const jsonConfig = this.#getConfigFor('json')
+    const jsonConfig = this.#config['json']
     if (this.#isType(ctx.request, jsonConfig.types)) {
       debug('detected JSON request "%s:%s"', requestMethod, requestUrl)
 
       try {
-        const { parsed, raw } = await parseJSON(ctx.request.request, jsonConfig)
+        const { parsed, raw } = await parseJSON(ctx.request.request, this.#parsersConfig.json)
         ctx.request.setInitialBody(parsed)
         ctx.request.updateRawBody(raw)
         ctx.request.bodyType = 'json'
@@ -260,13 +252,13 @@ export class BodyParserMiddleware {
     /**
      * Handles raw request body
      */
-    const rawConfig = this.#getConfigFor('raw')
+    const rawConfig = this.#config['raw']
     if (this.#isType(ctx.request, rawConfig.types)) {
       debug('parsing raw body "%s:%s"', requestMethod, requestUrl)
 
       try {
         ctx.request.setInitialBody({})
-        ctx.request.updateRawBody(await parseText(ctx.request.request, rawConfig))
+        ctx.request.updateRawBody(await parseText(ctx.request.request, this.#parsersConfig.raw))
         ctx.request.bodyType = 'raw'
         return next()
       } catch (error) {

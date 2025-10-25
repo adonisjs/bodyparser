@@ -7,27 +7,29 @@
  * file that was distributed with this source code.
  */
 
-import raw from 'raw-body'
 import inflate from 'inflation'
 import type { IncomingMessage } from 'node:http'
+import raw, { type Encoding, type Options as RawBodyOptions } from 'raw-body'
+
 import { type BodyParserRawConfig } from '../types.ts'
+
+export function prepareTextParserOptions(options: Partial<BodyParserRawConfig>): RawBodyOptions & {
+  encoding: Encoding
+} {
+  return {
+    encoding: options.encoding ?? 'utf8',
+    limit: options.limit ?? '56kb',
+    length: 0,
+  }
+}
 
 /**
  * Inflates request body
  */
-export function parseText(req: IncomingMessage, options: Partial<BodyParserRawConfig>) {
-  /**
-   * Shallow clone options
-   */
-  const normalizedOptions = Object.assign(
-    {
-      encoding: 'utf8',
-      limit: '1mb',
-      length: 0,
-    },
-    options
-  )
-
+export function parseText(
+  req: IncomingMessage,
+  options: ReturnType<typeof prepareTextParserOptions>
+) {
   /**
    * Mimicing behavior of
    * https://github.com/poppinss/co-body/blob/master/lib/text.js#L30
@@ -35,8 +37,8 @@ export function parseText(req: IncomingMessage, options: Partial<BodyParserRawCo
   const contentLength = req.headers['content-length']
   const encoding = req.headers['content-encoding'] || 'identity'
   if (contentLength && encoding === 'identity') {
-    normalizedOptions.length = ~~contentLength
+    options = { ...options, length: ~~contentLength }
   }
 
-  return raw(inflate(req), normalizedOptions)
+  return raw(inflate(req), options)
 }

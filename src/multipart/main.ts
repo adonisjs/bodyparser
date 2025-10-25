@@ -22,6 +22,7 @@ import type {
   FileValidationOptions,
   PartHandler as PartHandlerType,
 } from '../types.ts'
+import { formBodyNormalizers } from '../utils.ts'
 
 /**
  * Multipart class offers a low level API to interact with the incoming
@@ -41,7 +42,6 @@ export class Multipart {
     limit: string | number
     fieldsLimit: string | number
     maxFields: number
-    convertEmptyStringsToNull: boolean
   }>
 
   /**
@@ -112,17 +112,23 @@ export class Multipart {
       fieldsLimit: string | number
       maxFields: number
       convertEmptyStringsToNull: boolean
+      trimWhitespaces: boolean
     }> = {},
     _featureFlags: Record<string, never> = {}
   ) {
+    let normalizer: undefined | ((value: string) => string | null)
+    if (config.convertEmptyStringsToNull && config.trimWhitespaces) {
+      normalizer = formBodyNormalizers.trimWhitespacesAndConvertToNull
+    } else if (config.convertEmptyStringsToNull) {
+      normalizer = formBodyNormalizers.convertToNull
+    } else if (config.trimWhitespaces) {
+      normalizer = formBodyNormalizers.trimWhitespaces
+    }
+
     this.#ctx = ctx
     this.#config = config
-    this.#fields = new FormFields({
-      convertEmptyStringsToNull: this.#config.convertEmptyStringsToNull === true,
-    })
-    this.#files = new FormFields({
-      convertEmptyStringsToNull: this.#config.convertEmptyStringsToNull === true,
-    })
+    this.#fields = new FormFields(normalizer)
+    this.#files = new FormFields(normalizer)
   }
 
   /**

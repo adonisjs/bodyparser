@@ -7,12 +7,13 @@
  * file that was distributed with this source code.
  */
 
-import raw from 'raw-body'
-import inflate from 'inflation'
-import { safeParse } from '@poppinss/utils/json'
 import type { IncomingMessage } from 'node:http'
+import { safeParse } from '@poppinss/utils/json'
 import { Exception } from '@poppinss/utils/exception'
+import { type Encoding, type Options as RawBodyOptions } from 'raw-body'
 
+import { parseText, prepareTextParserOptions } from './text.ts'
+import { formBodyNormalizers } from '../utils.ts'
 import { type BodyParserJSONConfig } from '../types.ts'
 
 /**
@@ -22,59 +23,48 @@ import { type BodyParserJSONConfig } from '../types.ts'
 // eslint-disable-next-line no-control-regex
 const strictJSONReg = /^[\x20\x09\x0a\x0d]*(\[|\{)/
 
-/**
- * JSON reviver to convert empty strings to null
- */
-function convertEmptyStringsToNull(key: string, value: any) {
-  if (key === '') {
-    return value
+export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>): RawBodyOptions & {
+  encoding: Encoding
+  strict: boolean
+  reviver?: (this: any, key: string, value: any) => any
+} {
+  let normalizer: undefined | ((value: string) => string | null)
+  if (options.convertEmptyStringsToNull && options.trimWhitespaces) {
+    normalizer = formBodyNormalizers.trimWhitespacesAndConvertToNull
+  } else if (options.convertEmptyStringsToNull) {
+    normalizer = formBodyNormalizers.convertToNull
+  } else if (options.trimWhitespaces) {
+    normalizer = formBodyNormalizers.trimWhitespaces
   }
 
-  if (value === '') {
-    return null
+  return {
+    ...prepareTextParserOptions(options),
+    strict: options.strict !== false,
+    reviver: normalizer
+      ? function JSONReviver(key, value) {
+          if (key === '') {
+            return value
+          }
+          return typeof value === 'string' ? normalizer(value) : value
+        }
+      : undefined,
   }
-
-  return value
 }
 
 /**
  * Parses JSON request body
  */
-export async function parseJSON(req: IncomingMessage, options: Partial<BodyParserJSONConfig>) {
-  /**
-   * Shallow clone options
-   */
-  const normalizedOptions = Object.assign(
-    {
-      encoding: 'utf8',
-      limit: '1mb',
-      length: 0,
-    },
-    options
-  )
-
-  /**
-   * Mimicing behavior of
-   * https://github.com/poppinss/co-body/blob/master/lib/json.js#L47
-   */
-  const contentLength = req.headers['content-length']
-  const encoding = req.headers['content-encoding'] || 'identity'
-  if (contentLength && encoding === 'identity') {
-    normalizedOptions.length = ~~contentLength
-  }
-
-  const strict = normalizedOptions.strict !== false
-  const reviver = normalizedOptions.convertEmptyStringsToNull
-    ? convertEmptyStringsToNull
-    : undefined
-
-  const requestBody = await raw(inflate(req), normalizedOptions)
+export async function parseJSON(
+  req: IncomingMessage,
+  options: ReturnType<typeof prepareJSONParserOptions>
+) {
+  const requestBody = await parseText(req, options)
 
   /**
    * Do not parse body when request body is empty
    */
   if (!requestBody) {
-    return strict
+    return options.strict
       ? {
           parsed: {},
           raw: requestBody,
@@ -88,13 +78,13 @@ export async function parseJSON(req: IncomingMessage, options: Partial<BodyParse
   /**
    * Test JSON body to ensure it is valid JSON in strict mode
    */
-  if (strict && !strictJSONReg.test(requestBody)) {
+  if (options.strict && !strictJSONReg.test(requestBody)) {
     throw new Exception('Invalid JSON, only supports object and array', { status: 422 })
   }
 
   try {
     return {
-      parsed: safeParse(requestBody, reviver),
+      parsed: safeParse(requestBody, options.reviver),
       raw: requestBody,
     }
   } catch (error) {

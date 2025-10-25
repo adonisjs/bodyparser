@@ -23,6 +23,7 @@ export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig
       queryString: {},
       types: ['application/x-www-form-urlencoded'],
       convertEmptyStringsToNull: true,
+      trimWhitespaces: true,
       ...config.form,
     },
 
@@ -37,6 +38,7 @@ export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig
         'application/csp-report',
       ],
       convertEmptyStringsToNull: true,
+      trimWhitespaces: true,
       ...config.json,
     },
 
@@ -55,6 +57,7 @@ export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig
       limit: '20mb',
       types: ['multipart/form-data'],
       convertEmptyStringsToNull: true,
+      trimWhitespaces: true,
       ...config.multipart,
     },
   }

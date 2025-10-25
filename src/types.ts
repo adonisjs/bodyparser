@@ -62,6 +62,7 @@ export type BodyParserJSONConfig = BodyParserBaseConfig & {
   strict: boolean
   /** Whether to convert empty strings to null values */
   convertEmptyStringsToNull: boolean
+  trimWhitespaces: boolean
 }
 
 /**
@@ -72,6 +73,7 @@ export type BodyParserFormConfig = BodyParserBaseConfig & {
   queryString: QueryStringConfig
   /** Whether to convert empty strings to null values */
   convertEmptyStringsToNull: boolean
+  trimWhitespaces: boolean
 }
 
 /**
@@ -91,6 +93,7 @@ export type BodyParserMultipartConfig = BodyParserBaseConfig & {
   processManually: string[]
   /** Whether to convert empty strings to null values */
   convertEmptyStringsToNull: boolean
+  trimWhitespaces: boolean
   /** Maximum size for all form fields combined */
   fieldsLimit?: number | string
   /** Function to generate temporary file names */

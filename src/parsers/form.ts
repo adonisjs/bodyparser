@@ -7,65 +7,64 @@
  * file that was distributed with this source code.
  */
 
-import raw from 'raw-body'
-import inflate from 'inflation'
 import qs, { type IParseOptions } from 'qs'
 import type { IncomingMessage } from 'node:http'
+import { type Encoding, type Options as RawBodyOptions } from 'raw-body'
+
+import { formBodyNormalizers } from '../utils.ts'
 import { type BodyParserFormConfig } from '../types.ts'
+import { parseText, prepareTextParserOptions } from './text.ts'
 
-/**
- * Parse x-www-form-urlencoded request body
- */
-export async function parseForm(req: IncomingMessage, options: Partial<BodyParserFormConfig>) {
-  /**
-   * Shallow clone options
-   */
-  const normalizedOptions = Object.assign(
-    {
-      encoding: 'utf8',
-      limit: '56kb',
-      length: 0,
-    },
-    options
-  )
-
+export function prepareFormParserOptions(
+  options: Partial<BodyParserFormConfig>
+): RawBodyOptions & { encoding: Encoding; qs: IParseOptions } {
   /**
    * Shallow clone query string options
    */
-  const queryStringOptions: IParseOptions = Object.assign({}, normalizedOptions.queryString)
-
-  /**
-   * Mimicing behavior of
-   * https://github.com/poppinss/co-body/blob/master/lib/form.js#L30
-   */
+  const queryStringOptions: IParseOptions = { ...options.queryString }
   if (queryStringOptions.allowDots === undefined) {
     queryStringOptions.allowDots = true
   }
 
-  /**
-   * Mimicing behavior of
-   * https://github.com/poppinss/co-body/blob/master/lib/form.js#L35
-   */
-  const contentLength = req.headers['content-length']
-  const encoding = req.headers['content-encoding'] || 'identity'
-  if (contentLength && encoding === 'identity') {
-    normalizedOptions.length = ~~contentLength
+  let normalizer: undefined | ((value: string) => string | null)
+  if (options.convertEmptyStringsToNull && options.trimWhitespaces) {
+    normalizer = formBodyNormalizers.trimWhitespacesAndConvertToNull
+  } else if (options.convertEmptyStringsToNull) {
+    normalizer = formBodyNormalizers.convertToNull
+  } else if (options.trimWhitespaces) {
+    normalizer = formBodyNormalizers.trimWhitespaces
   }
 
   /**
    * Convert empty strings to null
    */
-  if (normalizedOptions.convertEmptyStringsToNull) {
+  if (normalizer) {
     queryStringOptions.decoder = function (str, defaultDecoder, charset, type) {
-      const value = defaultDecoder(str, defaultDecoder, charset)
-      if (type === 'value' && value === '') {
-        return null
+      let value = defaultDecoder(str, defaultDecoder, charset)
+      if (type === 'value') {
+        return normalizer(value)
       }
       return value
     }
   }
 
-  const requestBody = await raw(inflate(req), normalizedOptions)
-  const parsed = qs.parse(requestBody, queryStringOptions)
+  /**
+   * Shallow clone of provided options
+   */
+  return {
+    ...prepareTextParserOptions(options),
+    qs: queryStringOptions,
+  }
+}
+
+/**
+ * Parse x-www-form-urlencoded request body
+ */
+export async function parseForm(
+  req: IncomingMessage,
+  options: ReturnType<typeof prepareFormParserOptions>
+) {
+  const requestBody = await parseText(req, options)
+  const parsed = qs.parse(requestBody, options.qs)
   return { parsed, raw: requestBody }
 }

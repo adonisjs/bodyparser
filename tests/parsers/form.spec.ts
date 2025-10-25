@@ -10,12 +10,12 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
-import { parseForm } from '../../src/parsers/form.ts'
+import { parseForm, prepareFormParserOptions } from '../../src/parsers/form.ts'
 
 test.group('Form parser', () => {
   test('parse valid request body', async ({ assert }) => {
     const server = createServer(async (req, res) => {
-      const body = await parseForm(req, {})
+      const body = await parseForm(req, prepareFormParserOptions({}))
       res.writeHead(200, { 'content-type': 'application/json' })
       res.end(JSON.stringify(body))
     })
@@ -35,7 +35,7 @@ test.group('Form parser', () => {
   test('should throw 415 with invalid content encoding', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {})
+        const body = await parseForm(req, prepareFormParserOptions({}))
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -57,11 +57,14 @@ test.group('Form parser', () => {
   test('parse until default depth (ie 5)', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          queryString: {
-            depth: 5,
-          },
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            queryString: {
+              depth: 5,
+            },
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -86,11 +89,14 @@ test.group('Form parser', () => {
   test('parse until configured depth', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          queryString: {
-            depth: 10,
-          },
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            queryString: {
+              depth: 10,
+            },
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -115,11 +121,14 @@ test.group('Form parser', () => {
   test('allow dots by default', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          queryString: {
-            depth: 5,
-          },
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            queryString: {
+              depth: 5,
+            },
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -135,11 +144,14 @@ test.group('Form parser', () => {
   test('disable dots', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          queryString: {
-            allowDots: false,
-          },
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            queryString: {
+              allowDots: false,
+            },
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -155,11 +167,14 @@ test.group('Form parser', () => {
   test('JSON poisoning: remove inline __proto__ properties', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          queryString: {
-            allowDots: false,
-          },
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            queryString: {
+              allowDots: false,
+            },
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -180,9 +195,12 @@ test.group('Form parser', () => {
   test('convert empty string to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          convertEmptyStringsToNull: true,
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            convertEmptyStringsToNull: true,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -203,9 +221,12 @@ test.group('Form parser', () => {
   test('do not convert empty string to null when not enabled', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          convertEmptyStringsToNull: false,
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            convertEmptyStringsToNull: false,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
@@ -226,9 +247,12 @@ test.group('Form parser', () => {
   test('do not convert empty keys to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {
-        const body = await parseForm(req, {
-          convertEmptyStringsToNull: true,
-        })
+        const body = await parseForm(
+          req,
+          prepareFormParserOptions({
+            convertEmptyStringsToNull: true,
+          })
+        )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
       } catch (error) {
