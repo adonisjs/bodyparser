@@ -22,9 +22,9 @@ export class FormFields {
   #normalizer?: (value: string) => string | null
 
   /**
-   * Creates a new FormFields instance
+   * Creates a new FormFields instance for collecting form data.
    *
-   * @param config - Configuration options for field processing
+   * @param normalizer - Optional normalizer function to process string values
    */
   constructor(normalizer?: (value: string) => string | null) {
     this.#normalizer = normalizer
@@ -94,7 +94,18 @@ export class FormFields {
   }
 
   /**
-   * Returns a copy of the form fields
+   * Returns the collected form fields as an object.
+   *
+   * @example
+   * ```ts
+   * const fields = new FormFields()
+   * fields.add('username', 'virk')
+   * fields.add('tags[]', 'node')
+   * fields.add('tags[]', 'typescript')
+   *
+   * console.log(fields.get())
+   * // { username: 'virk', tags: ['node', 'typescript'] }
+   * ```
    */
   get() {
     return this.#fields

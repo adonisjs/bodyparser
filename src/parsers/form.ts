@@ -15,6 +15,12 @@ import { formBodyNormalizers } from '../utils.ts'
 import { type BodyParserFormConfig } from '../types.ts'
 import { parseText, prepareTextParserOptions } from './text.ts'
 
+/**
+ * Prepares parser options for URL-encoded form data by configuring
+ * query string parsing and value normalization.
+ *
+ * @param options - Form body parser configuration
+ */
 export function prepareFormParserOptions(
   options: Partial<BodyParserFormConfig>
 ): RawBodyOptions & { encoding: Encoding; qs: IParseOptions } {
@@ -58,7 +64,18 @@ export function prepareFormParserOptions(
 }
 
 /**
- * Parse x-www-form-urlencoded request body
+ * Parses URL-encoded form data (application/x-www-form-urlencoded) from
+ * the request body and returns both parsed and raw representations.
+ *
+ * @param req - The incoming HTTP request
+ * @param options - Parser options including encoding, limits, and query string config
+ *
+ * @example
+ * ```ts
+ * const { parsed, raw } = await parseForm(request, options)
+ * // parsed: { username: 'virk', tags: ['node', 'typescript'] }
+ * // raw: 'username=virk&tags=node&tags=typescript'
+ * ```
  */
 export async function parseForm(
   req: IncomingMessage,

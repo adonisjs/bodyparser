@@ -13,6 +13,12 @@ import raw, { type Encoding, type Options as RawBodyOptions } from 'raw-body'
 
 import { type BodyParserRawConfig } from '../types.ts'
 
+/**
+ * Prepares parser options for raw text body parsing by applying defaults
+ * for encoding and size limits.
+ *
+ * @param options - Raw body parser configuration
+ */
 export function prepareTextParserOptions(options: Partial<BodyParserRawConfig>): RawBodyOptions & {
   encoding: Encoding
 } {
@@ -24,7 +30,11 @@ export function prepareTextParserOptions(options: Partial<BodyParserRawConfig>):
 }
 
 /**
- * Inflates request body
+ * Parses and inflates the raw request body as text. Automatically handles
+ * compressed request bodies (gzip, deflate, etc.).
+ *
+ * @param req - The incoming HTTP request
+ * @param options - Parser options including encoding and size limits
  */
 export function parseText(
   req: IncomingMessage,

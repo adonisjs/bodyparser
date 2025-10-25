@@ -23,6 +23,12 @@ import { type BodyParserJSONConfig } from '../types.ts'
 // eslint-disable-next-line no-control-regex
 const strictJSONReg = /^[\x20\x09\x0a\x0d]*(\[|\{)/
 
+/**
+ * Prepares parser options for JSON body parsing by configuring strict mode
+ * and value normalization through a reviver function.
+ *
+ * @param options - JSON body parser configuration
+ */
 export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>): RawBodyOptions & {
   encoding: Encoding
   strict: boolean
@@ -52,7 +58,18 @@ export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>)
 }
 
 /**
- * Parses JSON request body
+ * Parses JSON request body with optional strict mode that enforces only
+ * objects and arrays as valid JSON. Returns both parsed and raw representations.
+ *
+ * @param req - The incoming HTTP request
+ * @param options - Parser options including encoding, limits, and strict mode
+ *
+ * @example
+ * ```ts
+ * const { parsed, raw } = await parseJSON(request, options)
+ * // parsed: { username: 'virk', age: 28 }
+ * // raw: '{"username":"virk","age":28}'
+ * ```
  */
 export async function parseJSON(
   req: IncomingMessage,

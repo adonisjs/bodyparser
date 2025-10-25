@@ -11,6 +11,12 @@ import stringHelpers from '@poppinss/utils/string'
 import { type BodyParserMultipartConfig } from '../types.ts'
 import { formBodyNormalizers } from '../utils.ts'
 
+/**
+ * Prepares configuration for multipart form data parsing by converting
+ * size limits from strings to bytes and configuring value normalization.
+ *
+ * @param config - Multipart body parser configuration
+ */
 export function prepareMultipartConfig(config: Partial<BodyParserMultipartConfig>): {
   limit?: number
   fieldsLimit?: number

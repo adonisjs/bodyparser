@@ -13,9 +13,19 @@ import { createWriteStream } from 'node:fs'
 import { pipeline } from 'node:stream/promises'
 
 /**
- * Writes readable stream to the given location by properly cleaning up readable
- * and writable streams in case of any errors. Also an optional data listener
- * can listen for the `data` event.
+ * Streams a file from a readable stream to a file system location. Automatically
+ * cleans up on errors and optionally reports data chunks to a listener.
+ *
+ * @param readStream - The source readable stream
+ * @param location - The destination file path
+ * @param dataListener - Optional callback to receive data chunks
+ *
+ * @example
+ * ```ts
+ * await streamFile(part, '/tmp/upload.jpg', (chunk) => {
+ *   console.log('Received', chunk.length, 'bytes')
+ * })
+ * ```
  */
 export async function streamFile(
   readStream: Readable,

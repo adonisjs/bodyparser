@@ -64,16 +64,20 @@ export class BodyParserMiddleware {
   }
 
   /**
-   * Returns a boolean telling if request `content-type` header
-   * matches the expected types or not
+   * Checks if the request content-type header matches any of the expected types.
+   *
+   * @param request - The HTTP request object
+   * @param types - Array of MIME types to check against
    */
   #isType(request: HttpContext['request'], types: string[]): boolean {
     return !!(types && types.length && request.is(types))
   }
 
   /**
-   * Returns a proper Adonis style exception for popular error codes
-   * returned by https://github.com/stream-utils/raw-body#readme.
+   * Converts raw-body errors into AdonisJS exceptions with appropriate
+   * status codes and error codes.
+   *
+   * @param error - The raw-body error object
    */
   #getExceptionFor(error: { type: string; status: number; message: string }) {
     switch (error.type) {
@@ -95,7 +99,10 @@ export class BodyParserMiddleware {
   }
 
   /**
-   * Returns the tmp path for storing the files temporarly
+   * Generates a temporary file path for storing uploaded files. Uses the
+   * configured tmpFileName function if provided, otherwise generates a UUID.
+   *
+   * @param config - The multipart configuration
    */
   #getTmpPath(config: BodyParserConfig['multipart']) {
     if (typeof config.tmpFileName === 'function') {

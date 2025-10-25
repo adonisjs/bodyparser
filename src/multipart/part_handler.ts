@@ -139,8 +139,8 @@ export class PartHandler {
   }
 
   /**
-   * Start the process of updating the file state
-   * to streaming mode.
+   * Marks the file as being in streaming mode. Should be called before
+   * processing the stream.
    */
   begin() {
     this.file.state = 'streaming'

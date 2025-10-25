@@ -278,19 +278,40 @@ export class Multipart {
   }
 
   /**
-   * Abort request by emitting error
+   * Aborts the multipart stream processing by emitting an error event.
+   * This will stop all file processing and reject the process promise.
    *
    * @param error - The error that caused the abort
+   *
+   * @example
+   * ```ts
+   * multipart.onFile('*', {}, async (part) => {
+   *   if (part.file.size > MAX_SIZE) {
+   *     multipart.abort(new Error('File too large'))
+   *   }
+   * })
+   * ```
    */
   abort(error: any): void {
     this.#form.emit('error', error)
   }
 
   /**
-   * Process the request by going through all the file and field
-   * streams.
+   * Processes the multipart request by parsing all file and field streams.
+   * Must be called after registering all file handlers with onFile.
    *
-   * @param config - Optional configuration overrides
+   * @param config - Optional configuration overrides for this specific request
+   *
+   * @example
+   * ```ts
+   * const multipart = ctx.request.multipart
+   *
+   * multipart.onFile('avatar', {}, async (part, reportChunk) => {
+   *   await streamFile(part, '/tmp/avatar.jpg', reportChunk)
+   * })
+   *
+   * await multipart.process()
+   * ```
    */
   process(config?: Partial<{ limit: string | number; maxFields: number }>): Promise<void> {
     return new Promise((resolve, reject) => {

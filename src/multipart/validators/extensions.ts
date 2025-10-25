@@ -113,7 +113,19 @@ export class ExtensionValidator {
   }
 
   /**
-   * Validate the file extension against allowed extensions
+   * Validates the file extension against the list of allowed extensions.
+   * During streaming, validation waits until the extension is detected.
+   *
+   * @example
+   * ```ts
+   * const validator = new ExtensionValidator(file)
+   * validator.extensions = ['jpg', 'png', 'gif']
+   * validator.validate()
+   *
+   * if (!file.isValid) {
+   *   console.log(file.errors) // Extension validation errors
+   * }
+   * ```
    */
   validate(): void {
     /**

@@ -98,7 +98,20 @@ export class SizeValidator {
   }
 
   /**
-   * Validate the file size against configured limits
+   * Validates the file size against configured limits. Can be called multiple
+   * times during streaming; validation is marked complete only when the file
+   * exceeds the limit or after the stream is consumed.
+   *
+   * @example
+   * ```ts
+   * const validator = new SizeValidator(file)
+   * validator.maxLimit = '2mb'
+   * validator.validate()
+   *
+   * if (!file.isValid) {
+   *   console.log(file.errors) // Size validation errors
+   * }
+   * ```
    */
   validate() {
     if (this.validated) {

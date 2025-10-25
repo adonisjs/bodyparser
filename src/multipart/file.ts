@@ -159,7 +159,19 @@ export class MultipartFile extends Macroable {
   }
 
   /**
-   * Validate the file using configured validators
+   * Runs all configured validators (size and extension) on the file.
+   * Validation results are stored in the errors array.
+   *
+   * @example
+   * ```ts
+   * file.sizeLimit = '2mb'
+   * file.allowedExtensions = ['jpg', 'png']
+   * file.validate()
+   *
+   * if (!file.isValid) {
+   *   console.log(file.errors)
+   * }
+   * ```
    */
   validate() {
     this.#extensionValidator.validate()
@@ -179,11 +191,23 @@ export class MultipartFile extends Macroable {
   }
 
   /**
-   * Moves the file to a given location. Multiple calls to the `move` method are allowed,
-   * in case you want to move a file to multiple locations.
+   * Moves the file from its temporary location to a permanent destination.
+   * Can be called multiple times to copy the file to multiple locations.
    *
-   * @param location - The destination directory
-   * @param options - Move options including name and overwrite flag
+   * @param location - The destination directory path
+   * @param options - Move options including custom filename and overwrite flag
+   *
+   * @example
+   * ```ts
+   * const avatar = request.file('avatar')
+   *
+   * if (avatar) {
+   *   await avatar.move(app.publicPath('uploads'), {
+   *     name: `${Date.now()}.${avatar.extname}`,
+   *     overwrite: true
+   *   })
+   * }
+   * ```
    */
   async move(location: string, options?: { name?: string; overwrite?: boolean }): Promise<void> {
     if (!this.tmpPath) {
@@ -210,7 +234,26 @@ export class MultipartFile extends Macroable {
   }
 
   /**
-   * Returns file JSON representation
+   * Serializes the file to a JSON-compatible object containing all metadata,
+   * validation state, and file paths.
+   *
+   * @example
+   * ```ts
+   * const file = request.file('avatar')
+   * console.log(file?.toJSON())
+   * // {
+   * //   fieldName: 'avatar',
+   * //   clientName: 'profile.jpg',
+   * //   size: 45056,
+   * //   extname: 'jpg',
+   * //   type: 'image',
+   * //   subtype: 'jpeg',
+   * //   state: 'consumed',
+   * //   isValid: true,
+   * //   validated: true,
+   * //   errors: []
+   * // }
+   * ```
    */
   toJSON(): FileJSON {
     return {

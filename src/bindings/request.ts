@@ -16,7 +16,10 @@ import { MultipartFile } from '../multipart/file.ts'
 import type { FileValidationOptions } from '../types.ts'
 
 /**
- * Updates the validation options on the file instance
+ * Updates the validation options on a file instance if they haven't been set already.
+ *
+ * @param file - The multipart file instance to update
+ * @param options - Validation options including size limit and allowed extensions
  */
 function setFileOptions(file: MultipartFile, options?: Partial<FileValidationOptions>) {
   if (file.sizeLimit === undefined && options && options.size) {
@@ -29,8 +32,9 @@ function setFileOptions(file: MultipartFile, options?: Partial<FileValidationOpt
 }
 
 /**
- * A boolean to know if file is an instance of multipart
- * file class
+ * Type guard to check if a value is an instance of MultipartFile.
+ *
+ * @param file - The value to check
  */
 function isInstanceOfFile(file: any): file is MultipartFile {
   return file && file instanceof MultipartFile
@@ -39,7 +43,8 @@ function isInstanceOfFile(file: any): file is MultipartFile {
 debug('extending request class with "file", "files" and "allFiles" macros')
 
 /**
- * Serialize files alongside rest of the request files
+ * Extends the Request class toJSON method to serialize files alongside
+ * the rest of the request data.
  */
 Request.macro('toJSON', function (this: Request) {
   return {
@@ -49,7 +54,20 @@ Request.macro('toJSON', function (this: Request) {
 })
 
 /**
- * Fetch a single file
+ * Extends the Request class with a method to fetch a single uploaded file.
+ * When an array of files exists for the key, returns the first file.
+ *
+ * @example
+ * ```ts
+ * const avatar = request.file('avatar', {
+ *   size: '2mb',
+ *   extnames: ['jpg', 'png', 'jpeg']
+ * })
+ *
+ * if (avatar && avatar.isValid) {
+ *   await avatar.move(app.publicPath('uploads'))
+ * }
+ * ```
  */
 Request.macro(
   'file',
@@ -68,7 +86,22 @@ Request.macro(
 )
 
 /**
- * Fetch an array of files
+ * Extends the Request class with a method to fetch all uploaded files for
+ * a given field name. Always returns an array, even if a single file was uploaded.
+ *
+ * @example
+ * ```ts
+ * const documents = request.files('documents', {
+ *   size: '5mb',
+ *   extnames: ['pdf', 'doc', 'docx']
+ * })
+ *
+ * for (const doc of documents) {
+ *   if (doc.isValid) {
+ *     await doc.move(app.publicPath('uploads'))
+ *   }
+ * }
+ * ```
  */
 Request.macro(
   'files',
@@ -85,7 +118,14 @@ Request.macro(
 )
 
 /**
- * Fetch all files
+ * Extends the Request class with a method to fetch all uploaded files
+ * from the request. Throws an error if the bodyparser middleware is not registered.
+ *
+ * @example
+ * ```ts
+ * const allFiles = request.allFiles()
+ * // { avatar: MultipartFile, documents: [MultipartFile, MultipartFile] }
+ * ```
  */
 Request.macro('allFiles', function allFiles(this: Request) {
   if (!this.__raw_files) {
