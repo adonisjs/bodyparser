@@ -10,7 +10,7 @@
     "!build/tests_helpers"
   ],
   "engines": {
-    "node": ">=18.16.0"
+    "node": ">=24.0.0"
   },
   "exports": {
     ".": "./build/index.js",
