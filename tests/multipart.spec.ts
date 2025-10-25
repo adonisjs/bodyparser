@@ -34,6 +34,7 @@ import {
   unicornNoExtFilePath,
   unicornUppercaseFilePath,
 } from './helpers.ts'
+import { prepareMultipartConfig } from '../src/parsers/multipart.ts'
 
 const BASE_URL = new URL('./tmp/', import.meta.url)
 const BASE_PATH = fileURLToPath(BASE_URL)
@@ -1016,7 +1017,10 @@ test.group('Multipart', () => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()
       const ctx = new HttpContextFactory().merge({ request, response }).create()
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: '20 mb' })
+      const multipart = new Multipart(
+        ctx,
+        prepareMultipartConfig({ maxFields: 1000, limit: '20 mb' })
+      )
 
       multipart.onFile('report', {}, (part, reporter) => {
         return new Promise((resolve, reject) => {
@@ -1049,7 +1053,10 @@ test.group('Multipart', () => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()
       const ctx = new HttpContextFactory().merge({ request, response }).create()
-      const multipart = new Multipart(ctx, { maxFields: 1000, limit: '10 mb' })
+      const multipart = new Multipart(
+        ctx,
+        prepareMultipartConfig({ maxFields: 1000, limit: '10 mb' })
+      )
 
       multipart.onFile(
         '*',
