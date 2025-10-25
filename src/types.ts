@@ -48,7 +48,7 @@ type QueryStringConfig = {
 type BodyParserBaseConfig = {
   /** Character encoding for parsing the body */
   encoding: string
-  /** Maximum size limit for the request body */
+  /** Maximum size (in bytes) limit for the request body */
   limit: string | number
   /** Array of supported MIME types */
   types: string[]
@@ -84,7 +84,11 @@ export type BodyParserRawConfig = BodyParserBaseConfig
 /**
  * Configuration options for parsing multipart form data requests
  */
-export type BodyParserMultipartConfig = BodyParserBaseConfig & {
+export type BodyParserMultipartConfig = {
+  /** Array of supported MIME types */
+  types: string[]
+  /** Maximum size (in bytes) limit for the request body */
+  limit: string | number
   /** Whether to auto-process files or array of route patterns to auto-process */
   autoProcess: boolean | string[]
   /** Maximum number of form fields allowed */
@@ -94,7 +98,7 @@ export type BodyParserMultipartConfig = BodyParserBaseConfig & {
   /** Whether to convert empty strings to null values */
   convertEmptyStringsToNull: boolean
   trimWhitespaces: boolean
-  /** Maximum size for all form fields combined */
+  /** Maximum size (in bytes) for all form fields combined */
   fieldsLimit?: number | string
   /** Function to generate temporary file names */
   tmpFileName?(): string

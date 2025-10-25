@@ -10,19 +10,19 @@
 // @ts-expect-error
 import multiparty from '@poppinss/multiparty'
 
-import bytes from 'bytes'
+import stringHelpers from '@poppinss/utils/string'
 import { Exception } from '@poppinss/utils/exception'
 import type { HttpContext } from '@adonisjs/http-server'
 
 import debug from '../debug.ts'
 import { FormFields } from '../form_fields.ts'
 import { PartHandler } from './part_handler.ts'
+import { type prepareMultipartConfig } from '../parsers/multipart.ts'
 import type {
   MultipartStream,
   FileValidationOptions,
   PartHandler as PartHandlerType,
 } from '../types.ts'
-import { formBodyNormalizers } from '../utils.ts'
 
 /**
  * Multipart class offers a low level API to interact with the incoming
@@ -38,11 +38,7 @@ export class Multipart {
   /**
    * Configuration options for multipart processing
    */
-  #config: Partial<{
-    limit: string | number
-    fieldsLimit: string | number
-    maxFields: number
-  }>
+  #config: ReturnType<typeof prepareMultipartConfig>
 
   /**
    * The registered handlers to handle the file uploads
@@ -84,11 +80,6 @@ export class Multipart {
   #upperLimit?: number
 
   /**
-   * Total size in bytes for all the fields (not the files)
-   */
-  #maxFieldsSize?: number
-
-  /**
    * A track of total number of file bytes processed so far
    */
   #processedBytes: number = 0
@@ -107,28 +98,14 @@ export class Multipart {
    */
   constructor(
     ctx: HttpContext,
-    config: Partial<{
-      limit: string | number
-      fieldsLimit: string | number
-      maxFields: number
-      convertEmptyStringsToNull: boolean
-      trimWhitespaces: boolean
-    }> = {},
+    config: ReturnType<typeof prepareMultipartConfig> = {},
     _featureFlags: Record<string, never> = {}
   ) {
-    let normalizer: undefined | ((value: string) => string | null)
-    if (config.convertEmptyStringsToNull && config.trimWhitespaces) {
-      normalizer = formBodyNormalizers.trimWhitespacesAndConvertToNull
-    } else if (config.convertEmptyStringsToNull) {
-      normalizer = formBodyNormalizers.convertToNull
-    } else if (config.trimWhitespaces) {
-      normalizer = formBodyNormalizers.trimWhitespaces
-    }
-
     this.#ctx = ctx
     this.#config = config
-    this.#fields = new FormFields(normalizer)
-    this.#files = new FormFields(normalizer)
+    this.#fields = new FormFields(config.normalizer)
+    this.#files = new FormFields(config.normalizer)
+    this.#upperLimit = config.limit
   }
 
   /**
@@ -264,30 +241,6 @@ export class Multipart {
   }
 
   /**
-   * Processes the user config and computes the `upperLimit` value from
-   * it.
-   */
-  #processConfig(config?: Partial<{ limit: string | number; maxFields: number }>) {
-    this.#config = Object.assign(this.#config, config)
-
-    /**
-     * Getting bytes from the `config.fieldsLimit` option, which can
-     * also be a string.
-     */
-    this.#maxFieldsSize =
-      typeof this.#config!.fieldsLimit === 'string'
-        ? bytes(this.#config.fieldsLimit)!
-        : this.#config!.fieldsLimit
-
-    /**
-     * Getting bytes from the `config.limit` option, which can
-     * also be a string
-     */
-    this.#upperLimit =
-      typeof this.#config!.limit === 'string' ? bytes(this.#config!.limit)! : this.#config!.limit
-  }
-
-  /**
    * Mark the process as finished
    */
   #finish(newState: 'error' | 'success') {
@@ -351,11 +304,17 @@ export class Multipart {
       }
 
       this.state = 'processing'
-      this.#processConfig(config)
+
+      /**
+       * Use local upperlimit
+       */
+      if (config && config.limit) {
+        this.#upperLimit = stringHelpers.bytes.parse(config.limit)!
+      }
 
       this.#form = new multiparty.Form({
-        maxFields: this.#config!.maxFields,
-        maxFieldsSize: this.#maxFieldsSize,
+        maxFields: config?.maxFields ?? this.#config.maxFields,
+        maxFieldsSize: this.#config.fieldsLimit,
       })
 
       debug('processing multipart body')

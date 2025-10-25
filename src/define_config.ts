@@ -52,7 +52,6 @@ export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig
     multipart: {
       autoProcess: true,
       processManually: [],
-      encoding: 'utf-8',
       maxFields: 1000,
       limit: '20mb',
       types: ['multipart/form-data'],

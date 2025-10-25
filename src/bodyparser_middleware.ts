@@ -27,6 +27,7 @@ import { parseForm, prepareFormParserOptions } from './parsers/form.ts'
  * Bindings to extend request
  */
 import './bindings/request.js'
+import { prepareMultipartConfig } from './parsers/multipart.ts'
 
 /**
  * BodyParser middleware parses the incoming request body and sets it as
@@ -42,6 +43,7 @@ export class BodyParserMiddleware {
     raw: ReturnType<typeof prepareTextParserOptions>
     form: ReturnType<typeof prepareFormParserOptions>
     json: ReturnType<typeof prepareJSONParserOptions>
+    multipart: ReturnType<typeof prepareMultipartConfig>
   }
 
   /**
@@ -56,6 +58,7 @@ export class BodyParserMiddleware {
       raw: prepareTextParserOptions(this.#config.raw),
       form: prepareFormParserOptions(this.#config.form),
       json: prepareJSONParserOptions(this.#config.json),
+      multipart: prepareMultipartConfig(this.#config.multipart),
     }
     debug('using config %O', this.#config)
   }
@@ -145,13 +148,7 @@ export class BodyParserMiddleware {
     if (this.#isType(ctx.request, multipartConfig.types)) {
       debug('detected multipart request "%s:%s"', requestMethod, requestUrl)
 
-      ctx.request.multipart = new Multipart(
-        ctx,
-        {
-          ...multipartConfig,
-        },
-        {}
-      )
+      ctx.request.multipart = new Multipart(ctx, this.#parsersConfig.multipart, {})
       ctx.request.bodyType = 'multipart'
 
       /**
