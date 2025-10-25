@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import bytes from 'bytes'
+import stringHelpers from '@poppinss/utils/string'
 import { type MultipartFile } from '../file.ts'
 
 /**
@@ -49,10 +49,7 @@ export class SizeValidator {
     this.#maximumAllowedLimit = limit
 
     if (this.#maximumAllowedLimit) {
-      this.#bytesLimit =
-        typeof this.#maximumAllowedLimit === 'string'
-          ? bytes(this.#maximumAllowedLimit)!
-          : this.#maximumAllowedLimit
+      this.#bytesLimit = stringHelpers.bytes.parse(this.#maximumAllowedLimit)!
     }
   }
 
@@ -72,7 +69,7 @@ export class SizeValidator {
     this.#file.errors.push({
       fieldName: this.#file.fieldName,
       clientName: this.#file.clientName,
-      message: `File size should be less than ${bytes(this.#bytesLimit)}`,
+      message: `File size should be less than ${stringHelpers.bytes.format(this.#bytesLimit)}`,
       type: 'size',
     })
   }
