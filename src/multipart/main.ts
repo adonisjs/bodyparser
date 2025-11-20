@@ -209,9 +209,8 @@ export class Multipart {
         try {
           await partHandler.reportProgress(line, lineLength)
         } catch (err) {
-          this.#ctx.logger.fatal(
-            'Unhandled multipart stream error. Make sure to handle "error" events for all manually processed streams'
-          )
+          part.emit('error', error)
+          this.abort(error)
         }
       })
 
