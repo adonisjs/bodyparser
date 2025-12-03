@@ -26,7 +26,7 @@ import { parseForm, prepareFormParserOptions } from './parsers/form.ts'
 /**
  * Bindings to extend request
  */
-import './bindings/request.js'
+import './bindings/request.ts'
 import { prepareMultipartConfig } from './parsers/multipart.ts'
 
 /**

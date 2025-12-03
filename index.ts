@@ -15,10 +15,10 @@ export { defineConfig } from './src/define_config.ts'
 export { MultipartFile, Multipart }
 
 /**
- * Extending request class with custom properties.
+ * Extending HttpRequest class with custom properties.
  */
 declare module '@adonisjs/http-server' {
-  export interface Request {
+  export interface HttpRequest {
     multipart: Multipart
     bodyType: 'unknown' | 'urlencoded' | 'multipart' | 'json' | 'raw'
     __raw_files: Record<string, MultipartFile | MultipartFile[]>

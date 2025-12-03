@@ -8,7 +8,7 @@
  */
 
 import lodash from '@poppinss/utils/lodash'
-import { Request } from '@adonisjs/http-server'
+import { HttpRequest } from '@adonisjs/http-server'
 import { RuntimeException } from '@poppinss/utils/exception'
 
 import debug from '../debug.ts'
@@ -46,7 +46,7 @@ debug('extending request class with "file", "files" and "allFiles" macros')
  * Extends the Request class toJSON method to serialize files alongside
  * the rest of the request data.
  */
-Request.macro('toJSON', function (this: Request) {
+HttpRequest.macro('toJSON', function (this: HttpRequest) {
   return {
     ...this.serialize(),
     files: this['__raw_files'] || {},
@@ -69,9 +69,9 @@ Request.macro('toJSON', function (this: Request) {
  * }
  * ```
  */
-Request.macro(
+HttpRequest.macro(
   'file',
-  function getFile(this: Request, key: string, options?: Partial<FileValidationOptions>) {
+  function getFile(this: HttpRequest, key: string, options?: Partial<FileValidationOptions>) {
     let file: unknown = lodash.get(this.allFiles(), key)
     file = Array.isArray(file) ? file[0] : file
 
@@ -103,9 +103,9 @@ Request.macro(
  * }
  * ```
  */
-Request.macro(
+HttpRequest.macro(
   'files',
-  function getFiles(this: Request, key: string, options?: Partial<FileValidationOptions>) {
+  function getFiles(this: HttpRequest, key: string, options?: Partial<FileValidationOptions>) {
     let files: unknown[] = lodash.get(this.allFiles(), key)
     files = Array.isArray(files) ? files : files ? [files] : []
 
@@ -127,7 +127,7 @@ Request.macro(
  * // { avatar: MultipartFile, documents: [MultipartFile, MultipartFile] }
  * ```
  */
-Request.macro('allFiles', function allFiles(this: Request) {
+HttpRequest.macro('allFiles', function allFiles(this: HttpRequest) {
   if (!this.__raw_files) {
     throw new RuntimeException(
       'Cannot read files. Make sure the bodyparser middleware is registered'
