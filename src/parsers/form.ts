@@ -7,8 +7,8 @@
  * file that was distributed with this source code.
  */
 
-import qs, { type IParseOptions } from 'qs'
 import type { IncomingMessage } from 'node:http'
+import qs, { type IParseOptions } from '@poppinss/qs'
 import { type Encoding, type Options as RawBodyOptions } from 'raw-body'
 
 import { formBodyNormalizers } from '../utils.ts'
