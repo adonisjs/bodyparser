@@ -27,8 +27,8 @@ AdonisJS Bodyparser is open-sourced software licensed under the [MIT license](LI
 [typescript-image]: https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript
 [typescript-url]:  "typescript"
 
-[npm-image]: https://img.shields.io/npm/v/@adonisjs/bodyparser/alpha.svg?style=for-the-badge&logo=npm
-[npm-url]: https://www.npmjs.com/package/@adonisjs/bodyparser/v/alpha "npm"
+[npm-image]: https://img.shields.io/npm/v/@adonisjs/bodyparser/latest.svg?style=for-the-badge&logo=npm
+[npm-url]: https://www.npmjs.com/package/@adonisjs/bodyparser/v/latest "npm"
 
 [license-image]: https://img.shields.io/npm/l/@adonisjs/bodyparser?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md "license"
