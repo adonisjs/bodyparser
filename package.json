@@ -26,7 +26,7 @@
     "typecheck": "tsc --noEmit",
     "clean": "del-cli build",
     "precompile": "npm run lint && npm run clean",
-    "compile": "tsup-node && tsc --emitDeclarationOnly --declaration",
+    "compile": "tsdown && tsc --emitDeclarationOnly --declaration",
     "build": "npm run compile",
     "version": "npm run build",
     "prepublishOnly": "npm run build",
@@ -64,7 +64,7 @@
     "reflect-metadata": "^0.2.2",
     "release-it": "^19.1.0",
     "supertest": "^7.1.4",
-    "tsup": "^8.5.1",
+    "tsdown": "^0.17.4",
     "typedoc": "^0.28.15",
     "typescript": "^5.9.3",
     "undici": "^7.16.0"
@@ -102,7 +102,7 @@
     "access": "public",
     "provenance": true
   },
-  "tsup": {
+  "tsdown": {
     "entry": [
       "./index.ts",
       "./src/types.ts",
@@ -112,8 +112,11 @@
     "outDir": "./build",
     "clean": true,
     "format": "esm",
+    "minify": "dce-only",
+    "fixedExtension": false,
     "dts": false,
-    "sourcemap": false,
+    "treeshake": false,
+    "sourcemaps": false,
     "target": "esnext"
   },
   "release-it": {
