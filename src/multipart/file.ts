@@ -219,7 +219,7 @@ export class MultipartFile extends Macroable {
     }
 
     options = Object.assign(
-      { name: `${string.random(40)}.${this.extname ?? 'unknown'}`, overwrite: true },
+      { name: `${string.uuid()}.${this.extname ?? 'unknown'}`, overwrite: true },
       options
     )
     const filePath = join(location, options.name!)
