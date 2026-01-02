@@ -15,6 +15,7 @@ import { moveFile } from '../utils.ts'
 import { SizeValidator } from './validators/size.ts'
 import { ExtensionValidator } from './validators/extensions.ts'
 import type { FileJSON, FileUploadError, FileValidationOptions } from '../types.ts'
+import string from '@poppinss/utils/string'
 
 /**
  * The file holds the meta/data for an uploaded file, along with
@@ -217,7 +218,10 @@ export class MultipartFile extends Macroable {
       })
     }
 
-    options = Object.assign({ name: this.clientName, overwrite: true }, options)
+    options = Object.assign(
+      { name: `${string.random(40)}.${this.extname ?? 'unknown'}`, overwrite: true },
+      options
+    )
     const filePath = join(location, options.name!)
 
     try {

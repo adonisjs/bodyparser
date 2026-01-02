@@ -8,6 +8,7 @@
  */
 
 import { tmpdir } from 'node:os'
+import string from '@poppinss/utils/string'
 import { join, isAbsolute } from 'node:path'
 import { Exception } from '@poppinss/utils/exception'
 import type { HttpContext } from '@adonisjs/http-server'
@@ -110,7 +111,7 @@ export class BodyParserMiddleware {
       return isAbsolute(tmpPath) ? tmpPath : join(tmpdir(), tmpPath)
     }
 
-    return join(tmpdir(), crypto.randomUUID())
+    return join(tmpdir(), string.uuid())
   }
 
   /**
