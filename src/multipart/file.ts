@@ -8,6 +8,7 @@
  */
 
 import { join } from 'node:path'
+import crypto from 'node:crypto'
 import { Exception } from '@poppinss/utils'
 import Macroable from '@poppinss/macroable'
 
@@ -181,7 +182,10 @@ export class MultipartFile extends Macroable {
       })
     }
 
-    options = Object.assign({ name: this.clientName, overwrite: true }, options)
+    options = Object.assign(
+      { name: `${crypto.randomUUID()}.${this.extname ?? 'unknown'}`, overwrite: true },
+      options
+    )
     const filePath = join(location, options.name!)
 
     try {

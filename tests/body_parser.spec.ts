@@ -24,7 +24,7 @@ import {
 import { AppFactory } from '@adonisjs/application/factories'
 
 import { Multipart } from '../src/multipart/main.js'
-import { MultipartFile } from '../src/multipart/file.js'
+import { type MultipartFile } from '../src/multipart/file.js'
 import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.js'
 import { packageFilePath, packageFileSize, unicornFilePath } from '../tests_helpers/main.js'
 
@@ -998,6 +998,7 @@ test.group('BodyParser Middleware | multipart', () => {
           await pkgFile.move(fs.basePath)
           assert.equal(pkgFile.state, 'moved')
           res.writeHead(200, { 'content-type': 'application/json' })
+          res.write(JSON.stringify({ file: pkgFile }))
           res.end()
         } catch (error) {
           res.writeHead(500, { 'content-type': 'application/json' })
@@ -1006,9 +1007,12 @@ test.group('BodyParser Middleware | multipart', () => {
       })
     })
 
-    await supertest(server).post('/').attach('package', packageFilePath).expect(200)
+    const { body } = await supertest(server)
+      .post('/')
+      .attach('package', packageFilePath)
+      .expect(200)
 
-    const uploadedFileContents = await fs.contents('package.json')
+    const uploadedFileContents = await fs.contents(body.file.fileName)
     const originalFileContents = await readFile(packageFilePath, 'utf-8')
     assert.equal(uploadedFileContents, originalFileContents)
   })
@@ -1055,7 +1059,7 @@ test.group('BodyParser Middleware | multipart', () => {
         const pkgFile = ctx.request.file('package')!
 
         try {
-          await pkgFile.move(fs.basePath, { overwrite: false })
+          await pkgFile.move(fs.basePath, { name: 'package.json', overwrite: false })
         } catch (error) {
           assert.equal(
             error.message,
