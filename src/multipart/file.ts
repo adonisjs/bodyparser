@@ -17,7 +17,7 @@ import { SizeValidator } from './validators/size.ts'
 import { ExtensionValidator } from './validators/extensions.ts'
 import type { FileJSON, FileUploadError, FileValidationOptions } from '../types.ts'
 
-const STORE_IN_FLASH = Symbol('store_in_flash')
+const STORE_IN_FLASH = Symbol.for('store_in_flash')
 
 /**
  * The file holds the meta/data for an uploaded file, along with
