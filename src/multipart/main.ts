@@ -209,8 +209,8 @@ export class Multipart {
         try {
           await partHandler.reportProgress(line, lineLength)
         } catch (err) {
-          part.emit('error', error)
-          this.abort(error)
+          part.emit('error', err)
+          this.abort(err)
         }
       })
 
