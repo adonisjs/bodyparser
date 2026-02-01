@@ -9,24 +9,28 @@
 
 import { join } from 'node:path'
 import Macroable from '@poppinss/macroable'
+import string from '@poppinss/utils/string'
 import { Exception } from '@poppinss/utils/exception'
 
 import { moveFile } from '../utils.ts'
 import { SizeValidator } from './validators/size.ts'
 import { ExtensionValidator } from './validators/extensions.ts'
 import type { FileJSON, FileUploadError, FileValidationOptions } from '../types.ts'
-import string from '@poppinss/utils/string'
+
+const STORE_IN_FLASH = Symbol('store_in_flash')
 
 /**
  * The file holds the meta/data for an uploaded file, along with
  * any errors that occurred during the upload process.
  */
 export class MultipartFile extends Macroable {
+  [STORE_IN_FLASH] = false
+
   /**
    * File validators for size and extension validation
    */
-  #sizeValidator = new SizeValidator(this)
-  #extensionValidator = new ExtensionValidator(this)
+  sizeValidator = new SizeValidator(this)
+  extensionValidator = new ExtensionValidator(this)
 
   /**
    * A boolean to know if file is an instance of this class
@@ -102,7 +106,7 @@ export class MultipartFile extends Macroable {
    * Whether or not the validations have been executed
    */
   get validated(): boolean {
-    return this.#sizeValidator.validated && this.#extensionValidator.validated
+    return this.sizeValidator.validated && this.extensionValidator.validated
   }
 
   /**
@@ -123,22 +127,22 @@ export class MultipartFile extends Macroable {
    * The maximum file size limit
    */
   get sizeLimit() {
-    return this.#sizeValidator.maxLimit
+    return this.sizeValidator.maxLimit
   }
 
   set sizeLimit(limit: number | string | undefined) {
-    this.#sizeValidator.maxLimit = limit
+    this.sizeValidator.maxLimit = limit
   }
 
   /**
    * Extensions allowed
    */
   get allowedExtensions() {
-    return this.#extensionValidator.extensions
+    return this.extensionValidator.extensions
   }
 
   set allowedExtensions(extensions: string[] | undefined) {
-    this.#extensionValidator.extensions = extensions
+    this.extensionValidator.extensions = extensions
   }
 
   /**
@@ -175,8 +179,8 @@ export class MultipartFile extends Macroable {
    * ```
    */
   validate() {
-    this.#extensionValidator.validate()
-    this.#sizeValidator.validate()
+    this.extensionValidator.validate()
+    this.sizeValidator.validate()
   }
 
   /**
