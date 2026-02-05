@@ -17,7 +17,7 @@ export class FormFields {
   /**
    * Internal storage for form fields
    */
-  #fields: any = {}
+  #fields: any = Object.create(null)
 
   #normalizer?: (value: string) => string | null
 
