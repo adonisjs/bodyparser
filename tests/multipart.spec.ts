@@ -1132,7 +1132,9 @@ test.group('Multipart', () => {
       res.end()
     })
 
-    await supertest(server).post('/').attach('file', fs.basePath + '/fake.png')
+    await supertest(server)
+      .post('/')
+      .attach('file', fs.basePath + '/fake.png')
 
     assert.property(files, 'file')
 
