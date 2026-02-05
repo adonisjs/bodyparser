@@ -1098,6 +1098,49 @@ test.group('Multipart', () => {
     assert.lengthOf(report.errors, 0)
   })
 
+  test('should not buffer entire file when magic number detection fails', async ({
+    assert,
+    fs,
+  }) => {
+    let files: null | Record<string, MultipartFile | MultipartFile[]> = null
+
+    /**
+     * Create a fake .png file filled with random data that
+     * won't match any magic number signature.
+     */
+    const fakeContent = Buffer.alloc(8192, 0x41)
+    await fs.create('fake.png', fakeContent.toString())
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 16000 })
+
+      multipart.onFile('file', {}, (part, reporter) => {
+        return new Promise((resolve, reject) => {
+          part.on('data', (line) => {
+            reporter(line)
+          })
+          part.on('error', reject)
+          part.on('end', resolve)
+        })
+      })
+
+      await multipart.process()
+      files = ctx.request['__raw_files']
+      res.end()
+    })
+
+    await supertest(server).post('/').attach('file', fs.basePath + '/fake.png')
+
+    assert.property(files, 'file')
+
+    const file = files!.file as MultipartFile
+    assert.equal(file.state, 'consumed')
+    assert.equal(file.extname, 'png')
+  })
+
   test('merge fields and files together', async ({ assert }) => {
     const stack: string[] = []
 
