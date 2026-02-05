@@ -95,9 +95,18 @@ export class PartHandler {
       return
     }
 
-    const fileType = this.#canFileTypeBeDetected
+    let fileType = this.#canFileTypeBeDetected
       ? await getFileType(this.#buff)
       : computeFileTypeFromName(this.file.clientName, this.file.headers)
+
+    /**
+     * If magic number detection failed after enough bytes have been
+     * buffered, fall back to detecting the file type from the
+     * filename and headers to prevent unbounded memory growth.
+     */
+    if (!fileType && this.#buff.length >= 4100) {
+      fileType = computeFileTypeFromName(this.file.clientName, this.file.headers)
+    }
 
     if (fileType) {
       this.file.extname = fileType.ext
