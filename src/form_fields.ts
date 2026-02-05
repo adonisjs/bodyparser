@@ -14,7 +14,7 @@ import lodash from '@poppinss/utils/lodash'
  * array gracefully
  */
 export class FormFields {
-  #fields: any = {}
+  #fields: any = Object.create(null)
   #config: { convertEmptyStringsToNull: boolean }
 
   constructor(config: { convertEmptyStringsToNull: boolean }) {
