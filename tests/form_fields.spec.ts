@@ -95,7 +95,7 @@ test.group('Form Fields Parser', () => {
     assert.deepEqual(formFields.get(), { username: null })
   })
 
-  test('should not pollute Object.prototype via __proto__', ({ assert }) => {
+  test('should not pollute Object.prototype with __proto__ property', ({ assert }) => {
     const formFields = new FormFields()
     formFields.add('__proto__.polluted', 'yes')
 
@@ -103,7 +103,7 @@ test.group('Form Fields Parser', () => {
     assert.isUndefined(clean['polluted'])
   })
 
-  test('should not pollute Object.prototype via constructor.prototype', ({ assert }) => {
+  test('should not pollute Object.prototype with constructor.prototype', ({ assert }) => {
     const formFields = new FormFields()
     formFields.add('constructor.prototype.polluted2', 'yes')
 

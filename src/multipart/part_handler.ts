@@ -63,8 +63,7 @@ export class PartHandler {
    * Think of this as using the optimal way for validating the file type
    */
   get #canFileTypeBeDetected() {
-    const fileExtension = extname(this.#part.filename).replace(/^\./, '') as any
-
+    const fileExtension = extname(this.#part.filename).replace(/^\./, '')
     return fileExtension ? supportMagicFileTypes.has(fileExtension) : true
   }
 
