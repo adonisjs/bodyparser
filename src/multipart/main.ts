@@ -109,8 +109,8 @@ export class Multipart {
     featureFlags: {
       mergeFieldsAndFiles: boolean
     } = {
-        mergeFieldsAndFiles: false,
-      }
+      mergeFieldsAndFiles: false,
+    }
   ) {
     this.#ctx = ctx
     this.#config = config
