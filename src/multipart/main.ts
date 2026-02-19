@@ -286,7 +286,7 @@ export class Multipart {
   #finish(newState: 'error' | 'success') {
     if (this.state === 'idle' || this.state === 'processing') {
       this.state = newState
-        ; (this.#ctx.request as any)['__raw_files'] = this.#files.get()
+      ;(this.#ctx.request as any)['__raw_files'] = this.#files.get()
       this.#ctx.request.setInitialBody(this.#fields.get())
     }
   }
