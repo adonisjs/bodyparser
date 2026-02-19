@@ -109,8 +109,8 @@ export class Multipart {
     featureFlags: {
       mergeFieldsAndFiles: boolean
     } = {
-      mergeFieldsAndFiles: false,
-    }
+        mergeFieldsAndFiles: false,
+      }
   ) {
     this.#ctx = ctx
     this.#config = config
@@ -226,8 +226,8 @@ export class Multipart {
         try {
           await partHandler.reportProgress(line, lineLength)
         } catch (err) {
-          part.emit('error', error)
-          this.abort(error)
+          part.emit('error', err)
+          this.abort(err)
         }
       })
 
@@ -286,7 +286,7 @@ export class Multipart {
   #finish(newState: 'error' | 'success') {
     if (this.state === 'idle' || this.state === 'processing') {
       this.state = newState
-      ;(this.#ctx.request as any)['__raw_files'] = this.#files.get()
+        ; (this.#ctx.request as any)['__raw_files'] = this.#files.get()
       this.#ctx.request.setInitialBody(this.#fields.get())
     }
   }
