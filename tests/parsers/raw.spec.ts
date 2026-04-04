@@ -10,6 +10,7 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
+import { gzipSync } from 'node:zlib'
 import { parseText, prepareTextParserOptions } from '../../src/parsers/text.ts'
 
 test.group('Raw parser', () => {
@@ -22,6 +23,42 @@ test.group('Raw parser', () => {
 
     const { text } = await supertest(server).post('/').send('Hello World!').expect(200)
     assert.equal(text, 'Hello World!')
+  })
+
+  test('inflate gzip request body', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const body = await parseText(req, prepareTextParserOptions({}))
+      res.writeHead(200)
+      res.end(body)
+    })
+
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+
+    try {
+      const address = server.address()
+      if (!address || typeof address === 'string') {
+        throw new Error('Failed to resolve test server address')
+      }
+
+      const response = await fetch(`http://127.0.0.1:${address.port}/`, {
+        method: 'POST',
+        headers: {
+          'content-encoding': 'gzip',
+        },
+        body: gzipSync(Buffer.from('Hello World!')),
+      })
+
+      assert.equal(response.status, 200)
+      assert.equal(await response.text(), 'Hello World!')
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => {
+          if (error) return reject(error)
+
+          resolve()
+        })
+      })
+    }
   })
 
   test('fail with 415 when content encoding is invalid', async ({ assert }) => {

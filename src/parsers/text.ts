@@ -25,7 +25,6 @@ export function prepareTextParserOptions(options: Partial<BodyParserRawConfig>):
   return {
     encoding: options.encoding ?? 'utf8',
     limit: options.limit ?? '56kb',
-    length: 0,
   }
 }
 
