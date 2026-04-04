@@ -10,6 +10,7 @@
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { createServer } from 'node:http'
+import { gzipSync } from 'node:zlib'
 import { parseJSON, prepareJSONParserOptions } from '../../src/parsers/json.ts'
 
 test.group('JSON parser', () => {
@@ -51,6 +52,59 @@ test.group('JSON parser', () => {
       .expect(415)
 
     assert.equal(text, 'Unsupported Content-Encoding: invalid')
+  })
+
+  test('parse valid gzip request body', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      try {
+        const body = await parseJSON(req, prepareJSONParserOptions({}))
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify(body))
+      } catch (error) {
+        res.writeHead(error.status || 500, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            message: error.message,
+            status: error.status,
+            code: error.code,
+            type: error.type,
+          })
+        )
+      }
+    })
+
+    const payload = gzipSync(Buffer.from(JSON.stringify({ foo: { bar: 'baz' } })))
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+
+    try {
+      const address = server.address()
+      if (!address || typeof address === 'string') {
+        throw new Error('Failed to resolve test server address')
+      }
+
+      const response = await fetch(`http://127.0.0.1:${address.port}/`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'content-encoding': 'gzip',
+        },
+        body: payload,
+      })
+
+      assert.equal(response.status, 200)
+      assert.deepEqual(await response.json(), {
+        parsed: { foo: { bar: 'baz' } },
+        raw: JSON.stringify({ foo: { bar: 'baz' } }),
+      })
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((error) => {
+          if (error) return reject(error)
+
+          resolve()
+        })
+      })
+    }
   })
 
   test('return empty string when content-length=0 and strict is false', async ({ assert }) => {
