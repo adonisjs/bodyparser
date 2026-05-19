@@ -413,7 +413,7 @@ test.group('Multipart', () => {
         await multipart.process()
         await multipart.process()
         res.end()
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(500)
         res.end(error.message)
       }
@@ -434,7 +434,7 @@ test.group('Multipart', () => {
       try {
         await multipart.process()
         res.end()
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(500)
         res.end(error.message)
       }
@@ -455,7 +455,7 @@ test.group('Multipart', () => {
       try {
         await multipart.process()
         res.end()
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(500)
         res.end(error.message)
       }
@@ -489,7 +489,7 @@ test.group('Multipart', () => {
       try {
         await multipart.process()
         res.end()
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(500)
         res.end(error.message)
       }
@@ -503,7 +503,7 @@ test.group('Multipart', () => {
         .field('age', '22')
 
       assert.equal(text, 'request entity too large')
-    } catch (error) {
+    } catch (error: any) {
       assert.oneOf(error.code, ['ECONNABORTED', 'ECONNRESET'])
     }
   })
@@ -946,7 +946,7 @@ test.group('Multipart', () => {
 
       try {
         await multipart.process()
-      } catch (error) {
+      } catch (error: any) {
         console.log(error)
       }
       files = ctx.request['__raw_files'] || null
@@ -990,7 +990,7 @@ test.group('Multipart', () => {
 
       try {
         await multipart.process()
-      } catch (error) {
+      } catch (error: any) {
         console.log(error)
       }
       files = ctx.request['__raw_files'] || null
@@ -1074,7 +1074,7 @@ test.group('Multipart', () => {
 
       try {
         await multipart.process()
-      } catch (error) {
+      } catch (error: any) {
         console.log(error)
       }
       files = ctx.request['__raw_files'] || null

@@ -38,7 +38,7 @@ test.group('JSON parser', () => {
         const body = await parseJSON(req, prepareJSONParserOptions({}))
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -60,7 +60,7 @@ test.group('JSON parser', () => {
         const body = await parseJSON(req, prepareJSONParserOptions({}))
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status || 500, { 'content-type': 'application/json' })
         res.end(
           JSON.stringify({
@@ -158,7 +158,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -184,7 +184,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -210,7 +210,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -239,7 +239,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -265,7 +265,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -291,7 +291,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -317,7 +317,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -348,7 +348,7 @@ test.group('JSON parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }

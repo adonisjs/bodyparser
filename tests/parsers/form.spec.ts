@@ -38,7 +38,7 @@ test.group('Form parser', () => {
         const body = await parseForm(req, prepareFormParserOptions({}))
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -67,7 +67,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -99,7 +99,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -131,7 +131,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -154,7 +154,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -177,7 +177,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -203,7 +203,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -229,7 +229,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -255,7 +255,7 @@ test.group('Form parser', () => {
         )
         res.writeHead(200, { 'content-type': 'application/json' })
         res.end(JSON.stringify(body))
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }

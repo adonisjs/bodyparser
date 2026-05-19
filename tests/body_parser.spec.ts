@@ -150,7 +150,7 @@ test.group('BodyParser Middleware | form data', () => {
 
       try {
         await middleware.handle(ctx, async () => {})
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -180,7 +180,7 @@ test.group('BodyParser Middleware | form data', () => {
 
       try {
         await middleware.handle(ctx, async () => {})
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -241,7 +241,7 @@ test.group('BodyParser Middleware | form data', () => {
 
       try {
         await middleware.handle(ctx, async () => {})
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -272,7 +272,7 @@ test.group('BodyParser Middleware | form data', () => {
 
       try {
         await middleware.handle(ctx, async () => {})
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -337,7 +337,7 @@ test.group('BodyParser Middleware | json', () => {
 
       try {
         await middleware.handle(ctx, async () => {})
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -436,7 +436,7 @@ test.group('BodyParser Middleware | raw body', () => {
 
       try {
         await middleware.handle(ctx, async () => {})
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -559,7 +559,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
       try {
         await middleware.handle(ctx, async () => {})
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
@@ -1072,7 +1072,7 @@ test.group('BodyParser Middleware | multipart', () => {
           res.writeHead(200, { 'content-type': 'application/json' })
           res.write(JSON.stringify({ file: pkgFile }))
           res.end()
-        } catch (error) {
+        } catch (error: any) {
           res.writeHead(500, { 'content-type': 'application/json' })
           res.end(error.message)
         }
@@ -1106,7 +1106,7 @@ test.group('BodyParser Middleware | multipart', () => {
           assert.equal(pkgFile.state, 'moved')
           res.writeHead(200, { 'content-type': 'application/json' })
           res.end()
-        } catch (error) {
+        } catch (error: any) {
           res.writeHead(500, { 'content-type': 'application/json' })
           res.end(error.message)
         }
@@ -1132,7 +1132,7 @@ test.group('BodyParser Middleware | multipart', () => {
 
         try {
           await pkgFile.move(fs.basePath, { name: 'package.json', overwrite: false })
-        } catch (error) {
+        } catch (error: any) {
           assert.equal(
             error.message,
             `"package.json" already exists at "${fs.basePath}". Set "overwrite = true" to overwrite it`
@@ -1350,7 +1350,7 @@ test.group('BodyParser Middleware | multipart', () => {
           pkgFile.sizeLimit = 20
           res.writeHead(200)
           res.end()
-        } catch (error) {
+        } catch (error: any) {
           res.writeHead(500)
           res.end(error.message)
         }
@@ -1379,7 +1379,7 @@ test.group('BodyParser Middleware | multipart', () => {
           pkgFile.allowedExtensions = ['jpg']
           res.writeHead(200)
           res.end()
-        } catch (error) {
+        } catch (error: any) {
           res.writeHead(500)
           res.end(error.message)
         }

@@ -104,7 +104,7 @@ export async function parseJSON(
       parsed: safeParse(requestBody, options.reviver),
       raw: requestBody,
     }
-  } catch (error) {
+  } catch (error: any) {
     error.status = 400
     error.body = requestBody
     throw error

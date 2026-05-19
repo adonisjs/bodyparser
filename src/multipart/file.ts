@@ -231,7 +231,7 @@ export class MultipartFile extends Macroable {
     try {
       await moveFile(this.tmpPath, filePath, { overwrite: options.overwrite! })
       this.markAsMoved(options.name!, filePath)
-    } catch (error) {
+    } catch (error: any) {
       if (error.message.includes('destination file already')) {
         throw new Exception(
           `"${options.name!}" already exists at "${location}". Set "overwrite = true" to overwrite it`

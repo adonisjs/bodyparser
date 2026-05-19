@@ -205,7 +205,7 @@ export class BodyParserMiddleware {
           const tmpPath = this.#getTmpPath(multipartConfig)
           await streamFile(part, tmpPath, reporter)
           return { tmpPath }
-        } catch (error) {
+        } catch (error: any) {
           ctx.request.multipart.abort(error)
         }
       })
@@ -213,7 +213,7 @@ export class BodyParserMiddleware {
       try {
         await ctx.request.multipart.process()
         return next()
-      } catch (error) {
+      } catch (error: any) {
         throw error
       }
     }
@@ -231,7 +231,7 @@ export class BodyParserMiddleware {
         ctx.request.updateRawBody(raw)
         ctx.request.bodyType = 'urlencoded'
         return next()
-      } catch (error) {
+      } catch (error: any) {
         throw this.#getExceptionFor(error)
       }
     }
@@ -249,7 +249,7 @@ export class BodyParserMiddleware {
         ctx.request.updateRawBody(raw)
         ctx.request.bodyType = 'json'
         return next()
-      } catch (error) {
+      } catch (error: any) {
         throw this.#getExceptionFor(error)
       }
     }
@@ -266,7 +266,7 @@ export class BodyParserMiddleware {
         ctx.request.updateRawBody(await parseText(ctx.request.request, this.#parsersConfig.raw))
         ctx.request.bodyType = 'raw'
         return next()
-      } catch (error) {
+      } catch (error: any) {
         throw this.#getExceptionFor(error)
       }
     }

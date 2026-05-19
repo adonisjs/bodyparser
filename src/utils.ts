@@ -148,7 +148,7 @@ export async function moveFile(
 
   try {
     await rename(sourcePath, destinationPath)
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'EXDEV') {
       await copyFile(sourcePath, destinationPath)
       await unlink(sourcePath)

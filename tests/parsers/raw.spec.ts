@@ -67,7 +67,7 @@ test.group('Raw parser', () => {
         const body = await parseText(req, prepareTextParserOptions({}))
         res.writeHead(200)
         res.end(body)
-      } catch (error) {
+      } catch (error: any) {
         res.writeHead(error.status)
         res.end(error.message)
       }
