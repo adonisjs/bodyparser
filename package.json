@@ -85,6 +85,11 @@
   "peerDependencies": {
     "@adonisjs/http-server": "^7.4.0"
   },
+  "overrides": {
+    "c8": {
+      "yargs": "^18.0.0"
+    }
+  },
   "keywords": [
     "adonisjs",
     "bodyparser",
