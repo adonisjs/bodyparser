@@ -103,11 +103,40 @@ test.group('Form Fields Parser', () => {
     assert.isUndefined(clean['polluted'])
   })
 
+  test('should not pollute Object.prototype with nested __proto__ property', ({ assert }) => {
+    const formFields = new FormFields()
+    formFields.add('user.__proto__.polluted', 'yes')
+
+    const clean: Record<string, any> = {}
+    assert.isUndefined(clean['polluted'])
+    assert.deepEqual(formFields.get(), {})
+  })
+
+  test('should not pollute Object.prototype with nested __proto__ property in bracket notation', ({
+    assert,
+  }) => {
+    const formFields = new FormFields()
+    formFields.add('user[__proto__][polluted]', 'yes')
+
+    const clean: Record<string, any> = {}
+    assert.isUndefined(clean['polluted'])
+    assert.deepEqual(formFields.get(), {})
+  })
+
   test('should not pollute Object.prototype with constructor.prototype', ({ assert }) => {
     const formFields = new FormFields()
     formFields.add('constructor.prototype.polluted2', 'yes')
 
     const clean: Record<string, any> = {}
     assert.isUndefined(clean['polluted2'])
+  })
+
+  test('should not pollute Object.prototype with nested constructor.prototype', ({ assert }) => {
+    const formFields = new FormFields()
+    formFields.add('user.constructor.prototype.polluted2', 'yes')
+
+    const clean: Record<string, any> = {}
+    assert.isUndefined(clean['polluted2'])
+    assert.deepEqual(formFields.get(), {})
   })
 })

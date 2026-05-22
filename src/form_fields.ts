@@ -9,6 +9,8 @@
 
 import lodash from '@poppinss/utils/lodash'
 
+const PROTOTYPE_POLLUTING_KEYS = new Set(['__proto__', 'prototype', 'constructor'])
+
 /**
  * A collection of form fields that stores form data while handling
  * arrays gracefully
@@ -68,6 +70,10 @@ export class FormFields {
       isArray = true
       return ''
     })
+
+    if (lodash.toPath(key).some((segment) => PROTOTYPE_POLLUTING_KEYS.has(segment))) {
+      return
+    }
 
     /**
      * Check to see if value exists or set it (if missing)
