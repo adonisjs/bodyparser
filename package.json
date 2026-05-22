@@ -1,6 +1,6 @@
 {
   "name": "@adonisjs/bodyparser",
-  "version": "10.1.4",
+  "version": "10.1.5",
   "description": "BodyParser middleware for AdonisJS http server to read and parse request body",
   "type": "module",
   "files": [
