@@ -71,17 +71,18 @@ export class FormFields {
       return ''
     })
 
-    if (lodash.toPath(key).some((segment) => PROTOTYPE_POLLUTING_KEYS.has(segment))) {
+    const keyPath = lodash.toPath(key)
+    if (keyPath.some((segment) => PROTOTYPE_POLLUTING_KEYS.has(segment))) {
       return
     }
 
     /**
      * Check to see if value exists or set it (if missing)
      */
-    const existingValue = lodash.get(this.#fields, key)
+    const existingValue = lodash.get(this.#fields, keyPath)
 
     if (!existingValue) {
-      lodash.set(this.#fields, key, isArray ? [value] : value)
+      lodash.set(this.#fields, keyPath, isArray ? [value] : value)
       return
     }
 
@@ -96,7 +97,7 @@ export class FormFields {
     /**
      * Set new value + existing value
      */
-    lodash.set(this.#fields, key, [existingValue, value])
+    lodash.set(this.#fields, keyPath, [existingValue, value])
   }
 
   /**
