@@ -363,6 +363,39 @@ test.group('Multipart', () => {
     assert.equal(files!.package instanceof MultipartFile && files!.package.size, packageFileSize)
   })
 
+  test('pass files with Object prototype field names to wildcard handler', async ({ assert }) => {
+    const receivedNames: string[] = []
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 })
+
+      multipart.onFile('*', {}, async (part) => {
+        receivedNames.push(part.name)
+        part.resume()
+      })
+
+      await multipart.process()
+      res.end()
+    })
+
+    const fieldNames = [
+      '__proto__',
+      'constructor',
+      'toString',
+      'valueOf',
+      'hasOwnProperty',
+      'isPrototypeOf',
+    ]
+
+    for (const fieldName of fieldNames) {
+      await supertest(server).post('/').attach(fieldName, Buffer.from('x'), 'a.txt')
+    }
+
+    assert.deepEqual(receivedNames, fieldNames)
+  })
+
   test('collect fields automatically', async ({ assert }) => {
     const stack: string[] = []
 

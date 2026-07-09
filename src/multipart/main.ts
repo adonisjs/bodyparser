@@ -48,7 +48,7 @@ export class Multipart {
       handler: PartHandlerType
       options: Partial<FileValidationOptions & { deferValidations: boolean }>
     }
-  } = {}
+  } = Object.create(null)
 
   /**
    * Collected fields from the multipart stream
@@ -171,7 +171,6 @@ export class Multipart {
     }
 
     debug('processing multipart part "%s"', name)
-    this.#pendingHandlers++
 
     /**
      * Instantiate the part handler
@@ -187,45 +186,48 @@ export class Multipart {
     this.#fields.add(partHandler.file.fieldName, partHandler.file)
     part.file = partHandler.file
 
+    this.#pendingHandlers++
     try {
-      const response = await handler.handler(part, async (line) => {
-        if (this.state !== 'processing') {
-          return
-        }
+      try {
+        const response = await handler.handler(part, async (line) => {
+          if (this.state !== 'processing') {
+            return
+          }
 
-        const lineLength = line.length
+          const lineLength = line.length
+
+          /**
+           * Keeping an eye on total bytes processed so far and shortcircuit
+           * request when more than expected bytes have been received.
+           */
+          const error = this.#validateProcessedBytes(lineLength)
+          if (error) {
+            part.emit('error', error)
+            this.abort(error)
+            return
+          }
+
+          try {
+            await partHandler.reportProgress(line, lineLength)
+          } catch (err) {
+            part.emit('error', err)
+            this.abort(err)
+          }
+        })
 
         /**
-         * Keeping an eye on total bytes processed so far and shortcircuit
-         * request when more than expected bytes have been received.
+         * Stream consumed successfully
          */
-        const error = this.#validateProcessedBytes(lineLength)
-        if (error) {
-          part.emit('error', error)
-          this.abort(error)
-          return
-        }
-
-        try {
-          await partHandler.reportProgress(line, lineLength)
-        } catch (err) {
-          part.emit('error', err)
-          this.abort(err)
-        }
-      })
-
-      /**
-       * Stream consumed successfully
-       */
-      await partHandler.reportSuccess(response || {})
-    } catch (error) {
-      /**
-       * The stream handler reported an exception
-       */
-      await partHandler.reportError(error)
+        await partHandler.reportSuccess(response || {})
+      } catch (error) {
+        /**
+         * The stream handler reported an exception
+         */
+        await partHandler.reportError(error)
+      }
+    } finally {
+      this.#pendingHandlers--
     }
-
-    this.#pendingHandlers--
   }
 
   /**
@@ -384,7 +386,11 @@ export class Multipart {
        * by their handlers
        */
       this.#form.on('part', async (part: MultipartStream) => {
-        await this.#handlePart(part)
+        try {
+          await this.#handlePart(part)
+        } catch (error) {
+          this.abort(error)
+        }
 
         /**
          * When a stream finishes before the handler, the close `event`
