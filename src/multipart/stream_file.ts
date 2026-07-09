@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { type Readable } from 'node:stream'
+import { Transform, type Readable } from 'node:stream'
 import { unlink } from 'node:fs/promises'
 import { createWriteStream } from 'node:fs'
 import { pipeline } from 'node:stream/promises'
@@ -32,16 +32,29 @@ export async function streamFile(
   location: string,
   dataListener?: (line: Buffer) => void
 ): Promise<void> {
-  if (typeof dataListener === 'function') {
-    readStream.pause()
-    readStream.on('data', dataListener)
-  }
-
   const writeStream = createWriteStream(location)
   try {
+    if (typeof dataListener === 'function') {
+      await pipeline(
+        readStream,
+        new Transform({
+          async transform(line: Buffer, _encoding, callback) {
+            try {
+              await dataListener(line)
+              callback(null, line)
+            } catch (error: any) {
+              callback(error)
+            }
+          },
+        }),
+        writeStream
+      )
+      return
+    }
+
     await pipeline(readStream, writeStream)
   } catch (error) {
-    unlink(writeStream.path).catch(() => {})
+    await unlink(writeStream.path).catch(() => {})
     throw error
   }
 }

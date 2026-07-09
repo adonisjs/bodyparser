@@ -541,6 +541,30 @@ test.group('Multipart', () => {
     }
   })
 
+  test('disrupt skipped file parts when total bytes limit is crossed', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 100, limit: 20 })
+
+      try {
+        await multipart.process()
+        res.end('OK')
+      } catch (error: any) {
+        res.writeHead(error.status)
+        res.end(error.message)
+      }
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .attach('unexpected', packageFilePath)
+      .expect(413)
+
+    assert.equal(text, 'request entity too large')
+  })
+
   test('disrupt part streaming when validation fails', async ({ assert }) => {
     assert.plan(5)
 

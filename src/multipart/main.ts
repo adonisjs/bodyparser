@@ -85,6 +85,11 @@ export class Multipart {
   #processedBytes: number = 0
 
   /**
+   * Tracks if abort has already been requested for the current form.
+   */
+  #hasAborted = false
+
+  /**
    * The current state of the multipart form handler
    */
   state: 'idle' | 'processing' | 'error' | 'success' = 'idle'
@@ -166,6 +171,16 @@ export class Multipart {
     const handler = this.#handlers[name] || this.#handlers['*']
     if (!handler) {
       debug('skipping multipart part as there are no handlers "%s"', name)
+      part.on('data', (line) => {
+        if (this.state !== 'processing') {
+          return
+        }
+
+        const error = this.#validateProcessedBytes(line.length)
+        if (error) {
+          this.abort(error)
+        }
+      })
       part.resume()
       return
     }
@@ -294,6 +309,11 @@ export class Multipart {
    * ```
    */
   abort(error: any): void {
+    if (this.#hasAborted) {
+      return
+    }
+
+    this.#hasAborted = true
     this.#form.emit('error', error)
   }
 
@@ -316,6 +336,29 @@ export class Multipart {
    */
   process(config?: Partial<{ limit: string | number; maxFields: number }>): Promise<void> {
     return new Promise((resolve, reject) => {
+      let processError: Error | undefined
+      let isErrorRejectionScheduled = false
+
+      const rejectWhenReady = () => {
+        if (!processError || this.#pendingHandlers > 0) {
+          return false
+        }
+
+        if (isErrorRejectionScheduled) {
+          return true
+        }
+
+        isErrorRejectionScheduled = true
+        process.nextTick(() => {
+          if (this.#ctx.request.request.readable) {
+            this.#ctx.request.request.resume()
+          }
+
+          reject(processError)
+        })
+        return true
+      }
+
       if (this.state !== 'idle') {
         reject(
           new Exception('multipart stream has already been consumed', {
@@ -348,36 +391,26 @@ export class Multipart {
       this.#form.on('error', (error: Error) => {
         this.#finish('error')
 
-        process.nextTick(() => {
-          if (this.#ctx.request.request.readable) {
-            this.#ctx.request.request.resume()
-          }
+        if (error.message.match(/stream ended unexpectedly/)) {
+          processError = new Exception('Invalid multipart request', {
+            status: 400,
+            code: 'E_INVALID_MULTIPART_REQUEST',
+          })
+        } else if (error.message.match(/maxFields [0-9]+ exceeded/)) {
+          processError = new Exception('Fields length limit exceeded', {
+            status: 413,
+            code: 'E_REQUEST_ENTITY_TOO_LARGE',
+          })
+        } else if (error.message.match(/maxFieldsSize [0-9]+ exceeded/)) {
+          processError = new Exception('Fields size in bytes exceeded', {
+            status: 413,
+            code: 'E_REQUEST_ENTITY_TOO_LARGE',
+          })
+        } else {
+          processError = error
+        }
 
-          if (error.message.match(/stream ended unexpectedly/)) {
-            reject(
-              new Exception('Invalid multipart request', {
-                status: 400,
-                code: 'E_INVALID_MULTIPART_REQUEST',
-              })
-            )
-          } else if (error.message.match(/maxFields [0-9]+ exceeded/)) {
-            reject(
-              new Exception('Fields length limit exceeded', {
-                status: 413,
-                code: 'E_REQUEST_ENTITY_TOO_LARGE',
-              })
-            )
-          } else if (error.message.match(/maxFieldsSize [0-9]+ exceeded/)) {
-            reject(
-              new Exception('Fields size in bytes exceeded', {
-                status: 413,
-                code: 'E_REQUEST_ENTITY_TOO_LARGE',
-              })
-            )
-          } else {
-            reject(error)
-          }
-        })
+        rejectWhenReady()
       })
 
       /**
@@ -390,6 +423,10 @@ export class Multipart {
           await this.#handlePart(part)
         } catch (error) {
           this.abort(error)
+        }
+
+        if (rejectWhenReady()) {
+          return
         }
 
         /**
@@ -419,6 +456,10 @@ export class Multipart {
        * file handlers are done processing files
        */
       this.#form.on('close', () => {
+        if (rejectWhenReady()) {
+          return
+        }
+
         if (this.#isClosed()) {
           this.#finish('success')
           resolve()
