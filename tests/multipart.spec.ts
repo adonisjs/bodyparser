@@ -235,15 +235,18 @@ test.group('Multipart', () => {
       const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 })
 
       multipart.onFile('package', {}, (part, reporter) => {
-        return new Promise((resolve, reject) => {
+        return new Promise<void>((resolve, reject) => {
+          const writeStream = createWriteStream(SAMPLE_FILE_PATH)
+
           part.pause()
           part.on('data', (line) => {
             reporter(line)
           })
 
           part.on('error', reject)
-          part.on('end', resolve)
-          part.pipe(createWriteStream(SAMPLE_FILE_PATH))
+          writeStream.on('error', reject)
+          writeStream.on('finish', resolve)
+          part.pipe(writeStream)
         })
       })
 
