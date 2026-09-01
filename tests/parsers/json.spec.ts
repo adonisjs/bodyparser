@@ -336,6 +336,103 @@ test.group('JSON parser', () => {
     })
   })
 
+  test('do not normalize values assigned to empty keys', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const body = await parseJSON(
+        req,
+        prepareJSONParserOptions({
+          convertEmptyStringsToNull: true,
+          trimWhitespaces: true,
+        })
+      )
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.end(JSON.stringify(body))
+    })
+
+    const payload = {
+      '': { value: ' value ', items: [''] },
+      'nested': { '': '', 'value': ' value ' },
+      'array': [{ '': ' ', 'value': '' }],
+    }
+    const { body } = await supertest(server).post('/').type('json').send(payload).expect(200)
+
+    assert.deepEqual(body, {
+      parsed: {
+        '': { value: 'value', items: [null] },
+        'nested': { '': '', 'value': 'value' },
+        'array': [{ '': ' ', 'value': null }],
+      },
+      raw: JSON.stringify(payload),
+    })
+  })
+
+  test('do not normalize a primitive root value in non-strict mode', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const body = await parseJSON(
+        req,
+        prepareJSONParserOptions({
+          strict: false,
+          convertEmptyStringsToNull: true,
+          trimWhitespaces: true,
+        })
+      )
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.end(JSON.stringify(body))
+    })
+
+    const { body } = await supertest(server).post('/').type('json').send('"  value  "').expect(200)
+
+    assert.deepEqual(body, {
+      parsed: '  value  ',
+      raw: '"  value  "',
+    })
+  })
+
+  test('remove prototype poisoning properties before normalizing values', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const body = await parseJSON(
+        req,
+        prepareJSONParserOptions({
+          convertEmptyStringsToNull: true,
+          trimWhitespaces: true,
+        })
+      )
+      res.writeHead(200, { 'content-type': 'application/json' })
+      res.end(JSON.stringify(body))
+    })
+
+    const payload =
+      '{"value":" keep ","__proto__":{"polluted":"yes"},"nested":{"constructor":{"prototype":{"polluted":"yes"}}}}'
+    const { body } = await supertest(server).post('/').type('json').send(payload).expect(200)
+
+    assert.deepEqual(body, {
+      parsed: { value: 'keep', nested: {} },
+      raw: payload,
+    })
+    assert.isFalse('polluted' in Object.prototype)
+  })
+
+  test('normalize deeply nested values without recursion', async ({ assert }) => {
+    const depth = 10_000
+    const payload = `${'['.repeat(depth)}" value "${']'.repeat(depth)}`
+    const server = createServer(async (req, res) => {
+      const body = await parseJSON(
+        req,
+        prepareJSONParserOptions({
+          trimWhitespaces: true,
+        })
+      )
+      let value = body.parsed
+      for (let index = 0; index < depth; index++) {
+        value = value[0]
+      }
+      res.end(value)
+    })
+
+    const { text } = await supertest(server).post('/').type('json').send(payload).expect(200)
+    assert.equal(text, 'value')
+  })
+
   test('trim whitespaces and convert empty string to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
       try {

@@ -25,14 +25,14 @@ const strictJSONReg = /^[\x20\x09\x0a\x0d]*(\[|\{)/
 
 /**
  * Prepares parser options for JSON body parsing by configuring strict mode
- * and value normalization through a reviver function.
+ * and value normalization.
  *
  * @param options - JSON body parser configuration
  */
 export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>): RawBodyOptions & {
   encoding: Encoding
   strict: boolean
-  reviver?: (this: any, key: string, value: any) => any
+  normalizer?: (value: string) => string | null
 } {
   let normalizer: undefined | ((value: string) => string | null)
   if (options.convertEmptyStringsToNull && options.trimWhitespaces) {
@@ -46,14 +46,46 @@ export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>)
   return {
     ...prepareTextParserOptions(options),
     strict: options.strict !== false,
-    reviver: normalizer
-      ? function JSONReviver(key, value) {
-          if (key === '') {
-            return value
-          }
-          return typeof value === 'string' ? normalizer(value) : value
+    normalizer,
+  }
+}
+
+/**
+ * Normalizes string values without using a JSON reviver, which is considerably
+ * slower than parsing first. The explicit stack also supports deeply nested JSON.
+ */
+function normalizeJSONValues(value: unknown, normalizer: (value: string) => string | null) {
+  if (!value || typeof value !== 'object') {
+    return
+  }
+
+  const stack: (Record<string, unknown> | unknown[])[] = [
+    value as Record<string, unknown> | unknown[],
+  ]
+  while (stack.length) {
+    const current = stack.pop()!
+
+    if (Array.isArray(current)) {
+      for (let index = 0; index < current.length; index++) {
+        const child = current[index]
+        if (typeof child === 'string') {
+          current[index] = normalizer(child)
+        } else if (child && typeof child === 'object') {
+          stack.push(child as Record<string, unknown> | unknown[])
         }
-      : undefined,
+      }
+      continue
+    }
+
+    for (const [key, child] of Object.entries(current)) {
+      if (typeof child === 'string') {
+        if (key !== '') {
+          current[key] = normalizer(child)
+        }
+      } else if (child && typeof child === 'object') {
+        stack.push(child as Record<string, unknown> | unknown[])
+      }
+    }
   }
 }
 
@@ -100,8 +132,13 @@ export async function parseJSON(
   }
 
   try {
+    const parsed = safeParse(requestBody)
+    if (options.normalizer) {
+      normalizeJSONValues(parsed, options.normalizer)
+    }
+
     return {
-      parsed: safeParse(requestBody, options.reviver),
+      parsed,
       raw: requestBody,
     }
   } catch (error: any) {
