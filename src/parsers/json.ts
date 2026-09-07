@@ -24,12 +24,6 @@ import { type BodyParserJSONConfig } from '../types.ts'
 const strictJSONReg = /^[\x20\x09\x0a\x0d]*(\[|\{)/
 
 /**
- * Count the root container as depth 1. Stay below downstream recursive
- * operations such as the HTTP server's cloneDeep stack limit.
- */
-const MAX_JSON_DEPTH = 100
-
-/**
  * Prepares parser options for JSON body parsing by configuring strict mode
  * and value normalization.
  *
@@ -38,6 +32,7 @@ const MAX_JSON_DEPTH = 100
 export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>): RawBodyOptions & {
   encoding: Encoding
   strict: boolean
+  maxDepth?: number
   normalizer?: (value: string) => string | null
 } {
   let normalizer: undefined | ((value: string) => string | null)
@@ -52,24 +47,28 @@ export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>)
   return {
     ...prepareTextParserOptions(options),
     strict: options.strict !== false,
+    maxDepth: options.maxDepth,
     normalizer,
   }
 }
 
 /**
- * Enforces the depth limit and optionally normalizes strings in one iterative
+ * Enforces an optional depth limit and normalizes strings in one iterative
  * traversal, without the cost of a JSON reviver.
  */
-function processJSONValues(value: unknown, normalizer?: (value: string) => string | null) {
-  if (!value || typeof value !== 'object') {
+function processJSONValues(
+  value: unknown,
+  { normalizer, maxDepth }: ReturnType<typeof prepareJSONParserOptions>
+) {
+  if ((!normalizer && maxDepth === undefined) || !value || typeof value !== 'object') {
     return
   }
 
   const stack = [{ value: value as Record<string, unknown> | unknown[], depth: 1 }]
   while (stack.length) {
     const { value: current, depth } = stack.pop()!
-    if (depth > MAX_JSON_DEPTH) {
-      throw new Exception(`Invalid JSON, maximum nesting depth is ${MAX_JSON_DEPTH}`, {
+    if (maxDepth !== undefined && depth > maxDepth) {
+      throw new Exception(`Invalid JSON, maximum nesting depth is ${maxDepth}`, {
         status: 400,
       })
     }
@@ -142,7 +141,7 @@ export async function parseJSON(
 
   try {
     const parsed = safeParse(requestBody)
-    processJSONValues(parsed, options.normalizer)
+    processJSONValues(parsed, options)
 
     return {
       parsed,

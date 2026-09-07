@@ -414,15 +414,22 @@ test.group('JSON parser', () => {
 
   test('enforce JSON depth with {$self}')
     .with(() =>
-      [100, 101, 10_000].flatMap((depth) =>
+      [
+        { depth: 100, maxDepth: 100 },
+        { depth: 101, maxDepth: 100 },
+        { depth: 10_000, maxDepth: 100 },
+        { depth: 2, maxDepth: 2 },
+        { depth: 3, maxDepth: 2 },
+        { depth: 10_000, maxDepth: undefined },
+      ].flatMap(({ depth, maxDepth }) =>
         ['array', 'object', 'mixed'].flatMap((shape) =>
           [false, true].flatMap((normalize) =>
-            [false, true].map((strict) => ({ depth, shape, normalize, strict }))
+            [false, true].map((strict) => ({ depth, maxDepth, shape, normalize, strict }))
           )
         )
       )
     )
-    .run(async ({ assert }, { depth, shape, normalize, strict }) => {
+    .run(async ({ assert }, { depth, maxDepth, shape, normalize, strict }) => {
       let payload = '" value "'
       for (let index = 0; index < depth; index++) {
         payload =
@@ -437,12 +444,17 @@ test.group('JSON parser', () => {
             req,
             prepareJSONParserOptions({
               strict,
+              maxDepth,
               trimWhitespaces: normalize,
               convertEmptyStringsToNull: normalize,
               limit: '1mb',
             })
           )
-          res.end(JSON.stringify(body))
+          let value = body.parsed
+          for (let index = 0; index < depth; index++) {
+            value = Array.isArray(value) ? value[0] : value['']
+          }
+          res.end(JSON.stringify({ raw: body.raw, value }))
         } catch (error) {
           assert.propertyVal(error, 'status', 400)
           assert.propertyVal(error, 'body', payload)
@@ -455,18 +467,14 @@ test.group('JSON parser', () => {
         .post('/')
         .type('json')
         .send(payload)
-        .expect(depth <= 100 ? 200 : 400)
+        .expect(maxDepth !== undefined && depth > maxDepth ? 400 : 200)
 
-      if (depth > 100) {
-        assert.equal(text, 'Invalid JSON, maximum nesting depth is 100')
+      if (maxDepth !== undefined && depth > maxDepth) {
+        assert.equal(text, `Invalid JSON, maximum nesting depth is ${maxDepth}`)
       } else {
         const body = JSON.parse(text)
         assert.equal(body.raw, payload)
-        let value = body.parsed
-        for (let index = 0; index < depth; index++) {
-          value = Array.isArray(value) ? value[0] : value['']
-        }
-        assert.equal(value, normalize && shape !== 'object' ? 'value' : ' value ')
+        assert.equal(body.value, normalize && shape !== 'object' ? 'value' : ' value ')
       }
     })
 

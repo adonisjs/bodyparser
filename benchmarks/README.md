@@ -2,7 +2,7 @@
 
 Run `npm run benchmark:json` from the repository root after installing dependencies.
 
-The benchmark measures the current `parseJSON` with whitespace trimming and empty-string conversion enabled. It includes reading an in-memory request stream through `parseText` and `raw-body`, JSON parsing, depth validation, and normalization. No HTTP transport is timed.
+The benchmark measures the current `parseJSON` with whitespace trimming and empty-string conversion enabled and no nesting depth limit. It includes reading an in-memory request stream through `parseText` and `raw-body`, JSON parsing, and normalization. No HTTP transport is timed.
 
 Payloads contain 400 or 5,400 user records with nested objects, arrays, strings, numbers, booleans, and nulls, producing bodies of 75,081 and 1,030,781 bytes.
 

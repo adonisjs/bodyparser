@@ -60,6 +60,8 @@ type BodyParserBaseConfig = {
 export type BodyParserJSONConfig = BodyParserBaseConfig & {
   /** Whether to only accept arrays and objects as valid JSON */
   strict: boolean
+  /** Maximum container nesting depth, counting the root as 1. Unlimited when omitted. */
+  maxDepth?: number
   /** Whether to convert empty strings to null values */
   convertEmptyStringsToNull: boolean
   trimWhitespaces: boolean
