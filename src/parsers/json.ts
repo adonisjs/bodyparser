@@ -24,6 +24,12 @@ import { type BodyParserJSONConfig } from '../types.ts'
 const strictJSONReg = /^[\x20\x09\x0a\x0d]*(\[|\{)/
 
 /**
+ * Count the root container as depth 1. Stay below downstream recursive
+ * operations such as the HTTP server's cloneDeep stack limit.
+ */
+const MAX_JSON_DEPTH = 100
+
+/**
  * Prepares parser options for JSON body parsing by configuring strict mode
  * and value normalization.
  *
@@ -51,39 +57,42 @@ export function prepareJSONParserOptions(options: Partial<BodyParserJSONConfig>)
 }
 
 /**
- * Normalizes string values without using a JSON reviver, which is considerably
- * slower than parsing first. The explicit stack also supports deeply nested JSON.
+ * Enforces the depth limit and optionally normalizes strings in one iterative
+ * traversal, without the cost of a JSON reviver.
  */
-function normalizeJSONValues(value: unknown, normalizer: (value: string) => string | null) {
+function processJSONValues(value: unknown, normalizer?: (value: string) => string | null) {
   if (!value || typeof value !== 'object') {
     return
   }
 
-  const stack: (Record<string, unknown> | unknown[])[] = [
-    value as Record<string, unknown> | unknown[],
-  ]
+  const stack = [{ value: value as Record<string, unknown> | unknown[], depth: 1 }]
   while (stack.length) {
-    const current = stack.pop()!
+    const { value: current, depth } = stack.pop()!
+    if (depth > MAX_JSON_DEPTH) {
+      throw new Exception(`Invalid JSON, maximum nesting depth is ${MAX_JSON_DEPTH}`, {
+        status: 400,
+      })
+    }
 
     if (Array.isArray(current)) {
       for (let index = 0; index < current.length; index++) {
         const child = current[index]
-        if (typeof child === 'string') {
+        if (normalizer && typeof child === 'string') {
           current[index] = normalizer(child)
         } else if (child && typeof child === 'object') {
-          stack.push(child as Record<string, unknown> | unknown[])
+          stack.push({ value: child as Record<string, unknown> | unknown[], depth: depth + 1 })
         }
       }
       continue
     }
 
     for (const [key, child] of Object.entries(current)) {
-      if (typeof child === 'string') {
+      if (normalizer && typeof child === 'string') {
         if (key !== '') {
           current[key] = normalizer(child)
         }
       } else if (child && typeof child === 'object') {
-        stack.push(child as Record<string, unknown> | unknown[])
+        stack.push({ value: child as Record<string, unknown> | unknown[], depth: depth + 1 })
       }
     }
   }
@@ -133,9 +142,7 @@ export async function parseJSON(
 
   try {
     const parsed = safeParse(requestBody)
-    if (options.normalizer) {
-      normalizeJSONValues(parsed, options.normalizer)
-    }
+    processJSONValues(parsed, options.normalizer)
 
     return {
       parsed,

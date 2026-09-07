@@ -6,6 +6,7 @@
   "files": [
     "build",
     "!build/bin",
+    "!build/benchmarks",
     "!build/tests",
     "!build/tests_helpers"
   ],
@@ -32,6 +33,7 @@
     "prepublishOnly": "npm run build",
     "release": "release-it",
     "quick:test": "node --import=@poppinss/ts-exec --enable-source-maps bin/test.ts",
+    "benchmark:json": "node --import=@poppinss/ts-exec benchmarks/json.ts",
     "docs": "typedoc"
   },
   "devDependencies": {

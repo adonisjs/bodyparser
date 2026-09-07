@@ -10,6 +10,11 @@ This repo provides the BodyParser middleware to process AdonisJS HTTP request bo
 ## Official Documentation
 The documentation is available on the [AdonisJS website](https://docs.adonisjs.com/guides/bodyparser-middleware)
 
+Parsed JSON bodies are limited to 100 levels of nested objects and arrays, counting the root container as level 1. The limit is checked after `safeParse` removes prototype-poisoning properties, so discarded subtrees do not count toward the limit. Deeper parsed bodies return HTTP 400, with or without string normalization and regardless of strict mode.
+
+## Benchmarks
+Run `npm run benchmark:json` to measure JSON parsing with string normalization enabled. See [benchmark methodology](benchmarks/README.md).
+
 ## Contributing
 One of the primary goals of AdonisJS is to have a vibrant community of users and contributors who believes in the principles of the framework.
 

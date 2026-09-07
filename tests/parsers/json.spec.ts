@@ -412,26 +412,63 @@ test.group('JSON parser', () => {
     assert.isFalse('polluted' in Object.prototype)
   })
 
-  test('normalize deeply nested values without recursion', async ({ assert }) => {
-    const depth = 10_000
-    const payload = `${'['.repeat(depth)}" value "${']'.repeat(depth)}`
-    const server = createServer(async (req, res) => {
-      const body = await parseJSON(
-        req,
-        prepareJSONParserOptions({
-          trimWhitespaces: true,
-        })
+  test('enforce JSON depth with {$self}')
+    .with(() =>
+      [100, 101, 10_000].flatMap((depth) =>
+        ['array', 'object', 'mixed'].flatMap((shape) =>
+          [false, true].flatMap((normalize) =>
+            [false, true].map((strict) => ({ depth, shape, normalize, strict }))
+          )
+        )
       )
-      let value = body.parsed
+    )
+    .run(async ({ assert }, { depth, shape, normalize, strict }) => {
+      let payload = '" value "'
       for (let index = 0; index < depth; index++) {
-        value = value[0]
+        payload =
+          shape === 'array' || (shape === 'mixed' && index % 2 === 0)
+            ? `[${payload}]`
+            : `{"":${payload}}`
       }
-      res.end(value)
-    })
 
-    const { text } = await supertest(server).post('/').type('json').send(payload).expect(200)
-    assert.equal(text, 'value')
-  })
+      const server = createServer(async (req, res) => {
+        try {
+          const body = await parseJSON(
+            req,
+            prepareJSONParserOptions({
+              strict,
+              trimWhitespaces: normalize,
+              convertEmptyStringsToNull: normalize,
+              limit: '1mb',
+            })
+          )
+          res.end(JSON.stringify(body))
+        } catch (error) {
+          assert.propertyVal(error, 'status', 400)
+          assert.propertyVal(error, 'body', payload)
+          res.writeHead(400)
+          res.end((error as Error).message)
+        }
+      })
+
+      const { text } = await supertest(server)
+        .post('/')
+        .type('json')
+        .send(payload)
+        .expect(depth <= 100 ? 200 : 400)
+
+      if (depth > 100) {
+        assert.equal(text, 'Invalid JSON, maximum nesting depth is 100')
+      } else {
+        const body = JSON.parse(text)
+        assert.equal(body.raw, payload)
+        let value = body.parsed
+        for (let index = 0; index < depth; index++) {
+          value = Array.isArray(value) ? value[0] : value['']
+        }
+        assert.equal(value, normalize && shape !== 'object' ? 'value' : ' value ')
+      }
+    })
 
   test('trim whitespaces and convert empty string to null', async ({ assert }) => {
     const server = createServer(async (req, res) => {
