@@ -14,7 +14,8 @@ import { join } from 'node:path'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { pathExists } from 'fs-extra'
-import { createServer } from 'node:http'
+import type { AddressInfo } from 'node:net'
+import { createServer, type Server } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import {
   RequestFactory,
@@ -24,6 +25,8 @@ import {
 import { AppFactory } from '@adonisjs/application/factories'
 
 import { Multipart } from '../src/multipart/main.ts'
+import { defineConfig } from '../src/define_config.ts'
+import { BodyParserMiddleware } from '../src/bodyparser_middleware.ts'
 import { type MultipartFile } from '../src/multipart/file.ts'
 import { BodyParserMiddlewareFactory } from '../factories/middleware_factory.ts'
 import {
@@ -105,6 +108,112 @@ test.group('BodyParser Middleware', () => {
       body: {},
       bodyType: 'unknown',
     })
+  })
+})
+
+/**
+ * Sends a QUERY request to the given server and returns the parsed JSON
+ * response. Supertest does not expose a typed API for the QUERY method.
+ */
+async function sendQueryRequest(server: Server, contentType: string, body: string) {
+  await new Promise<void>((resolve) => server.listen(0, 'localhost', () => resolve()))
+  try {
+    const { port } = server.address() as AddressInfo
+    const response = await fetch(`http://localhost:${port}`, {
+      method: 'QUERY',
+      headers: { 'content-type': contentType },
+      body,
+    })
+    return response.json()
+  } finally {
+    server.close()
+  }
+}
+
+test.group('BodyParser Middleware | QUERY method', () => {
+  test('allow QUERY requests by default', ({ assert }) => {
+    assert.include(defineConfig({}).allowedMethods, 'QUERY')
+  })
+
+  test('parse JSON body of QUERY requests', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            method: ctx.request.method(),
+            body: ctx.request.body(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
+      })
+    })
+
+    const body = await sendQueryRequest(
+      server,
+      'application/json',
+      '{"username":"virk","limit":10}'
+    )
+
+    assert.deepEqual(body, {
+      method: 'QUERY',
+      body: { username: 'virk', limit: 10 },
+      bodyType: 'json',
+    })
+  })
+
+  test('parse urlencoded body of QUERY requests', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            body: ctx.request.body(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
+      })
+    })
+
+    const body = await sendQueryRequest(
+      server,
+      'application/x-www-form-urlencoded',
+      'q=foo&limit=10&sort=-published'
+    )
+
+    assert.deepEqual(body, {
+      body: { q: 'foo', limit: '10', sort: '-published' },
+      bodyType: 'urlencoded',
+    })
+  })
+
+  test('do not parse QUERY requests when not part of allowedMethods', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddleware(
+        defineConfig({ allowedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'] })
+      )
+
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify({ body: ctx.request.body() }))
+      })
+    })
+
+    const body = await sendQueryRequest(server, 'application/json', '{"username":"virk"}')
+    assert.deepEqual(body, { body: {} })
   })
 })
 
