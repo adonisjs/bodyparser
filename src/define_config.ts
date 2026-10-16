@@ -32,7 +32,7 @@ import { type BodyParserConfig, type BodyParserOptionalConfig } from './types.ts
  */
 export function defineConfig(config: BodyParserOptionalConfig): BodyParserConfig {
   return {
-    allowedMethods: config.allowedMethods || ['POST', 'PUT', 'PATCH', 'DELETE'],
+    allowedMethods: config.allowedMethods || ['POST', 'PUT', 'PATCH', 'DELETE', 'QUERY'],
 
     form: {
       encoding: 'utf-8',
