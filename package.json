@@ -74,7 +74,7 @@
   "dependencies": {
     "@poppinss/macroable": "^1.1.2",
     "@poppinss/middleware": "^3.2.7",
-    "@poppinss/multiparty": "^3.0.0",
+    "@poppinss/multiparty": "^3.0.1",
     "@poppinss/qs": "^6.15.0",
     "@poppinss/utils": "^7.0.1",
     "file-type": "^22.0.1",
