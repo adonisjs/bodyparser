@@ -628,6 +628,67 @@ test.group('Multipart', () => {
     assert.equal(text, 'request entity too large')
   })
 
+  test('drain request body before rejecting when total bytes limit is crossed', async ({
+    assert,
+  }) => {
+    let isRequestComplete: boolean | undefined
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 100, limit: 20 })
+
+      try {
+        await multipart.process()
+        res.end('OK')
+      } catch (error: any) {
+        isRequestComplete = req.complete
+        res.writeHead(error.status)
+        res.end(error.message)
+      }
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .attach('unexpected', Buffer.alloc(5 * 1024 * 1024), 'unexpected.bin')
+      .expect(413)
+
+    assert.equal(text, 'request entity too large')
+    assert.isTrue(isRequestComplete)
+  })
+
+  test('drain request body before rejecting when part headers size limit is crossed', async ({
+    assert,
+  }) => {
+    let isRequestComplete: boolean | undefined
+
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000 })
+
+      try {
+        await multipart.process()
+        res.end('OK')
+      } catch (error: any) {
+        isRequestComplete = req.complete
+        res.writeHead(error.status)
+        res.end(error.message)
+      }
+    })
+
+    const { text } = await supertest(server)
+      .post('/')
+      .field('a'.repeat(20 * 1024), 'virk')
+      .attach('package', Buffer.alloc(5 * 1024 * 1024), 'package.bin')
+      .expect(413)
+
+    assert.equal(text, 'Part headers size in bytes exceeded')
+    assert.isTrue(isRequestComplete)
+  })
+
   test('disrupt part streaming when validation fails', async ({ assert }) => {
     assert.plan(5)
 
