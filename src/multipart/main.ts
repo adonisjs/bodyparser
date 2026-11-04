@@ -350,8 +350,21 @@ export class Multipart {
 
         isErrorRejectionScheduled = true
         process.nextTick(() => {
-          if (this.#ctx.request.request.readable) {
-            this.#ctx.request.request.resume()
+          const request = this.#ctx.request.request
+
+          /**
+           * Drain the rest of the request body before rejecting. Responding
+           * while the client is still uploading closes the connection with
+           * unread data, and the client receives ECONNRESET or EPIPE instead
+           * of the response.
+           */
+          if (request.readable && !request.destroyed) {
+            const onFinished = () => reject(processError)
+            request.once('end', onFinished)
+            request.once('error', onFinished)
+            request.once('close', onFinished)
+            request.resume()
+            return
           }
 
           reject(processError)
