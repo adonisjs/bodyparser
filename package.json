@@ -138,7 +138,7 @@
     "npm": {
       "publish": true,
       "skipChecks": true,
-      "tag": "v6"
+      "tag": "latest-v6"
     },
     "plugins": {
       "@release-it/conventional-changelog": {
