@@ -501,6 +501,68 @@ test.group('Multipart', () => {
     assert.equal(text, 'Fields size in bytes exceeded')
   })
 
+  test('FIELDS: raise error when part headers size limit is crossed', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 })
+
+      try {
+        await multipart.process()
+        res.end()
+      } catch (error: any) {
+        res.writeHead(error.status)
+        res.end(`${error.code}: ${error.message}`)
+      }
+    })
+
+    const { status, text } = await supertest(server)
+      .post('/')
+      .field('a'.repeat(20 * 1024), 'virk')
+
+    assert.equal(status, 413)
+    assert.equal(text, 'E_REQUEST_ENTITY_TOO_LARGE: Part headers size in bytes exceeded')
+  })
+
+  test('FILE: ignore file with malformed filename* encoding', async ({ assert }) => {
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const multipart = new Multipart(ctx, { maxFields: 1000, limit: 8000 })
+
+      multipart.onFile('*', {}, async (part) => {
+        part.resume()
+      })
+
+      try {
+        await multipart.process()
+        res.end(JSON.stringify(ctx.request['__raw_files']))
+      } catch (error: any) {
+        res.writeHead(500)
+        res.end(error.message)
+      }
+    })
+
+    const { status, text } = await supertest(server)
+      .post('/')
+      .set('Content-Type', 'multipart/form-data; boundary=foo')
+      .send(
+        [
+          '--foo',
+          `Content-Disposition: form-data; name="package"; filename*=utf-8''%FF`,
+          '',
+          'hello',
+          '--foo--',
+          '',
+        ].join('\r\n')
+      )
+
+    assert.equal(status, 200)
+    assert.equal(text, '{}')
+  })
+
   test('disrupt file uploads error when total bytes limit is crossed', async ({ assert }) => {
     assert.plan(2)
 

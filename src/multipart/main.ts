@@ -406,6 +406,11 @@ export class Multipart {
             status: 413,
             code: 'E_REQUEST_ENTITY_TOO_LARGE',
           })
+        } else if (error.message.match(/maxHeaderSize [0-9]+ exceeded/)) {
+          processError = new Exception('Part headers size in bytes exceeded', {
+            status: 413,
+            code: 'E_REQUEST_ENTITY_TOO_LARGE',
+          })
         } else {
           processError = error
         }
