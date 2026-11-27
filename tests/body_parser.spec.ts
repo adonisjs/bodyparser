@@ -14,8 +14,7 @@ import { join } from 'node:path'
 import supertest from 'supertest'
 import { test } from '@japa/runner'
 import { pathExists } from 'fs-extra'
-import type { AddressInfo } from 'node:net'
-import { createServer, type Server } from 'node:http'
+import { createServer } from 'node:http'
 import { readFile } from 'node:fs/promises'
 import {
   RequestFactory,
@@ -111,85 +110,36 @@ test.group('BodyParser Middleware', () => {
   })
 })
 
-/**
- * Sends a request to the given server with `fetch` and returns the status and
- * the parsed JSON response. Supertest does not expose a typed API for the
- * QUERY method.
- *
- * `fetch` sets no Content-Type for a body that is a Uint8Array.
- */
-async function sendRequest(
-  server: Server,
-  options: { method?: string; headers?: Record<string, string>; body?: string | Uint8Array }
-) {
-  await new Promise<void>((resolve) => server.listen(0, 'localhost', () => resolve()))
-  try {
-    const { port } = server.address() as AddressInfo
-    const response = await fetch(`http://localhost:${port}`, {
-      method: options.method ?? 'QUERY',
-      headers: options.headers,
-      body: options.body,
-    })
-    return { status: response.status, body: await response.json() }
-  } finally {
-    server.close()
-  }
-}
-
-/**
- * Creates a server that runs the bodyparser middleware and responds with the
- * body, the bodyType and the raw body. It also reads the request stream after
- * the middleware, to show if the middleware left the stream unread.
- */
-function createBodyParserServer(middleware: BodyParserMiddleware) {
-  return createServer(async (req, res) => {
-    const request = new RequestFactory().merge({ req, res }).create()
-    const response = new ResponseFactory().merge({ req, res }).create()
-    const ctx = new HttpContextFactory().merge({ request, response }).create()
-
-    const readStream = async () => {
-      let unread = ''
-      for await (const chunk of req) {
-        unread += chunk
-      }
-      return unread
-    }
-
-    try {
-      await middleware.handle(ctx, async () => {
-        const payload = {
-          method: ctx.request.method(),
-          body: ctx.request.body(),
-          bodyType: ctx.request.bodyType,
-          raw: ctx.request.raw(),
-          unread: await readStream(),
-        }
-        res.writeHead(200, { 'content-type': 'application/json' })
-        res.end(JSON.stringify(payload))
-      })
-    } catch (error: any) {
-      const payload = { code: error.code, message: error.message, unread: await readStream() }
-      res.writeHead(error.status, { 'content-type': 'application/json' })
-      res.end(JSON.stringify(payload))
-    }
-  })
-}
-
 test.group('BodyParser Middleware | QUERY method', () => {
   test('allow QUERY requests by default', ({ assert }) => {
     assert.include(defineConfig({}).allowedMethods, 'QUERY')
   })
 
   test('parse JSON body of QUERY requests', async ({ assert }) => {
-    const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
-    const { status, body } = await sendRequest(server, {
-      headers: { 'content-type': 'application/json' },
-      body: '{"username":"virk","limit":10}',
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            method: ctx.request.method(),
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
+      })
     })
 
-    assert.equal(status, 200)
-    assert.containsSubset(body, {
+    const { body } = await new supertest.Test(server, 'QUERY', '/')
+      .type('json')
+      .send({ username: 'virk', limit: 10 })
+      .expect(200)
+
+    assert.deepEqual(body, {
       method: 'QUERY',
       body: { username: 'virk', limit: 10 },
       bodyType: 'json',
@@ -197,43 +147,89 @@ test.group('BodyParser Middleware | QUERY method', () => {
   })
 
   test('parse JSON body of QUERY requests with content-type parameters', async ({ assert }) => {
-    const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
-    const { status, body } = await sendRequest(server, {
-      headers: { 'content-type': 'application/json; charset=utf-8' },
-      body: '{"username":"virk"}',
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
+      })
     })
 
-    assert.equal(status, 200)
-    assert.containsSubset(body, { body: { username: 'virk' }, bodyType: 'json' })
+    const { body } = await new supertest.Test(server, 'QUERY', '/')
+      .set('content-type', 'application/json; charset=utf-8')
+      .send(JSON.stringify({ username: 'virk' }))
+      .expect(200)
+
+    assert.deepEqual(body, {
+      body: { username: 'virk' },
+      bodyType: 'json',
+    })
   })
 
   test('parse urlencoded body of QUERY requests', async ({ assert }) => {
-    const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
-    const { status, body } = await sendRequest(server, {
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-      body: 'q=foo&limit=10&sort=-published',
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+          })
+        )
+      })
     })
 
-    assert.equal(status, 200)
-    assert.containsSubset(body, {
+    const { body } = await new supertest.Test(server, 'QUERY', '/')
+      .type('form')
+      .send('q=foo&limit=10&sort=-published')
+      .expect(200)
+
+    assert.deepEqual(body, {
       body: { q: 'foo', limit: '10', sort: '-published' },
       bodyType: 'urlencoded',
     })
   })
 
   test('do not read the body of QUERY requests with an unknown media type', async ({ assert }) => {
-    const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
-    const { status, body } = await sendRequest(server, {
-      headers: { 'content-type': 'application/sql' },
-      body: 'SELECT * FROM users',
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+            raw: ctx.request.raw(),
+            unread: Buffer.concat(await req.toArray()).toString(),
+          })
+        )
+      })
     })
 
-    assert.equal(status, 200)
+    const { body } = await new supertest.Test(server, 'QUERY', '/')
+      .set('content-type', 'application/sql')
+      .send('SELECT * FROM users')
+      .expect(200)
+
     assert.deepEqual(body, {
-      method: 'QUERY',
       body: {},
       bodyType: 'unknown',
       raw: null,
@@ -242,13 +238,36 @@ test.group('BodyParser Middleware | QUERY method', () => {
   })
 
   test('fail QUERY requests with no content-type', async ({ assert }) => {
-    const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
-    const { status, body } = await sendRequest(server, {
-      body: new TextEncoder().encode('{"username":"virk"}'),
+      try {
+        await middleware.handle(ctx, async () => {
+          res.writeHead(200)
+          res.end()
+        })
+      } catch (error: any) {
+        res.writeHead(error.status, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            code: error.code,
+            message: error.message,
+            unread: Buffer.concat(await req.toArray()).toString(),
+          })
+        )
+      }
     })
 
-    assert.equal(status, 400)
+    /**
+     * Superagent sets no content-type for a Buffer body
+     */
+    const { body } = await new supertest.Test(server, 'QUERY', '/')
+      .send(Buffer.from(JSON.stringify({ username: 'virk' })))
+      .expect(400)
+
     assert.deepEqual(body, {
       code: 'E_INVALID_QUERY_CONTENT_TYPE',
       message: 'QUERY requests must have a valid Content-Type header',
@@ -257,27 +276,56 @@ test.group('BodyParser Middleware | QUERY method', () => {
   })
 
   test('fail QUERY requests with no content-type and no body', async ({ assert }) => {
-    const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
-    const { status, body } = await sendRequest(server, {})
-
-    assert.equal(status, 400)
-    assert.deepEqual(body, {
-      code: 'E_INVALID_QUERY_CONTENT_TYPE',
-      message: 'QUERY requests must have a valid Content-Type header',
-      unread: '',
+      try {
+        await middleware.handle(ctx, async () => {
+          res.writeHead(200)
+          res.end()
+        })
+      } catch (error: any) {
+        res.writeHead(error.status)
+        res.end(error.code)
+      }
     })
+
+    const { text } = await new supertest.Test(server, 'QUERY', '/').expect(400)
+    assert.equal(text, 'E_INVALID_QUERY_CONTENT_TYPE')
   })
 
   test('fail QUERY requests with an invalid content-type', async ({ assert }) => {
-    const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddlewareFactory().create()
 
-    const { status, body } = await sendRequest(server, {
-      headers: { 'content-type': 'json' },
-      body: '{"username":"virk"}',
+      try {
+        await middleware.handle(ctx, async () => {
+          res.writeHead(200)
+          res.end()
+        })
+      } catch (error: any) {
+        res.writeHead(error.status, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            code: error.code,
+            message: error.message,
+            unread: Buffer.concat(await req.toArray()).toString(),
+          })
+        )
+      }
     })
 
-    assert.equal(status, 400)
+    const { body } = await new supertest.Test(server, 'QUERY', '/')
+      .set('content-type', 'json')
+      .send(JSON.stringify({ username: 'virk' }))
+      .expect(400)
+
     assert.deepEqual(body, {
       code: 'E_INVALID_QUERY_CONTENT_TYPE',
       message: 'QUERY requests must have a valid Content-Type header',
@@ -286,45 +334,87 @@ test.group('BodyParser Middleware | QUERY method', () => {
   })
 
   test('do not parse QUERY requests when not part of allowedMethods', async ({ assert }) => {
-    const server = createBodyParserServer(
-      new BodyParserMiddleware(defineConfig({ allowedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'] }))
-    )
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddleware(
+        defineConfig({ allowedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'] })
+      )
 
-    const { status, body } = await sendRequest(server, {
-      headers: { 'content-type': 'application/json' },
-      body: '{"username":"virk"}',
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            body: ctx.request.all(),
+            unread: Buffer.concat(await req.toArray()).toString(),
+          })
+        )
+      })
     })
 
-    assert.equal(status, 200)
-    assert.containsSubset(body, { body: {}, unread: '{"username":"virk"}' })
+    const { body } = await new supertest.Test(server, 'QUERY', '/')
+      .type('json')
+      .send({ username: 'virk' })
+      .expect(200)
+
+    assert.deepEqual(body, {
+      body: {},
+      unread: '{"username":"virk"}',
+    })
   })
 
   test('do not check the content-type of QUERY requests when not part of allowedMethods', async ({
     assert,
   }) => {
-    const server = createBodyParserServer(
-      new BodyParserMiddleware(defineConfig({ allowedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'] }))
-    )
+    const server = createServer(async (req, res) => {
+      const request = new RequestFactory().merge({ req, res }).create()
+      const response = new ResponseFactory().merge({ req, res }).create()
+      const ctx = new HttpContextFactory().merge({ request, response }).create()
+      const middleware = new BodyParserMiddleware(
+        defineConfig({ allowedMethods: ['POST', 'PUT', 'PATCH', 'DELETE'] })
+      )
 
-    const { status, body } = await sendRequest(server, {})
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
+        res.end(JSON.stringify({ body: ctx.request.all() }))
+      })
+    })
 
-    assert.equal(status, 200)
-    assert.containsSubset(body, { method: 'QUERY', body: {} })
+    const { body } = await new supertest.Test(server, 'QUERY', '/').expect(200)
+    assert.deepEqual(body, { body: {} })
   })
 
   test('do not check the content-type of {$self} requests')
     .with(['POST', 'PUT', 'PATCH', 'DELETE'])
     .run(async ({ assert }, method) => {
-      const server = createBodyParserServer(new BodyParserMiddlewareFactory().create())
+      const server = createServer(async (req, res) => {
+        const request = new RequestFactory().merge({ req, res }).create()
+        const response = new ResponseFactory().merge({ req, res }).create()
+        const ctx = new HttpContextFactory().merge({ request, response }).create()
+        const middleware = new BodyParserMiddlewareFactory().create()
 
-      const { status, body } = await sendRequest(server, {
-        method,
-        body: new TextEncoder().encode('{"username":"virk"}'),
+        await middleware.handle(ctx, async () => {
+          res.writeHead(200, { 'content-type': 'application/json' })
+          res.end(
+            JSON.stringify({
+              body: ctx.request.all(),
+              bodyType: ctx.request.bodyType,
+              raw: ctx.request.raw(),
+              unread: Buffer.concat(await req.toArray()).toString(),
+            })
+          )
+        })
       })
 
-      assert.equal(status, 200)
+      /**
+       * Superagent sets no content-type for a Buffer body
+       */
+      const { body } = await new supertest.Test(server, method, '/')
+        .send(Buffer.from(JSON.stringify({ username: 'virk' })))
+        .expect(200)
+
       assert.deepEqual(body, {
-        method,
         body: {},
         bodyType: 'unknown',
         raw: null,
