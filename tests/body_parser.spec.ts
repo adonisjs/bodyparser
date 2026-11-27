@@ -270,7 +270,7 @@ test.group('BodyParser Middleware | QUERY method', () => {
 
     assert.deepEqual(body, {
       code: 'E_INVALID_QUERY_CONTENT_TYPE',
-      message: 'QUERY requests must have a valid Content-Type header',
+      message: 'QUERY requests must have a Content-Type header',
       unread: '{"username":"virk"}',
     })
   })
@@ -297,38 +297,37 @@ test.group('BodyParser Middleware | QUERY method', () => {
     assert.equal(text, 'E_INVALID_QUERY_CONTENT_TYPE')
   })
 
-  test('fail QUERY requests with an invalid content-type', async ({ assert }) => {
+  test('do not read the body of QUERY requests with an invalid content-type', async ({
+    assert,
+  }) => {
     const server = createServer(async (req, res) => {
       const request = new RequestFactory().merge({ req, res }).create()
       const response = new ResponseFactory().merge({ req, res }).create()
       const ctx = new HttpContextFactory().merge({ request, response }).create()
       const middleware = new BodyParserMiddlewareFactory().create()
 
-      try {
-        await middleware.handle(ctx, async () => {
-          res.writeHead(200)
-          res.end()
-        })
-      } catch (error: any) {
-        res.writeHead(error.status, { 'content-type': 'application/json' })
+      await middleware.handle(ctx, async () => {
+        res.writeHead(200, { 'content-type': 'application/json' })
         res.end(
           JSON.stringify({
-            code: error.code,
-            message: error.message,
+            body: ctx.request.all(),
+            bodyType: ctx.request.bodyType,
+            raw: ctx.request.raw(),
             unread: Buffer.concat(await req.toArray()).toString(),
           })
         )
-      }
+      })
     })
 
     const { body } = await new supertest.Test(server, 'QUERY', '/')
-      .set('content-type', 'json')
+      .set('content-type', 'foo')
       .send(JSON.stringify({ username: 'virk' }))
-      .expect(400)
+      .expect(200)
 
     assert.deepEqual(body, {
-      code: 'E_INVALID_QUERY_CONTENT_TYPE',
-      message: 'QUERY requests must have a valid Content-Type header',
+      body: {},
+      bodyType: 'unknown',
+      raw: null,
       unread: '{"username":"virk"}',
     })
   })
