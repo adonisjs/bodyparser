@@ -8,7 +8,6 @@
  */
 
 import { tmpdir } from 'node:os'
-import mediaTyper from 'media-typer'
 import string from '@poppinss/utils/string'
 import { join, isAbsolute } from 'node:path'
 import { Exception } from '@poppinss/utils/exception'
@@ -76,23 +75,6 @@ export class BodyParserMiddleware {
   }
 
   /**
-   * Checks if the request has a `Content-Type` header with a valid media
-   * type. The parameters after the media type, for example `; charset=utf-8`,
-   * are not checked.
-   *
-   * @param request - The HTTP request object
-   */
-  #hasValidContentType(request: HttpContext['request']): boolean {
-    const contentType = request.header('content-type')
-    if (!contentType) {
-      return false
-    }
-
-    const mediaType = contentType.split(';')[0]
-    return mediaTyper.test(mediaType.trim())
-  }
-
-  /**
    * Converts raw-body errors into AdonisJS exceptions with appropriate
    * status codes and error codes.
    *
@@ -156,13 +138,13 @@ export class BodyParserMiddleware {
     }
 
     /**
-     * QUERY requests must have a valid Content-Type header (RFC 10008, section 2).
+     * QUERY requests must have a Content-Type header (RFC 10008, section 2).
      * The check runs before the check of an empty body, so that a QUERY request
      * with no body and no Content-Type fails too.
      */
-    if (requestMethod === 'QUERY' && !this.#hasValidContentType(ctx.request)) {
-      debug('invalid content-type for QUERY request "%s:%s"', requestMethod, requestUrl)
-      throw new Exception('QUERY requests must have a valid Content-Type header', {
+    if (requestMethod === 'QUERY' && !ctx.request.header('content-type')) {
+      debug('missing content-type for QUERY request "%s:%s"', requestMethod, requestUrl)
+      throw new Exception('QUERY requests must have a Content-Type header', {
         status: 400,
         code: 'E_INVALID_QUERY_CONTENT_TYPE',
       })
